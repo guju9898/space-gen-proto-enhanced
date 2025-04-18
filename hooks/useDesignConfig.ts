@@ -1,146 +1,123 @@
 "use client"
 
-import type React from "react"
+import * as React from "react"
+import type { ReactNode, ReactElement } from "react"
+import { BaseRenderConfig, ExteriorConfig, InteriorConfig, LandscapeConfig } from "@/types/studio"
 
-import { useState, useCallback, createContext, useContext } from "react"
-
-interface ExteriorConfig {
-  exteriorType: string | null
-  architecturalStyle: string | null
-  colorPalette: string | null
-  timeOfDay: string | null
-  roofStyle: string | null
-  exteriorMaterials: string[]
-  exteriorAccents: string[]
-  focalPoint: string | null
-  views: string[]
-  realism: number
-}
+type StudioType = 'interior' | 'exterior' | 'landscape'
 
 interface DesignConfig {
-  roomType: string | null
-  designStyle: string | null
-  composition: string | null
-  mood: string | null
-  colorPalette: string | null
-  lighting: string | null
-  materials: string[]
-  realism: number
-  exterior?: ExteriorConfig
-  // Add more properties as needed
+  interior: InteriorConfig
+  exterior: ExteriorConfig
+  landscape: LandscapeConfig
+  activeStudio: StudioType
 }
-
-// Define named types for the update functions
-type UpdateConfigFn = <K extends keyof DesignConfig>(key: K, value: DesignConfig[K]) => void
-type UpdateTypeConfigFn = (renderType: "interior" | "exterior" | "landscape", key: string, value: any) => void
 
 interface DesignConfigContextType {
   config: DesignConfig
-  updateConfig: UpdateConfigFn
-  updateTypeConfig: UpdateTypeConfigFn
-  resetConfig: () => void
-  renderType: "interior" | "exterior" | "landscape"
-  setRenderType: (type: "interior" | "exterior" | "landscape") => void
+  updateConfig: (studioType: StudioType, updates: Partial<InteriorConfig | ExteriorConfig | LandscapeConfig>) => void
+  setActiveStudio: (type: StudioType) => void
 }
 
-// Default exterior configuration
-const defaultExteriorConfig: ExteriorConfig = {
-  exteriorType: null,
-  architecturalStyle: null,
-  colorPalette: null,
-  timeOfDay: null,
-  roofStyle: null,
-  exteriorMaterials: [],
-  exteriorAccents: [],
-  focalPoint: null,
-  views: [],
-  realism: 70,
+const defaultConfig: DesignConfig = {
+  activeStudio: 'interior',
+  interior: {
+    roomType: 'living',
+    style: 'modern',
+    colorPalette: 'neutral',
+    lighting: 50,
+    furnitureStyle: 'modern',
+    wallColor: 'white',
+    floorMaterial: 'wood'
+  },
+  exterior: {
+    buildingType: 'house',
+    architecturalStyle: 'modern',
+    surroundingEnvironment: 'urban',
+    timeOfDay: 'day',
+    style: 'modern',
+    colorPalette: 'neutral',
+    lighting: 50
+  },
+  landscape: {
+    terrainType: 'flat',
+    vegetation: 'grass',
+    season: 'summer',
+    timeOfDay: 'day',
+    style: 'modern',
+    colorPalette: 'neutral',
+    lighting: 50
+  }
 }
 
-const initialConfig: DesignConfig = {
-  roomType: null,
-  designStyle: null,
-  composition: null,
-  mood: null,
-  colorPalette: null,
-  lighting: null,
-  materials: [],
-  realism: 50,
-  exterior: defaultExteriorConfig, // Include default exterior config
-}
+const DesignConfigContext = React.createContext<DesignConfigContextType | null>(null)
+DesignConfigContext.displayName = 'DesignConfigContext'
 
-const DesignConfigContext = createContext<DesignConfigContextType | undefined>(undefined)
+export function DesignConfigProvider({ children }: { children: ReactNode }): ReactElement {
+  const [config, setConfig] = React.useState<DesignConfig>(defaultConfig)
 
-export function DesignConfigProvider({ children }: { children: React.ReactNode }) {
-  const [config, setConfig] = useState<DesignConfig>(initialConfig)
-  const [renderType, setRenderType] = useState<"interior" | "exterior" | "landscape">("interior")
-
-  type ConfigKey = keyof DesignConfig
-  const updateConfig = useCallback((key: ConfigKey, value: DesignConfig[ConfigKey]) => {
-    // If value is a string, check if it's empty and convert to null
-    if (typeof value === "string" && value.trim() === "") {
-      setConfig((prev) => ({
-        ...prev,
-        [key]: null,
-      }))
-    } else {
-      setConfig((prev) => ({
-        ...prev,
-        [key]: value,
-      }))
-    }
+  const updateConfig = React.useCallback((
+    studioType: StudioType,
+    updates: Partial<InteriorConfig | ExteriorConfig | LandscapeConfig>
+  ) => {
+    setConfig(prev => ({
+      ...prev,
+      [studioType]: {
+        ...prev[studioType],
+        ...updates
+      }
+    }))
   }, [])
 
-  // New function to update config based on render type
-  const updateTypeConfig = useCallback((renderType: "interior" | "exterior" | "landscape", key: string, value: any) => {
-    if (renderType === "exterior") {
-      setConfig((prev) => ({
-        ...prev,
-        exterior: {
-          ...(prev.exterior || defaultExteriorConfig),
-          [key]: typeof value === "string" && value.trim() === "" ? null : value,
-        },
-      }))
-    } else if (renderType === "interior") {
-      // For interior, we update the main config directly
-      setConfig((prev) => ({
-        ...prev,
-        [key]: typeof value === "string" && value.trim() === "" ? null : value,
-      }))
-    } else if (renderType === "landscape") {
-      // For future landscape implementation
-      // This would be similar to exterior but with a landscape property
-      console.log("Landscape config updates not yet implemented")
-    }
+  const setActiveStudio = React.useCallback((type: StudioType) => {
+    setConfig(prev => ({
+      ...prev,
+      activeStudio: type
+    }))
   }, [])
 
-  const resetConfig = useCallback(() => {
-    setConfig(initialConfig)
-  }, [])
+  const contextValue: DesignConfigContextType = {
+    config,
+    updateConfig,
+    setActiveStudio
+  }
 
-  return (
-    <DesignConfigContext.Provider
-      value={{ config, updateConfig, updateTypeConfig, resetConfig, renderType, setRenderType }}
-    >
-      {children}
-    </DesignConfigContext.Provider>
+  return React.createElement(
+    DesignConfigContext.Provider,
+    { value: contextValue },
+    children
   )
 }
 
 export function useDesignConfig() {
-  const context = useContext(DesignConfigContext)
-
-  if (context === undefined) {
-    // For demo purposes, we'll provide a mock implementation if used outside provider
-    return {
-      config: initialConfig,
-      updateConfig: <K extends keyof DesignConfig>(_key: K, _value: DesignConfig[K]) => {},
-      updateTypeConfig: (_renderType: "interior" | "exterior" | "landscape", _key: string, _value: any) => {},
-      resetConfig: () => {},
-      renderType: "interior" as const,
-      setRenderType: (_type: "interior" | "exterior" | "landscape") => {},
-    }
+  const context = React.useContext(DesignConfigContext)
+  if (!context) {
+    throw new Error('useDesignConfig must be used within a DesignConfigProvider')
   }
-
   return context
+}
+
+// Studio-specific hooks
+export function useInteriorConfig() {
+  const { config, updateConfig } = useDesignConfig()
+  return {
+    config: config.interior,
+    updateConfig: (updates: Partial<InteriorConfig>) => updateConfig('interior', updates)
+  }
+}
+
+export function useExteriorConfig() {
+  const { config, updateConfig } = useDesignConfig()
+  return {
+    config: config.exterior,
+    updateConfig: (updates: Partial<ExteriorConfig>) => updateConfig('exterior', updates)
+  }
+}
+
+export function useLandscapeConfig() {
+  const { config, updateConfig } = useDesignConfig()
+  return {
+    config: config.landscape,
+    updateConfig: (updates: Partial<LandscapeConfig>) => updateConfig('landscape', updates)
+  }
 }

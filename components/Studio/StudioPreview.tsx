@@ -1,100 +1,64 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import SafeImage from "@/components/SafeImage"
-import { Info, Loader2, ChevronRight } from "lucide-react"
+import { Loader2 } from "lucide-react"
+import Image from "next/image"
 
-interface StudioPreviewProps {
+export interface StudioPreviewProps {
+  currentImage: string | null
   renderImage: string | null
-  isLoading?: boolean
-  error?: string | null
-  onOpenInfo?: () => void
-  emptyStateText?: string
-  onViewAll?: () => void
+  isRendering: boolean
+  onRender: () => void
+  error: string | null
 }
 
 export default function StudioPreview({
+  currentImage,
   renderImage,
-  isLoading = false,
-  error = null,
-  onOpenInfo,
-  emptyStateText = "You don't have any generated image yet",
-  onViewAll,
+  isRendering,
+  onRender,
+  error,
 }: StudioPreviewProps) {
-  const [isImageLoaded, setIsImageLoaded] = useState(false)
-
-  // Reset image loaded state when render image changes
-  useEffect(() => {
-    setIsImageLoaded(false)
-  }, [renderImage])
-
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-medium">Latest renders</h2>
-        {onViewAll && (
-          <button onClick={onViewAll} className="flex items-center text-zinc-400 hover:text-white">
-            <span className="text-sm">View all</span>
-            <ChevronRight className="w-4 h-4 ml-1" />
-          </button>
-        )}
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium text-white">Preview</h3>
+        <button
+          onClick={onRender}
+          disabled={!currentImage || isRendering}
+          className={`px-4 py-2 rounded-md font-medium ${
+            !currentImage || isRendering
+              ? "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+              : "bg-gradient-to-r from-[#FF6B00] to-[#9747ff] text-white hover:opacity-90"
+          }`}
+        >
+          {isRendering ? (
+            <div className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Generating...</span>
+            </div>
+          ) : (
+            "Generate Design"
+          )}
+        </button>
       </div>
 
-      <div className="flex-1 w-full bg-zinc-900/50 rounded-lg flex items-center justify-center overflow-hidden">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center p-6">
-            <div className="w-10 h-10 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-sm text-zinc-400">Generating your design...</p>
-          </div>
-        ) : error ? (
-          <div className="flex flex-col items-center justify-center p-6 text-center">
-            <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center mb-4">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-red-500"
-              >
-                <path d="M12 9v4" />
-                <path d="M12 17h.01" />
-                <path d="M3.6 3.6A9 9 0 1 0 20.4 20.4 9 9 0 0 0 3.6 3.6" />
-              </svg>
-            </div>
-            <p className="text-sm text-red-400 mb-2">Error generating design</p>
-            <p className="text-xs text-zinc-500">{error}</p>
-          </div>
-        ) : renderImage ? (
-          <div className="relative w-full h-full">
-            {!isImageLoaded && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
-              </div>
-            )}
-            {renderImage && (
-              <SafeImage
-                src={renderImage}
-                alt="Generated design"
-                fill
-                className={`object-contain transition-opacity duration-300 ${
-                  isImageLoaded ? "opacity-100" : "opacity-0"
-                }`}
-                onLoad={() => setIsImageLoaded(true)}
-                sizes="(max-width: 1200px) 100vw, 800px"
-              />
-            )}
-          </div>
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+          <p className="text-red-400 text-sm">{error}</p>
+        </div>
+      )}
+
+      <div className="relative aspect-video rounded-lg overflow-hidden bg-zinc-900/50">
+        {renderImage ? (
+          <Image
+            src={renderImage}
+            alt="Generated design"
+            fill
+            className="object-cover"
+          />
         ) : (
-          <div className="flex flex-col items-center justify-center text-center p-6">
-            <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
-              <Info className="w-5 h-5 text-zinc-400" />
-            </div>
-            <p className="text-sm text-zinc-400">{emptyStateText}</p>
+          <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+            {currentImage ? "Click Generate to see the result" : "Upload an image to get started"}
           </div>
         )}
       </div>

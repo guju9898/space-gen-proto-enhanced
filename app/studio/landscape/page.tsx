@@ -11,7 +11,7 @@ import TipsModal from "@/components/Studio/TipsModal"
 import RequestInfoModal from "@/components/Studio/RequestInfoModal"
 import DesignControlsPanel from "@/components/Studio/Variables/DesignControlsPanel"
 
-export default function ExteriorStudioPage() {
+export default function LandscapeStudioPage() {
   const [currentImage, setCurrentImage] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [renderImage, setRenderImage] = useState<string | null>(null)
@@ -58,8 +58,8 @@ export default function ExteriorStudioPage() {
     <DesignConfigProvider>
       <StudioLayout
         formContent={
-          <FormPanel onRender={handleRenderDesign} disableRender={!currentImage} renderType="exterior">
-            <DesignControlsPanel designType="exterior" onGenerateDesign={handleRenderDesign} />
+          <FormPanel onRender={handleRenderDesign} disableRender={!currentImage} renderType="landscape">
+            <DesignControlsPanel designType="landscape" onGenerateDesign={handleRenderDesign} />
           </FormPanel>
         }
         previewContent={
@@ -84,4 +84,4 @@ export default function ExteriorStudioPage() {
       </StudioLayout>
     </DesignConfigProvider>
   )
-}
+} 

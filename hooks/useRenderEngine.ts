@@ -1,63 +1,66 @@
 "use client"
 
 import { useState } from "react"
-
-interface RenderOptions {
-  renderType: "interior" | "exterior" | "landscape"
-  config: any
-  sourceImage?: string | null
-}
+import { useDesignConfig } from './useDesignConfig'
+import { ExteriorConfig, InteriorConfig, LandscapeConfig, RenderRequest, RenderResponse } from "@/types/studio"
 
 interface RenderResult {
   imageUrl: string | null
   error: string | null
 }
 
-export function useRenderEngine() {
-  const [isRendering, setIsRendering] = useState(false)
+interface RenderConfig {
+  renderType: 'interior' | 'exterior' | 'landscape'
+  sourceImage: string | null
+  config: InteriorConfig | ExteriorConfig | LandscapeConfig
+}
 
-  const render = async (options: RenderOptions): Promise<RenderResult> => {
+// Simulated API call - replace with actual API integration later
+const mockGenerateImage = async (config: RenderConfig): Promise<RenderResult> => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 2000))
+
+  // For demo purposes, return the source image
+  // In production, this would call the actual AI service
+  if (!config.sourceImage) {
+    return {
+      imageUrl: null,
+      error: 'No source image provided'
+    }
+  }
+
+  // Simulate 10% chance of error
+  if (Math.random() < 0.1) {
+    throw new Error('Simulated API error')
+  }
+
+  return {
+    imageUrl: config.sourceImage,
+    error: null
+  }
+}
+
+export function useRenderEngine() {
+  const { config: designConfig } = useDesignConfig()
+  const [isRendering, setIsRendering] = useState(false)
+  const [lastResult, setLastResult] = useState<RenderResult>({ imageUrl: null, error: null })
+
+  const render = async (config: RenderConfig) => {
     setIsRendering(true)
+    setLastResult({ imageUrl: null, error: null })
 
     try {
-      // Validate inputs
-      if (!options.sourceImage) {
-        throw new Error("Source image is required for rendering")
-      }
-
-      // Log the render request (for debugging)
-      console.log(`Rendering ${options.renderType} with config:`, options.config)
-
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 3000))
-
-      // Return mock image based on render type
-      let resultImage: string
-
-      switch (options.renderType) {
-        case "exterior":
-          resultImage = "/studio/exterior/generated-exterior.jpg"
-          break
-        case "interior":
-          resultImage = "/studio/generated-design.jpg"
-          break
-        case "landscape":
-          resultImage = "/studio/landscape/generated-landscape.jpg"
-          break
-        default:
-          resultImage = "/studio/generated-design.jpg"
-      }
-
-      return {
-        imageUrl: resultImage,
-        error: null,
-      }
+      // In production, replace mockGenerateImage with actual API call
+      const result = await mockGenerateImage(config)
+      setLastResult(result)
+      return result
     } catch (error) {
-      console.error("Render engine error:", error)
-      return {
+      const errorResult = {
         imageUrl: null,
-        error: error instanceof Error ? error.message : "An unknown error occurred during rendering",
+        error: error instanceof Error ? error.message : 'An unknown error occurred'
       }
+      setLastResult(errorResult)
+      return errorResult
     } finally {
       setIsRendering(false)
     }
@@ -66,5 +69,6 @@ export function useRenderEngine() {
   return {
     render,
     isRendering,
+    lastResult
   }
 }
