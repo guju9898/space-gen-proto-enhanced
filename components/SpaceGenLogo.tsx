@@ -2,9 +2,9 @@ import Link from "next/link"
 
 export default function SpaceGenLogo() {
   return (
-    <Link href="/" className="flex items-center">
-      <div className="w-8 h-8 bg-gradient-to-r from-[#FF6B00] to-[#9747ff] rounded mr-2"></div>
-      <span className="font-bold text-lg text-white">Space Gen</span>
+    <Link href="/" className="flex items-center gap-2">
+      <div className="w-8 h-8 rounded-full bg-primary" />
+      <span className="text-xl font-bold">Space Gen</span>
     </Link>
   )
 } 

@@ -1,18 +1,22 @@
 export interface BaseRenderConfig {
   style: string;
   colorPalette: string;
-  lighting: number;
-  sourceImage?: string;
+  image: File | null;
 }
 
 export interface InteriorConfig {
   roomType: string;
-  style?: string;
-  colorPalette?: string;
-  lighting?: string;
-  furnitureStyle?: string;
-  wallColor?: string;
-  floorMaterial?: string;
+  designStyle: string;
+  colorPalette: string;
+  lighting: string;
+  timeOfDay: string;
+  mood: string;
+  architect: string;
+  lens: string;
+  typology: string;
+  geometry: string;
+  image: File | null;
+  realism: number;
 }
 
 export interface ExteriorConfig {
@@ -22,22 +26,37 @@ export interface ExteriorConfig {
   timeOfDay: string;
   style: string;
   colorPalette: string;
-  lighting: number;
+  lighting: string;
+  image: File | null;
+  realism: number;
 }
 
-export interface LandscapeConfig extends BaseRenderConfig {
-  terrainType: string;
-  vegetation: string;
-  season: string;
-  timeOfDay: string;
+export interface LandscapeConfig {
+  gardenType: string;
+  style: string;
+  colorPalette: string;
+  lighting: string;
+  image: File | null;
+  realism: number;
 }
 
-export interface ProductConfig extends BaseRenderConfig {
+export interface ProductConfig {
   productType: string;
+  style: string;
+  colorPalette: string;
   material: string;
-  backgroundStyle: string;
-  perspective: string;
+  image: File | null;
+  realism: number;
 }
+
+export type StudioType = "interior" | "exterior" | "landscape" | "product";
+
+export type DesignConfig = {
+  interior: InteriorConfig;
+  exterior: ExteriorConfig;
+  landscape: LandscapeConfig;
+  activeStudio: StudioType;
+};
 
 export interface RenderRequest {
   renderType: 'interior' | 'exterior' | 'landscape' | 'product';

@@ -1,50 +1,50 @@
 "use client"
 
-import { useDesignConfig } from "@/hooks/useDesignConfig"
-import { Building2, Home, Trees } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { Home, Building2, Trees } from "lucide-react"
+import { cn } from "@/lib/utils"
 
-const studios = [
+const studioTypes = [
   {
     name: "Interior",
-    path: "/studio/interior",
-    icon: Home,
+    href: "/studio/interior",
+    icon: Home
   },
   {
     name: "Exterior",
-    path: "/studio/exterior",
-    icon: Building2,
+    href: "/studio/exterior",
+    icon: Building2
   },
   {
     name: "Landscape",
-    path: "/studio/landscape",
-    icon: Trees,
-  },
+    href: "/studio/landscape",
+    icon: Trees
+  }
 ]
 
-export default function StudioModeToggle() {
+export function StudioModeToggle() {
   const pathname = usePathname()
-  const { setActiveStudio } = useDesignConfig()
 
   return (
-    <div className="flex items-center gap-2 p-2 bg-zinc-900 rounded-lg">
-      {studios.map((studio) => {
-        const isActive = pathname === studio.path
-        const Icon = studio.icon
+    <div className="flex items-center space-x-2">
+      {studioTypes.map((type) => {
+        const Icon = type.icon
+        const isActive = pathname.startsWith(type.href)
+        
         return (
           <Link
-            key={studio.path}
-            href={studio.path}
-            onClick={() => setActiveStudio(studio.name.toLowerCase() as 'interior' | 'exterior' | 'landscape')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+            key={type.name}
+            href={type.href}
+            className={cn(
+              "flex items-center space-x-2 rounded-full px-4 py-2 text-sm font-medium transition-colors",
               isActive
-                ? "bg-gradient-to-r from-[#FF6B00] to-[#9747ff] text-white"
-                : "text-muted-foreground hover:text-white"
-            }`}
+                ? "bg-primary text-primary-foreground"
+                : "text-foreground/60 hover:bg-muted"
+            )}
           >
-            <Icon className="w-4 h-4" />
-            <span className="text-sm font-medium">{studio.name}</span>
+            <Icon className="h-4 w-4" />
+            <span>{type.name}</span>
           </Link>
         )
       })}

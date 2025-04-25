@@ -1,204 +1,416 @@
 "use client"
 
-import { useState } from "react"
-import { DesignConfigProvider } from "@/hooks/useDesignConfig"
-import { StudioPageLayout, FormSection } from "@/components/Studio/StudioPageLayout"
-import { Button } from "@/components/ui/button"
-import { useDesignConfig } from "@/hooks/useDesignConfig"
+import { useState, useEffect } from "react"
+import { StudioLayout } from "@/components/Studio/StudioLayout"
+import { FormPanel } from "@/components/Studio/FormPanel"
+import { RequestSummary } from "@/components/Studio/RequestSummary"
+import { useInteriorConfig } from "@/hooks/useDesignConfig"
 import { InteriorConfig } from "@/types/studio"
-import { Wand2, ImageIcon, Bed, Sofa, Utensils, Bath, Briefcase, Sun, Moon, Cloud, Palette, Droplet, Zap } from "lucide-react"
-import { PreviewCard } from "@/components/Studio/PreviewCard"
-import { LatestRenders } from "@/components/Studio/LatestRenders"
-import { VisualSelector } from "@/components/Studio/VisualSelector"
-import { TagGroup } from "@/components/Studio/TagGroup"
+import { DropdownSelector } from "@/components/Studio/Variables/DropdownSelector"
+import { RealisticSlider } from "@/components/Studio/Variables/RealisticSlider"
+import { Button } from "@/components/ui/button"
+import { StudioPreview } from "@/components/Studio/StudioPreview"
+import { ImageUpload } from "@/components/Studio/ImageUpload"
+import { 
+  Home, 
+  Palette, 
+  Sun, 
+  Moon, 
+  Image as ImageIcon,
+  Smile,
+  HelpCircle,
+  Camera,
+  Layout,
+  Square,
+  Star,
+  Layers,
+  Building2,
+  CameraIcon,
+  LayoutGrid,
+  Box,
+  Clock,
+  Building,
+  User,
+  Lightbulb
+} from "lucide-react"
+import { FormSection } from "@/components/Studio/FormSection"
+import {
+  roomTypes,
+  designStyles,
+  colorPalettes,
+  lightingOptions,
+  timeOfDayOptions,
+  moodOptions,
+  architects,
+  lenses,
+  typologies,
+  geometries
+} from "@/lib/studio/variables"
+import { generateImageFromConfig } from "@/lib/api/generateImage"
 
-const roomTypeOptions = [
-  { value: "living", label: "Living Room", icon: Sofa },
-  { value: "bedroom", label: "Bedroom", icon: Bed },
-  { value: "kitchen", label: "Kitchen", icon: Utensils },
-  { value: "bathroom", label: "Bathroom", icon: Bath },
-  { value: "office", label: "Office", icon: Briefcase },
-]
+const defaultConfig: InteriorConfig = {
+  roomType: "living",
+  designStyle: "modern",
+  colorPalette: "neutral",
+  lighting: "natural",
+  timeOfDay: "day",
+  mood: "calm",
+  architect: "foster",
+  lens: "wide",
+  typology: "open",
+  geometry: "rectangular",
+  image: null,
+  realism: 50
+}
 
-const styleOptions = [
-  { value: "modern", label: "Modern", thumbnail: "/styles/modern.jpg" },
-  { value: "traditional", label: "Traditional", thumbnail: "/styles/traditional.jpg" },
-  { value: "minimalist", label: "Minimalist", thumbnail: "/styles/minimalist.jpg" },
-]
-
-const lightingOptions = [
-  { value: "daylight", label: "Daylight", icon: Sun },
-  { value: "evening", label: "Evening", icon: Moon },
-  { value: "overcast", label: "Overcast", icon: Cloud },
-]
-
-const colorPaletteOptions = [
-  { value: "neutral", label: "Neutral", color: "#f5f5f5" },
-  { value: "warm", label: "Warm", color: "#fef3c7" },
-  { value: "cool", label: "Cool", color: "#e0f2fe" },
-]
+interface ImageState {
+  file: File | null;
+  previewUrl: string | null;
+}
 
 export default function InteriorStudioPage() {
-  const { config, updateConfig } = useDesignConfig()
-  const interiorConfig = config?.interior || {
-    roomType: "living",
-    style: "modern",
-    colorPalette: "neutral",
-    lighting: "daylight"
+  const { config, updateConfig } = useInteriorConfig()
+  const [mounted, setMounted] = useState(false)
+  const [currentRender, setCurrentRender] = useState<string | null>(null)
+  const [latestRenders, setLatestRenders] = useState<string[]>([])
+  const [isRendering, setIsRendering] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [imageState, setImageState] = useState<ImageState | null>(null)
+
+  // Handle client-side initialization
+  useEffect(() => {
+    setMounted(true)
+    // Initialize state with default values to prevent hydration mismatch
+    updateConfig(defaultConfig)
+    return () => {
+      // Cleanup any existing image previews
+      if (imageState && imageState.previewUrl && imageState.previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(imageState.previewUrl)
+      }
+    }
+  }, [])
+
+  // Early return during SSR
+  if (!mounted) {
+    return (
+      <StudioLayout
+        formContent={<FormPanel><div className="h-[800px]" /></FormPanel>}
+        previewContent={<div className="h-[600px]" />}
+        requestContent={<div className="h-[100px]" />}
+      />
+    )
   }
 
-  const handleConfigChange = (updates: Partial<InteriorConfig>) => {
-    updateConfig('interior', {
-      ...interiorConfig,
-      ...updates
-    })
+  const handleConfigChange = (key: keyof InteriorConfig, value: string | number | File | null) => {
+    setError(null) // Clear any previous errors
+    updateConfig({ [key]: value })
   }
 
-  const handleTagRemove = (key: keyof InteriorConfig) => {
-    if (key === 'roomType') return // Prevent removing required field
-    handleConfigChange({ [key]: undefined })
+  const handleImageUpload = async (file: File, previewUrl: string) => {
+    try {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Please upload an image file')
+      }
+
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error('Image size should be less than 10MB')
+      }
+
+      // Clean up previous preview URL if it exists
+      if (imageState && imageState.previewUrl && imageState.previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(imageState.previewUrl)
+      }
+
+      // Convert file to base64
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
+
+      setImageState({ file, previewUrl })
+      handleConfigChange("image", base64)
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload image')
+      setImageState(null)
+      handleConfigChange("image", null)
+    }
   }
 
-  const handleClearAll = () => {
-    handleConfigChange({
-      style: undefined,
-      colorPalette: undefined,
-      lighting: undefined
-    })
+  const handleGenerate = async (config: Record<string, any>) => {
+    setIsRendering(true);
+
+    try {
+      // Sanitize invalid string-based image URLs before API call
+      if (
+        config.image &&
+        typeof config.image === "string" &&
+        !config.image.startsWith("http")
+      ) {
+        console.warn("⚠️ Ignoring invalid image string:", config.image);
+        config.image = null;
+      }
+
+      const imageUrl = await generateImageFromConfig(config);
+
+      if (imageUrl) {
+        console.log("✅ Image generated:", imageUrl);
+        setCurrentRender(imageUrl);
+      } else {
+        console.warn("⚠️ Image generation returned null or failed.");
+      }
+    } catch (error) {
+      console.error("❌ Generation error:", error);
+    }
+
+    setIsRendering(false);
+  };
+
+  const handleThumbnailClick = (renderUrl: string) => {
+    setCurrentRender(renderUrl)
   }
 
-  const renderButton = (
-    <Button
-      className="w-full bg-gradient-to-r from-[#FF6B00] to-[#9747ff] text-white hover:opacity-90"
-      size="lg"
-    >
-      <Wand2 className="mr-2 h-4 w-4" />
-      Render Design
-    </Button>
-  )
+  const handleRemoveTag = (key: string) => {
+    if (key in defaultConfig) {
+      updateConfig({ [key]: defaultConfig[key as keyof InteriorConfig] })
+    }
+  }
 
   const formContent = (
-    <div className="space-y-6">
-      <PreviewCard
-        label="Your current interior"
-        tips="Use a bright, wide-angle photo for best AI results"
-      />
+    <FormPanel>
+      <div className="space-y-8">
+        {error && (
+          <div className="bg-destructive/10 text-destructive px-4 py-2 rounded-md text-sm">
+            {error}
+          </div>
+        )}
+        
+        <FormSection title="Room Settings" icon={Layout}>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Room Type</label>
+              <select
+                className="w-full mt-1"
+                value={config.roomType}
+                onChange={(e) => handleConfigChange("roomType", e.target.value)}
+              >
+                {roomTypes.map(type => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Design Style</label>
+              <select
+                className="w-full mt-1"
+                value={config.designStyle}
+                onChange={(e) => handleConfigChange("designStyle", e.target.value)}
+              >
+                {designStyles.map(style => (
+                  <option key={style.value} value={style.value}>
+                    {style.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </FormSection>
 
-      <FormSection title="Room type">
-        <VisualSelector
-          options={roomTypeOptions}
-          value={interiorConfig.roomType}
-          onChange={(value) => handleConfigChange({ roomType: value as InteriorConfig['roomType'] })}
-        />
-      </FormSection>
+        <FormSection title="Visual Composition" icon={Camera}>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Camera Angle</label>
+              <select
+                className="w-full mt-1"
+                value={config.lens}
+                onChange={(e) => handleConfigChange("lens", e.target.value)}
+              >
+                {lenses.map(angle => (
+                  <option key={angle.value} value={angle.value}>
+                    {angle.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Room Layout</label>
+              <select
+                className="w-full mt-1"
+                value={config.typology}
+                onChange={(e) => handleConfigChange("typology", e.target.value)}
+              >
+                {typologies.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </FormSection>
 
-      <FormSection title="Design style">
-        <VisualSelector
-          options={styleOptions}
-          value={interiorConfig.style}
-          onChange={(value) => handleConfigChange({ style: value as InteriorConfig['style'] })}
-        />
-      </FormSection>
+        <FormSection title="Materials & Textures" icon={Star}>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Color Palette</label>
+              <select
+                className="w-full mt-1"
+                value={config.colorPalette}
+                onChange={(e) => handleConfigChange("colorPalette", e.target.value)}
+              >
+                {colorPalettes.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </FormSection>
 
-      <FormSection title="Lighting">
-        <VisualSelector
-          options={lightingOptions}
-          value={interiorConfig.lighting}
-          onChange={(value) => handleConfigChange({ lighting: value as InteriorConfig['lighting'] })}
-        />
-      </FormSection>
+        <FormSection title="Lighting & Atmosphere" icon={Lightbulb}>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Lighting</label>
+              <select
+                className="w-full mt-1"
+                value={config.lighting}
+                onChange={(e) => handleConfigChange("lighting", e.target.value)}
+              >
+                {lightingOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Time of Day</label>
+              <select
+                className="w-full mt-1"
+                value={config.timeOfDay}
+                onChange={(e) => handleConfigChange("timeOfDay", e.target.value)}
+              >
+                {timeOfDayOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Mood</label>
+              <select
+                className="w-full mt-1"
+                value={config.mood}
+                onChange={(e) => handleConfigChange("mood", e.target.value)}
+              >
+                {moodOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </FormSection>
 
-      <FormSection title="Color palette">
-        <VisualSelector
-          options={colorPaletteOptions}
-          value={interiorConfig.colorPalette}
-          onChange={(value) => handleConfigChange({ colorPalette: value as InteriorConfig['colorPalette'] })}
-        />
-      </FormSection>
-    </div>
+        <FormSection title="Architectural Details" icon={Building}>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Architect</label>
+              <select
+                className="w-full mt-1"
+                value={config.architect}
+                onChange={(e) => handleConfigChange("architect", e.target.value)}
+              >
+                {architects.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Geometry</label>
+              <select
+                className="w-full mt-1"
+                value={config.geometry}
+                onChange={(e) => handleConfigChange("geometry", e.target.value)}
+              >
+                {geometries.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </FormSection>
+
+        <FormSection title="Reference Image" icon={ImageIcon}>
+          <ImageUpload 
+            onUpload={handleImageUpload}
+            currentPreview={imageState?.previewUrl}
+            accept="image/*"
+            maxSize={10 * 1024 * 1024}
+          />
+        </FormSection>
+
+        <div className="space-y-6">
+          <div>
+            <label className="text-sm text-muted-foreground mb-1 block">
+              Rendering Style
+            </label>
+            <RealisticSlider
+              value={config.realism}
+              onChange={(value) => handleConfigChange("realism", value)}
+            />
+          </div>
+          
+          <div className="pt-4 border-t border-border">
+            <Button 
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium"
+              onClick={() => handleGenerate(config)}
+              disabled={isRendering}
+            >
+              {isRendering ? "Generating..." : "Generate"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </FormPanel>
   )
 
   const previewContent = (
-    <div className="space-y-6">
-      <div className="aspect-video bg-muted rounded-xl border border-border shadow-sm flex items-center justify-center">
-        <p className="text-muted-foreground">Preview will appear here</p>
-      </div>
-      <LatestRenders renders={[]} />
+    <div className="bg-card rounded-lg border border-border p-6">
+      <StudioPreview
+        currentRender={currentRender}
+        latestRenders={latestRenders}
+        isRendering={isRendering}
+        onThumbnailClick={handleThumbnailClick}
+      />
     </div>
   )
 
   const requestContent = (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Request Summary</h3>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-muted-foreground"
-          onClick={handleClearAll}
-        >
-          Clear all
-        </Button>
-      </div>
-      <div className="space-y-4">
-        <TagGroup
-          title="Room"
-          icon={Sofa}
-          tags={[
-            {
-              label: "Type",
-              value: interiorConfig.roomType,
-              icon: Sofa,
-              required: true
-            }
-          ]}
-        />
-        <TagGroup
-          title="Style"
-          icon={Palette}
-          tags={[
-            {
-              label: "Design",
-              value: interiorConfig.style,
-              icon: Palette,
-              onRemove: () => handleTagRemove("style")
-            }
-          ]}
-        />
-        <TagGroup
-          title="Lighting"
-          icon={Zap}
-          tags={[
-            {
-              label: "Time",
-              value: interiorConfig.lighting,
-              icon: Zap,
-              onRemove: () => handleTagRemove("lighting")
-            }
-          ]}
-        />
-        <TagGroup
-          title="Colors"
-          icon={Droplet}
-          tags={[
-            {
-              label: "Palette",
-              value: interiorConfig.colorPalette,
-              icon: Droplet,
-              onRemove: () => handleTagRemove("colorPalette")
-            }
-          ]}
-        />
-      </div>
-    </div>
+    <RequestSummary
+      config={config}
+      onRemove={handleRemoveTag}
+    />
   )
 
   return (
-    <StudioPageLayout
+    <StudioLayout
       formContent={formContent}
       previewContent={previewContent}
       requestContent={requestContent}
-      renderButton={renderButton}
     />
   )
 } 

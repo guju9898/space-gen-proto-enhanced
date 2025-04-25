@@ -8,16 +8,15 @@ import type { Metadata } from "next"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Space Gen - Redesign Your Space with AI",
-  description: "Transform your living and commercial spaces with our AI-powered design tool",
-    generator: 'v0.dev'
+  title: "Space Gen",
+  description: "AI-powered interior design studio",
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>

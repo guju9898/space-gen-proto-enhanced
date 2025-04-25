@@ -8,6 +8,7 @@ interface VisualSelectorProps {
     icon?: LucideIcon
     thumbnail?: string
     color?: string
+    emoji?: string
   }[]
   value: string
   onChange: (value: string) => void
@@ -21,10 +22,11 @@ export function VisualSelector({ options, value, onChange, className }: VisualSe
         <button
           key={option.value}
           className={cn(
-            "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-colors",
+            "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all",
             "hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20",
+            "hover:shadow-sm active:shadow-none",
             value === option.value
-              ? "border-primary bg-primary/5"
+              ? "border-primary bg-primary/5 shadow-sm"
               : "border-border bg-card"
           )}
           onClick={() => onChange(option.value)}
@@ -45,7 +47,10 @@ export function VisualSelector({ options, value, onChange, className }: VisualSe
               style={{ backgroundColor: option.color }}
             />
           )}
-          <span className="text-sm font-medium">{option.label}</span>
+          {option.emoji && (
+            <span className="text-2xl">{option.emoji}</span>
+          )}
+          <span className="text-sm font-medium text-center">{option.label}</span>
         </button>
       ))}
     </div>

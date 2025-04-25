@@ -125,4 +125,4 @@ export function useProductConfig() {
     config: context.product,
     updateConfig: (updates: Partial<ProductConfig>) => context.updateConfig(updates)
   }
-}
+} 
