@@ -1,6 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { useSearchParams } from "next/navigation";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -10,15 +11,33 @@ export default function MagicLinkForm({ redirectTo = "/studio" }: { redirectTo?:
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+
+  // Check for error from callback page
+  useEffect(() => {
+    const errorParam = searchParams?.get("error");
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam));
+      setStatus("error");
+    }
+  }, [searchParams]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setStatus("sending");
     setError(null);
     try {
+      // --- replacement snippet: ensure you keep surrounding error handling / UI code intact ---
+      const redirectTarget = typeof window !== "undefined"
+        ? `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`
+        : `/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`;
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${window.location.origin}${redirectTo}` },
+        options: {
+          // send magic link which lands on our callback page (it will store the session)
+          emailRedirectTo: redirectTarget
+        }
       });
       if (error) {
         setError(error.message);
