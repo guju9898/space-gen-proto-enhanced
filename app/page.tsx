@@ -13,29 +13,32 @@ export default function Home() {
         </div>
 
         <nav className="hidden md:flex items-center gap-8">
-          <Link href="#" className="text-sm text-white hover:text-primary/90">
+          <Link href="/" className="text-sm text-white hover:text-primary/90">
             Home
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+          <Link href="/gallery" className="text-sm text-muted-foreground hover:text-white">
             Gallery
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+          {/* TODO: create /pricing page */}
+          <Link href="/pricing" className="text-sm text-muted-foreground hover:text-white">
             Pricing
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+          {/* TODO: create /blog page */}
+          <Link href="/blog" className="text-sm text-muted-foreground hover:text-white">
             Blog
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+          {/* TODO: create /faq page */}
+          <Link href="/faq" className="text-sm text-muted-foreground hover:text-white">
             FAQ
           </Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <Link href="#" className="text-sm text-white hover:text-primary/90">
+          <Link href="/auth/login" className="text-sm text-white hover:text-primary/90">
             Login
           </Link>
           <Link
-            href="#"
+            href="/auth/signup"
             className="text-sm bg-gradient-to-r from-[#9747ff] to-[#8608fd] hover:opacity-90 text-white px-4 py-2 rounded-md"
           >
             Sign Up
@@ -55,7 +58,7 @@ export default function Home() {
           minutes, not weeks.
         </p>
         <Link
-          href="#"
+          href="/studio"
           className="inline-flex items-center gap-2 bg-gradient-to-r from-[#9747ff] to-[#8608fd] hover:opacity-90 text-white px-6 py-3 rounded-md font-medium"
         >
           Get Started <ChevronRight className="w-4 h-4" />
@@ -284,7 +287,7 @@ export default function Home() {
               <li className="text-sm text-muted-foreground">Basic style options</li>
             </ul>
             <Link
-              href="#"
+              href="/onboarding"
               className="block text-center py-2 border border-[#343434] rounded-md text-white hover:bg-[#343434]/50 transition"
             >
               Get Started
@@ -311,7 +314,7 @@ export default function Home() {
               <li className="text-sm text-muted-foreground">Advanced style options</li>
             </ul>
             <Link
-              href="#"
+              href="/onboarding"
               className="block text-center py-2 bg-gradient-to-r from-[#9747ff] to-[#8608fd] rounded-md text-white hover:opacity-90 transition"
             >
               Get Started
@@ -335,7 +338,7 @@ export default function Home() {
               <li className="text-sm text-muted-foreground">All style options</li>
             </ul>
             <Link
-              href="#"
+              href="/onboarding"
               className="block text-center py-2 border border-[#343434] rounded-md text-white hover:bg-[#343434]/50 transition"
             >
               Get Started
@@ -359,7 +362,7 @@ export default function Home() {
               <li className="text-sm text-muted-foreground">Commercial license</li>
             </ul>
             <Link
-              href="#"
+              href="/onboarding"
               className="block text-center py-2 border border-[#343434] rounded-md text-white hover:bg-[#343434]/50 transition"
             >
               Get Started
@@ -436,7 +439,7 @@ export default function Home() {
               Join thousands of satisfied customers who have transformed their spaces with our AI-powered design tool.
             </p>
             <Link
-              href="#"
+              href="/onboarding"
               className="inline-flex items-center gap-2 bg-gradient-to-r from-[#9747ff] to-[#8608fd] hover:opacity-90 text-white px-6 py-3 rounded-md font-medium"
             >
               Get Started <ChevronRight className="w-4 h-4" />
@@ -464,22 +467,22 @@ export default function Home() {
             </div>
 
             <nav className="flex flex-wrap justify-center gap-6 mb-4 md:mb-0">
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="#privacy" className="text-sm text-muted-foreground hover:text-white">
                 Privacy Policy
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="#terms" className="text-sm text-muted-foreground hover:text-white">
                 Terms of Service
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="#about" className="text-sm text-muted-foreground hover:text-white">
                 About
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="#contact" className="text-sm text-muted-foreground hover:text-white">
                 Contact
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="#pricing" className="text-sm text-muted-foreground hover:text-white">
                 Pricing
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="#faq" className="text-sm text-muted-foreground hover:text-white">
                 FAQ
               </Link>
             </nav>

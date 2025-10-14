@@ -13,26 +13,29 @@ export default function GalleryPage() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
+          {/* TODO: change href to /about when implemented */}
           <Link href="#" className="text-sm text-muted-foreground hover:text-white">
             About
           </Link>
           <Link href="/gallery" className="text-sm text-white hover:text-primary/90">
             Gallery
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+          {/* TODO: change href to /pricing when implemented */}
+          <Link href="/pricing" className="text-sm text-muted-foreground hover:text-white">
             Pricing
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+          {/* TODO: create /faq page */}
+          <Link href="/faq" className="text-sm text-muted-foreground hover:text-white">
             FAQ
           </Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <Link href="#" className="text-sm text-white hover:text-primary/90">
+          <Link href="/auth/login" className="text-sm text-white hover:text-primary/90">
             Log in
           </Link>
           <Link
-            href="#"
+            href="/onboarding"
             className="text-sm bg-gradient-to-r from-[#9747ff] to-[#8608fd] hover:opacity-90 text-white px-4 py-2 rounded-md"
           >
             Redesign now
@@ -201,7 +204,7 @@ export default function GalleryPage() {
               See how AI can help you visualize and create your dream space in minutes.
             </p>
             <Link
-              href="#"
+              href="/studio"
               className="inline-flex items-center gap-2 bg-gradient-to-r from-[#9747ff] to-[#8608fd] hover:opacity-90 text-white px-6 py-3 rounded-md font-medium"
             >
               Try It Now <ChevronRight className="w-4 h-4" />
@@ -229,22 +232,24 @@ export default function GalleryPage() {
             </div>
 
             <nav className="flex flex-wrap justify-center gap-6 mb-4 md:mb-0">
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="#privacy" className="text-sm text-muted-foreground hover:text-white">
                 Privacy Policy
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="#terms" className="text-sm text-muted-foreground hover:text-white">
                 Terms of Service
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="#about" className="text-sm text-muted-foreground hover:text-white">
                 About
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="#contact" className="text-sm text-muted-foreground hover:text-white">
                 Contact
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              {/* TODO: change href to /pricing when implemented */}
+              <Link href="/pricing" className="text-sm text-muted-foreground hover:text-white">
                 Pricing
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              {/* TODO: create /faq page */}
+              <Link href="/faq" className="text-sm text-muted-foreground hover:text-white">
                 FAQ
               </Link>
             </nav>

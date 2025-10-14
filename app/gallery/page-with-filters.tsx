@@ -14,26 +14,29 @@ export default function GalleryPageWithFilters() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
+          {/* TODO: change href to /about when implemented */}
           <Link href="#" className="text-sm text-muted-foreground hover:text-white">
             About
           </Link>
           <Link href="/gallery" className="text-sm text-white hover:text-primary/90">
             Gallery
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+          {/* TODO: change href to /pricing when implemented */}
+          <Link href="/pricing" className="text-sm text-muted-foreground hover:text-white">
             Pricing
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+          {/* TODO: create /faq page */}
+          <Link href="/faq" className="text-sm text-muted-foreground hover:text-white">
             FAQ
           </Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <Link href="#" className="text-sm text-white hover:text-primary/90">
+          <Link href="/auth/login" className="text-sm text-white hover:text-primary/90">
             Log in
           </Link>
           <Link
-            href="#"
+            href="/onboarding"
             className="text-sm bg-gradient-to-r from-[#9747ff] to-[#8608fd] hover:opacity-90 text-white px-4 py-2 rounded-md"
           >
             Redesign now
