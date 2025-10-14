@@ -3,21 +3,35 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 /**
- * Lightweight middleware protecting /studio.
- * If no Supabase session cookie (sb-access-token) exists, redirect to /auth/login.
- * This is intentionally minimal — real subscription checks happen server-side in the studio page.
+ * Middleware: protect /studio routes by checking for a Supabase session cookie.
+ * - Skips Next internals, static files, and API routes for performance.
+ * - Checks multiple common Supabase cookie names; update AUTH_COOKIE_NAMES if your app uses a different name.
  */
-export function middleware(req: NextRequest) {
-  const url = req.nextUrl.clone();
+const PUBLIC_FILE = /\.(.*)$/;
+const AUTH_COOKIE_NAMES = ["sb-access-token", "supabase-auth-token", "sb:token", "sb-token"];
 
-  // Protect /studio and nested routes
-  if (url.pathname.startsWith("/studio")) {
-    // Supabase stores the access token in sb-access-token cookie (default)
-    const token = req.cookies.get("sb-access-token")?.value;
-    if (!token) {
-      url.pathname = "/auth/login";
-      url.searchParams.set("redirect", req.nextUrl.pathname);
-      return NextResponse.redirect(url);
+export function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // Skip next internals and static files, and API
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/static") ||
+    PUBLIC_FILE.test(pathname)
+  ) {
+    return NextResponse.next();
+  }
+
+  // Only guard the /studio path (and its children)
+  if (pathname.startsWith("/studio")) {
+    // Look for any common supabase auth cookie
+    const hasAuth = AUTH_COOKIE_NAMES.some((name) => !!req.cookies.get(name)?.value);
+    if (!hasAuth) {
+      const redirectUrl = req.nextUrl.clone();
+      redirectUrl.pathname = "/auth/login";
+      redirectUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(redirectUrl);
     }
   }
 
