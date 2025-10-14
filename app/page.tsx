@@ -38,7 +38,7 @@ export default function Home() {
             Login
           </Link>
           <Link
-            href="/auth/signup"
+            href="/onboarding"
             className="text-sm bg-gradient-to-r from-[#9747ff] to-[#8608fd] hover:opacity-90 text-white px-4 py-2 rounded-md"
           >
             Sign Up
