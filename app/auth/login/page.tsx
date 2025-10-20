@@ -1,29 +1,46 @@
-'use client'
+"use client";
 
-import { useSearchParams } from 'next/navigation'
-import MagicLinkForm from '../MagicLinkForm'
+import { useState } from "react";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export default function LoginPage() {
-  const searchParams = useSearchParams()
-  const redirectTo = searchParams?.get('redirect') || '/studio'
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<string | null>(null);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus("Sending magic link...");
+    const supabase = getSupabaseBrowserClient();
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo:
+          typeof window !== "undefined"
+            ? `${window.location.origin}/auth/callback?redirectTo=%2Fstudio`
+            : undefined,
+      },
+    });
+
+    if (error) setStatus(`Error: ${error.message}`);
+    else setStatus("Check your email for the login link.");
+  };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-background text-foreground px-4">
-      <div className="w-full max-w-md p-6 bg-[#0f1720]/60 rounded-lg">
-        <h1 className="text-2xl font-bold mb-6 text-white text-center">Log in</h1>
-        
-        {/* TODO: Configure SMTP settings in Supabase project Settings → Email */}
-        <MagicLinkForm redirectTo={redirectTo} />
-        
-        <div className="mt-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            Don't have an account?{' '}
-            <a href="/auth/signup" className="text-primary hover:underline">
-              Sign up
-            </a>
-          </p>
-        </div>
-      </div>
-    </main>
-  )
+    <form onSubmit={onSubmit} className="max-w-md mx-auto p-6 space-y-4">
+      <input
+        type="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="you@example.com"
+        className="w-full border rounded p-2"
+        autoComplete="email"
+      />
+      <button type="submit" className="w-full border rounded p-2">
+        Send magic link
+      </button>
+      {status && <p className="text-sm text-gray-700">{status}</p>}
+    </form>
+  );
 }

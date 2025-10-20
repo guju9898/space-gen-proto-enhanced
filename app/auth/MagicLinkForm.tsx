@@ -1,11 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { useSearchParams } from "next/navigation";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export default function MagicLinkForm({ redirectTo = "/studio" }: { redirectTo?: string }) {
   const [email, setEmail] = useState("");
@@ -27,6 +23,8 @@ export default function MagicLinkForm({ redirectTo = "/studio" }: { redirectTo?:
     setStatus("sending");
     setError(null);
     try {
+      const supabase = getSupabaseBrowserClient();
+      
       // --- replacement snippet: ensure you keep surrounding error handling / UI code intact ---
       const redirectTarget = typeof window !== "undefined"
         ? `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`
