@@ -1,39 +1,28 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { createClient } from "@supabase/supabase-js";
-
-/**
- * Server-only endpoint to validate the logged-in user and confirm an active subscription.
- * - Requires SUPABASE_SERVICE_ROLE_KEY in server env.
- * - Returns 200 { ok: true } if active; 401/403 otherwise.
- */
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { persistSession: false } }
 );
 
 export async function GET() {
   const cookieStore = await cookies();
-  const authCookie = cookieStore.getAll().find(c => /sb-.*-auth-token/.test(c.name));
-  const token = authCookie?.value;
-  if (!token) return NextResponse.json({ ok: false }, { status: 401 });
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
-  // Validate user using service role key (server-side only)
-  const { data: userResult } = await supabaseAdmin.auth.getUser(token);
-  const user = userResult?.user;
-  if (!user) return NextResponse.json({ ok: false }, { status: 401 });
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) return NextResponse.json({ ok: false }, { status: 401 });
 
-  // Query subscriptions table (adjust table/column names if your schema differs)
-  const { data: subscription, error } = await supabaseAdmin
+  const { data, error: subErr } = await supabaseAdmin
     .from("subscriptions")
-    .select("status")
+    .select("id,status")
     .eq("user_id", user.id)
-    .single();
+    .eq("status", "active")
+    .maybeSingle();
 
-  if (error || !subscription || subscription.status !== "active") {
-    return NextResponse.json({ ok: false }, { status: 403 });
-  }
-
-  return NextResponse.json({ ok: true });
+  if (subErr) return NextResponse.json({ ok: false, error: subErr.message }, { status: 500 });
+  return NextResponse.json({ ok: !!data });
 }
