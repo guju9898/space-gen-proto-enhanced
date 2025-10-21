@@ -1,97 +1,65 @@
-import { createClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server'
-import { Replicate } from 'replicate'
-import type { RenderRequest } from '@/types/studio'
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { z } from "zod";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { createPrediction } from "@/lib/replicate";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN!,
-})
+const InputSchema = z.object({
+  image: z.string().url(),
+  prompt: z.string().min(3),
+  guidance_scale: z.number().min(1).max(50).optional(),
+  negative_prompt: z.string().optional(),
+  prompt_strength: z.number().min(0).max(1).optional(),
+  num_inference_steps: z.number().min(1).max(500).optional(),
+  seed: z.number().int().optional().nullable(),
+});
 
-export async function POST(request: Request) {
+// very light, local burst guard to avoid spam (replace with Upstash later)
+const recentByIp = new Map<string, number>();
+
+export async function POST(req: Request) {
   try {
-    const { renderType, config, sourceImage } = await request.json() as RenderRequest
-
-    // Verify user has credits
-    const { data: user } = await supabase.auth.getUser()
-    if (!user?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0] || "unknown";
+    const now = Date.now();
+    const last = recentByIp.get(ip) || 0;
+    if (now - last < 1500) { // 1.5s min gap
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
+    recentByIp.set(ip, now);
 
-    const { data: userData } = await supabase
-      .from('users')
-      .select('credits')
-      .eq('id', user.user.id)
-      .single()
-
-    if (!userData || userData.credits < 1) {
-      return NextResponse.json({ error: 'Insufficient credits' }, { status: 402 })
+    const body = await req.json();
+    const parsed = InputSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid input", details: parsed.error.flatten() }, { status: 400 });
     }
+    const input = parsed.data;
 
-    // Generate prompt based on config
-    const prompt = generatePrompt(renderType, config)
+    const cookieStore = await cookies();
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    // Call Replicate API
-    const output = await replicate.run(
-      "stability-ai/stable-diffusion:db21e45d3f7023abc2a46ee38a23973f6dce16bb082a930b0c49861f96d1e5bf",
-      {
-        input: {
-          prompt,
-          image: sourceImage,
-          num_outputs: 1,
-          num_inference_steps: 50,
-          guidance_scale: 7.5,
-        }
-      }
-    )
+    const prediction = await createPrediction(input);
 
-    // Deduct credit and save render
-    await supabase
-      .from('users')
-      .update({ credits: userData.credits - 1 })
-      .eq('id', user.user.id)
-
-    await supabase
-      .from('renders')
-      .insert({
-        user_id: user.user.id,
-        render_type: renderType,
-        config,
-        source_image_url: sourceImage,
-        result_image_url: output[0],
-        prompt,
-      })
+    // persist placeholder row (RLS: auth user can insert their own)
+    await supabase.from("renders").insert({
+      render_type: "interior",
+      config: { input, prediction_id: prediction.id, status: prediction.status },
+      source_image_url: input.image,
+      result_image_url: null,
+      prompt: input.prompt,
+    });
 
     return NextResponse.json({
-      imageUrl: output[0],
-      prompt,
-      timestamp: new Date().toISOString(),
-    })
-  } catch (error) {
-    console.error('Render error:', error)
-    return NextResponse.json(
-      { error: 'Failed to process render request' },
-      { status: 500 }
-    )
-  }
-}
-
-function generatePrompt(renderType: string, config: any): string {
-  // This is a simplified version - you'll want to expand this based on your specific needs
-  const basePrompt = `A ${config.style} ${renderType} design with ${config.colorPalette} color palette`
-  
-  switch (renderType) {
-    case 'interior':
-      return `${basePrompt}, ${config.roomType} with ${config.furnitureStyle} furniture`
-    case 'exterior':
-      return `${basePrompt}, ${config.buildingType} in ${config.architecturalStyle} style`
-    case 'product':
-      return `${basePrompt}, ${config.productType} made of ${config.material}`
-    default:
-      return basePrompt
+      id: prediction.id,
+      status: prediction.status,
+      created: prediction?.created_at ?? new Date().toISOString(),
+      prompt: input.prompt,
+    });
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message || "Render create failed" }, { status: 502 });
   }
 } 
