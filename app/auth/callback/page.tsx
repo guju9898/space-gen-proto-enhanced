@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
-export default function AuthCallbackPage() {
+function CallbackInner() {
   const router = useRouter();
   const search = useSearchParams();
   const [message, setMessage] = useState("Finalizing sign-in...");
@@ -121,5 +121,13 @@ export default function AuthCallbackPage() {
         Open DevTools → Console (Preserve log) and capture logs between === AUTH DEBUG START/END === if anything fails.
       </p>
     </div>
+  );
+}
+
+export default function CallbackPage() {
+  return (
+    <Suspense fallback={<p className="p-6">Signing you in…</p>}>
+      <CallbackInner />
+    </Suspense>
   );
 }

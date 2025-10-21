@@ -33,7 +33,8 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
         .from("renders")
         .update({
           result_image_url: outputArray[0],
-          config: { ...(pred as any) }, // optional: store full prediction or keep minimal
+          // keep minimal status while preserving prediction_id
+          config: { prediction_id: id, status: pred.status },
         })
         .contains("config", { prediction_id: id }); // JSON containment filter
     }

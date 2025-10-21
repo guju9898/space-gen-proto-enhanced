@@ -1,5 +1,3 @@
-import type { RequestInit } from "next/dist/server/web/spec-extension/request";
-
 const API = "https://api.replicate.com/v1";
 const TOKEN = process.env.REPLICATE_API_TOKEN!;
 const VERSION = process.env.REPLICATE_VERSION || "76604baddc85b1b4616e1c6475eca080da339c8875bd4996705440484a6eac38";
@@ -30,7 +28,7 @@ export async function createPrediction(input: ReplicateInput) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
-  } as RequestInit);
+  });
   if (!res.ok) {
     const err = await res.text();
     throw new Error(`Replicate create failed: ${res.status} ${err}`);
@@ -41,7 +39,7 @@ export async function createPrediction(input: ReplicateInput) {
 export async function getPrediction(id: string) {
   const res = await fetch(`${API}/predictions/${id}`, {
     headers: { Authorization: `Bearer ${TOKEN}` },
-  } as RequestInit);
+  });
   if (!res.ok) {
     const err = await res.text();
    throw new Error(`Replicate get failed: ${res.status} ${err}`);

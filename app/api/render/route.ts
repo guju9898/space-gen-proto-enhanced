@@ -46,6 +46,7 @@ export async function POST(req: Request) {
 
     // persist placeholder row (RLS: auth user can insert their own)
     await supabase.from("renders").insert({
+      user_id: user.id,
       render_type: "interior",
       config: { input, prediction_id: prediction.id, status: prediction.status },
       source_image_url: input.image,
