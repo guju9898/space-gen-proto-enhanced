@@ -14,7 +14,9 @@ const supabaseAdmin = createClient(
 );
 
 export async function GET() {
-  const token = cookies().get("sb-access-token")?.value;
+  const cookieStore = await cookies();
+  const authCookie = cookieStore.getAll().find(c => /sb-.*-auth-token/.test(c.name));
+  const token = authCookie?.value;
   if (!token) return NextResponse.json({ ok: false }, { status: 401 });
 
   // Validate user using service role key (server-side only)

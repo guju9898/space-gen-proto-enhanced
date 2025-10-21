@@ -16,7 +16,9 @@ const supabaseAdmin = createClient(
 );
 
 async function verifyStudioAccessOrRedirect() {
-  const token = cookies().get("sb-access-token")?.value;
+  const cookieStore = await cookies();
+  const authCookie = cookieStore.getAll().find(c => /sb-.*-auth-token/.test(c.name));
+  const token = authCookie?.value;
   if (!token) {
     redirect("/auth/login?redirect=/studio");
   }
