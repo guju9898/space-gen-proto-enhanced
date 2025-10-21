@@ -72,11 +72,12 @@ interface DesignControlsPanelProps {
 
 export default function DesignControlsPanel({ designType = "interior", onGenerateDesign }: DesignControlsPanelProps) {
   const { config, updateConfig } = useDesignConfig()
+  const activeConfig = config?.[designType] || {}
 
   const handleGenerateDesign = () => {
-    console.log("Current design configuration:", config)
+    console.log("Current design configuration:", activeConfig)
     if (onGenerateDesign) {
-      onGenerateDesign(config)
+      onGenerateDesign(activeConfig)
     }
   }
 
@@ -87,7 +88,7 @@ export default function DesignControlsPanel({ designType = "interior", onGenerat
         <h3 className="text-sm font-medium mb-3 text-white">Room type</h3>
         <ImageSelector
           options={roomTypes}
-          value={config.roomType}
+          value={activeConfig.roomType}
           onChange={(value) => updateConfig("roomType", value)}
         />
       </div>
@@ -97,7 +98,7 @@ export default function DesignControlsPanel({ designType = "interior", onGenerat
         <h3 className="text-sm font-medium mb-3 text-white">Design style</h3>
         <ImageSelector
           options={designStyles}
-          value={config.designStyle}
+          value={activeConfig.designStyle}
           onChange={(value) => updateConfig("designStyle", value)}
         />
       </div>
@@ -107,7 +108,7 @@ export default function DesignControlsPanel({ designType = "interior", onGenerat
         <h3 className="text-sm font-medium mb-2 text-white">Composition</h3>
         <DropdownSelector
           options={compositionOptions}
-          value={config.composition}
+          value={activeConfig.composition}
           onChange={(value) => updateConfig("composition", value)}
           placeholder="Select composition"
         />
@@ -118,7 +119,7 @@ export default function DesignControlsPanel({ designType = "interior", onGenerat
         <h3 className="text-sm font-medium mb-2 text-white">Mood</h3>
         <DropdownSelector
           options={moodOptions}
-          value={config.mood}
+          value={activeConfig.mood}
           onChange={(value) => updateConfig("mood", value)}
           placeholder="Select mood"
         />
@@ -129,7 +130,7 @@ export default function DesignControlsPanel({ designType = "interior", onGenerat
         <h3 className="text-sm font-medium mb-3 text-white">Color palette</h3>
         <ColorPaletteSelector
           options={colorPalettes}
-          value={config.colorPalette}
+          value={activeConfig.colorPalette}
           onChange={(value) => updateConfig("colorPalette", value)}
         />
       </div>
@@ -139,7 +140,7 @@ export default function DesignControlsPanel({ designType = "interior", onGenerat
         <h3 className="text-sm font-medium mb-2 text-white">Lighting</h3>
         <DropdownSelector
           options={lightingOptions}
-          value={config.lighting}
+          value={activeConfig.lighting}
           onChange={(value) => updateConfig("lighting", value)}
           placeholder="Select lighting"
         />
@@ -150,7 +151,7 @@ export default function DesignControlsPanel({ designType = "interior", onGenerat
         <h3 className="text-sm font-medium mb-3 text-white">Materials</h3>
         <TagSelector
           options={materialOptions}
-          selectedValues={config.materials || []}
+          selectedValues={activeConfig.materials || []}
           onChange={(values) => updateConfig("materials", values)}
           maxSelections={3}
         />
@@ -163,7 +164,7 @@ export default function DesignControlsPanel({ designType = "interior", onGenerat
           min={0}
           max={100}
           step={10}
-          value={config.realism || 50}
+          value={activeConfig.realism || 50}
           onChange={(value) => updateConfig("realism", value)}
           labels={["Stylized", "Photorealistic"]}
         />

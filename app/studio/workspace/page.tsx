@@ -125,7 +125,7 @@ function StudioWorkspace() {
   }
 
   // Get active selections for the request panel
-  const activeSelections = Object.entries(config).filter(
+  const activeSelections = Object.entries(config?.interior || {}).filter(
     ([key, value]) => value !== null && value !== undefined && !Array.isArray(value) && key !== "realism",
   )
 
