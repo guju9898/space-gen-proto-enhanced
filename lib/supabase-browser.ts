@@ -13,6 +13,11 @@ export function getSupabaseBrowserClient() {
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: false,
+      cookieOptions: {
+        secure: process.env.NODE_ENV === "production", // NOT secure in dev
+        sameSite: "lax",
+        path: "/",
+      },
     },
   });
   return _client;
