@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export const config = { matcher: ["/studio"] };
+export const config = { matcher: ["/studio/:path*"] };
 
 export function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
