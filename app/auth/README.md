@@ -26,9 +26,9 @@ This app uses Supabase magic link authentication for both login and signup flows
 
 ### Files
 
-- `MagicLinkForm.tsx` - Shared component for magic link flow
 - `login/page.tsx` - Login page (redirects to `/studio` or custom redirect)
 - `signup/page.tsx` - Signup page (redirects to `/onboarding`)
+- `callback/page.tsx` - Handles magic link authentication and sets HTTP-only cookies
 
 ### Environment Variables
 

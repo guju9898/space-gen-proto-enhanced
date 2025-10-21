@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export const config = {
-  matcher: ["/studio"],
-};
+export const config = { matcher: ["/studio"] };
 
 export function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
@@ -14,6 +12,5 @@ export function middleware(req: NextRequest) {
     url.search = `?redirect=${encodeURIComponent(req.nextUrl.pathname)}`;
     return NextResponse.redirect(url);
   }
-
   return NextResponse.next();
 }

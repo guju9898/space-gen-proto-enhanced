@@ -21,10 +21,8 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     let cancelled = false;
-
     (async () => {
       const supabase = getSupabaseBrowserClient();
-
       const hash = (typeof window !== "undefined" && window.location.hash) || "";
       const query = (typeof window !== "undefined" && window.location.search) || "";
 
@@ -71,57 +69,56 @@ export default function AuthCallbackPage() {
           return;
         }
 
-        // 1) Magic link hash tokens → setSession
+        // 1) Magic-link hash tokens
         if (access_token && refresh_token && typeof supabase.auth.setSession === "function") {
-          const { error: setErr } = await supabase.auth.setSession({
-            access_token,
-            refresh_token,
+          const { error: setErr } = await supabase.auth.setSession({ access_token, refresh_token });
+          if (setErr) { setMessage(`Failed to set session: ${setErr.message}`); return; }
+
+          // Sync HTTP-only cookies for middleware
+          await fetch("/api/auth/session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ access_token, refresh_token }),
           });
-          if (setErr) {
-            setMessage(`Failed to set session: ${setErr.message}`);
-            return;
-          }
-          if (!cancelled) {
-            setMessage("Signed in. Redirecting...");
-            router.replace(redirectTo);
-          }
+
+          if (!cancelled) { setMessage("Signed in. Redirecting..."); router.replace(redirectTo); }
           return;
         }
 
-        // 2) OAuth/PKCE code → exchangeCodeForSession if available
+        // 2) OAuth/PKCE code
         if (code && typeof (supabase.auth as any).exchangeCodeForSession === "function") {
           const { error: xErr } = await (supabase.auth as any).exchangeCodeForSession(code);
-          if (xErr) {
-            setMessage(`Failed to exchange code: ${xErr.message}`);
-            return;
+          if (xErr) { setMessage(`Failed to exchange code: ${xErr.message}`); return; }
+
+          const session = (await supabase.auth.getSession()).data.session;
+          if (session?.access_token && session?.refresh_token) {
+            await fetch("/api/auth/session", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                access_token: session.access_token,
+                refresh_token: session.refresh_token,
+              }),
+            });
           }
-          if (!cancelled) {
-            setMessage("Signed in via code. Redirecting...");
-            router.replace(redirectTo);
-          }
+
+          if (!cancelled) { setMessage("Signed in via code. Redirecting..."); router.replace(redirectTo); }
           return;
         }
 
-        // 3) Nothing useful in URL
-        setMessage(
-          "No session tokens found in URL. If you clicked an old link, request a new magic link."
-        );
+        setMessage("No session tokens found in URL. Request a new magic link.");
       } catch (e: any) {
         setMessage(`Unexpected error: ${e?.message || String(e)}`);
       }
     })();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [redirectTo]);
 
   return (
     <div className="mx-auto max-w-md p-6 text-sm text-gray-800">
       <p>{message}</p>
       <p className="mt-2 text-xs text-gray-500">
-        If this page is stuck, open DevTools → Console, enable "Preserve log", reload,
-        and copy logs between the === AUTH DEBUG START/END === markers.
+        Open DevTools → Console (Preserve log) and capture logs between === AUTH DEBUG START/END === if anything fails.
       </p>
     </div>
   );

@@ -37,9 +37,7 @@ export default function LoginPage() {
         className="w-full border rounded p-2"
         autoComplete="email"
       />
-      <button type="submit" className="w-full border rounded p-2">
-        Send magic link
-      </button>
+      <button type="submit" className="w-full border rounded p-2">Send magic link</button>
       {status && <p className="text-sm text-gray-700">{status}</p>}
     </form>
   );

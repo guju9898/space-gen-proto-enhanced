@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation"
-
 // ---- SERVER GUARD BLOCK (inserted) ----
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
