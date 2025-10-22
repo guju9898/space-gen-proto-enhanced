@@ -45,8 +45,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
       output: outputArray,
       error: pred.error ?? null,
     };
-    const statusCode = pred.status === "failed" ? 502 : 200;
-    return NextResponse.json(payload, { status: statusCode });
+    return NextResponse.json(payload, { status: 200 });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || "Render status failed" }, { status: 502 });
   }

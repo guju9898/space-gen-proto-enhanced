@@ -42,6 +42,37 @@ export async function POST(req: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    // Pre-flight HEAD check for image URL
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
+      const headResponse = await fetch(input.image, {
+        method: "HEAD",
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!headResponse.ok) {
+        return NextResponse.json(
+          { error: `Image URL is not reachable (status ${headResponse.status})` },
+          { status: 422 }
+        );
+      }
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        return NextResponse.json(
+          { error: "Image URL is not reachable (timeout)" },
+          { status: 422 }
+        );
+      }
+      return NextResponse.json(
+        { error: `Image URL is not reachable (${error.message})` },
+        { status: 422 }
+      );
+    }
+
     const prediction = await createPrediction(input);
 
     // persist placeholder row (RLS: auth user can insert their own)
