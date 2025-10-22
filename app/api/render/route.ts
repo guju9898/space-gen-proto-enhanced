@@ -22,6 +22,8 @@ const recentByIp = new Map<string, number>();
 
 export async function POST(req: Request) {
   try {
+    const DEV = process.env.NEXT_PUBLIC_DEBUG?.toLowerCase() === "true";
+    
     const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0] || "unknown";
     const now = Date.now();
     const last = recentByIp.get(ip) || 0;
@@ -36,6 +38,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid input", details: parsed.error.flatten() }, { status: 400 });
     }
     const input = parsed.data;
+
+    if (DEV) console.log("[SpaceGen API] Incoming image_url:", input.image);
 
     const cookieStore = await cookies();
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
@@ -75,6 +79,8 @@ export async function POST(req: Request) {
 
     const prediction = await createPrediction(input);
 
+    if (DEV) console.log("[SpaceGen API] Prediction id:", prediction.id, "status:", prediction.status);
+
     // persist placeholder row (RLS: auth user can insert their own)
     await supabase.from("renders").insert({
       user_id: user.id,
@@ -92,6 +98,8 @@ export async function POST(req: Request) {
       prompt: input.prompt,
     });
   } catch (e: any) {
+    const DEV = process.env.NEXT_PUBLIC_DEBUG?.toLowerCase() === "true";
+    if (DEV) console.log("[SpaceGen API] Error:", e?.message || "Render create failed");
     return NextResponse.json({ error: e?.message || "Render create failed" }, { status: 502 });
   }
 } 

@@ -52,6 +52,7 @@ import { buildInteriorPrompt } from "@/lib/prompt/interior"
 import { ensurePublicImageUrl } from "@/lib/images/ensurePublicImageUrl"
 import { isPublicHttpUrl } from "@/lib/url/isPublicHttpUrl"
 import { supabaseBrowser } from "@/lib/supabase/browserClient"
+import { devLog } from "@/lib/debug/devLog"
 
 const defaultConfig: InteriorConfig = {
   roomType: "living",
@@ -157,14 +158,14 @@ export default function InteriorStudioPage() {
   }
 
   const handleGenerate = async (config: Record<string, any>) => {
-    setIsRendering(true);
     setError(null);
-
+    setIsRendering(true);
+    
     try {
+      devLog("Start render with config:", config);
+
       if (!user?.id) {
-        setError("Please sign in to generate images.");
-        setIsRendering(false);
-        return;
+        throw new Error("Please sign in to generate images.");
       }
 
       // Normalize the image source using the new helper
@@ -176,9 +177,7 @@ export default function InteriorStudioPage() {
 
       // Validate the result is a public URL
       if (!isPublicHttpUrl(publicImageUrl)) {
-        setError("Please provide a public image URL or select a file to upload.");
-        setIsRendering(false);
-        return;
+        throw new Error("Please provide a public image URL or select a file to upload.");
       }
 
       // Build prompt from the active selections
@@ -203,18 +202,22 @@ export default function InteriorStudioPage() {
         num_inference_steps: 50,
       });
 
+      devLog("Render job created:", res?.imageUrl ?? res);
+
       // Update the existing preview path
       if (res.imageUrl) {
         console.log("✅ Image generated:", res.imageUrl);
         setCurrentRender(res.imageUrl);
         setLatestRenders(prev => [res.imageUrl, ...prev.slice(0, 19)]); // Keep latest 20
+        setError(null);
       } else {
-        console.warn("⚠️ Image generation returned null or failed.");
-        setError("Image generation failed");
+        throw new Error("Image generation failed");
       }
-    } catch (e: any) {
-      console.error("❌ Generation error:", e);
-      setError(e?.message ?? "Generation failed");
+    } catch (err: any) {
+      devLog("Render error:", err);
+      setError(
+        err?.message ?? "Render failed. Check your image URL/file, then try again."
+      );
     } finally {
       setIsRendering(false);
     }

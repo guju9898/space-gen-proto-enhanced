@@ -15,10 +15,15 @@ interface Normalized {
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
   try {
+    const DEV = process.env.NEXT_PUBLIC_DEBUG?.toLowerCase() === "true";
+    
     const { id } = params;
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
     const pred = await getPrediction(id);
+    
+    if (DEV) console.log("[SpaceGen API] Prediction id:", id, "status:", pred.status);
+
     const outputArray =
       Array.isArray(pred.output) ? pred.output
       : pred.output ? [pred.output]
@@ -47,6 +52,8 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     };
     return NextResponse.json(payload, { status: 200 });
   } catch (e: any) {
+    const DEV = process.env.NEXT_PUBLIC_DEBUG?.toLowerCase() === "true";
+    if (DEV) console.log("[SpaceGen API] Error:", e?.message || "Render status failed");
     return NextResponse.json({ error: e?.message || "Render status failed" }, { status: 502 });
   }
 }
