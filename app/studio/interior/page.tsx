@@ -49,6 +49,9 @@ import {
 import { generateImageFromConfig } from "@/lib/api/generateImage"
 import { useRenderJob } from "@/hooks/useRenderJob"
 import { buildInteriorPrompt } from "@/lib/prompt/interior"
+import { ensurePublicImageUrl } from "@/lib/images/ensurePublicImageUrl"
+import { isPublicHttpUrl } from "@/lib/url/isPublicHttpUrl"
+import { supabaseBrowser } from "@/lib/supabase/browserClient"
 
 const defaultConfig: InteriorConfig = {
   roomType: "living",
@@ -79,12 +82,21 @@ export default function InteriorStudioPage() {
   const [error, setError] = useState<string | null>(null)
   const { loading: renderLoading, error: renderError, run: runRender } = useRenderJob()
   const [imageState, setImageState] = useState<ImageState | null>(null)
+  const [user, setUser] = useState<any>(null)
 
   // Handle client-side initialization
   useEffect(() => {
     setMounted(true)
     // Initialize state with default values to prevent hydration mismatch
     updateConfig(defaultConfig)
+    
+    // Get user session
+    const getUser = async () => {
+      const { data: { user } } = await supabaseBrowser.auth.getUser()
+      setUser(user)
+    }
+    getUser()
+    
     return () => {
       // Cleanup any existing image previews
       if (imageState && imageState.previewUrl && imageState.previewUrl.startsWith('blob:')) {
@@ -149,17 +161,22 @@ export default function InteriorStudioPage() {
     setError(null);
 
     try {
-      // Get the reference image URL - prefer uploaded file URL or existing image URL
-      let imageUrlInput: string | null = null;
-      
-      if (imageState?.previewUrl) {
-        imageUrlInput = imageState.previewUrl;
-      } else if (config.image && typeof config.image === "string" && config.image.startsWith("http")) {
-        imageUrlInput = config.image;
+      if (!user?.id) {
+        setError("Please sign in to generate images.");
+        setIsRendering(false);
+        return;
       }
-      
-      if (!imageUrlInput) {
-        setError("Please upload a reference image first.");
+
+      // Normalize the image source using the new helper
+      const publicImageUrl = await ensurePublicImageUrl({
+        rawUrl: imageState?.previewUrl || config.image,
+        file: imageState?.file || null,
+        userId: user.id,
+      });
+
+      // Validate the result is a public URL
+      if (!isPublicHttpUrl(publicImageUrl)) {
+        setError("Please provide a public image URL or select a file to upload.");
         setIsRendering(false);
         return;
       }
@@ -179,7 +196,7 @@ export default function InteriorStudioPage() {
 
       // Call the render API via the helper
       const res = await runRender({
-        image: imageUrlInput,
+        image: publicImageUrl,
         prompt,
         guidance_scale: 15,
         prompt_strength: 0.8,
@@ -190,7 +207,7 @@ export default function InteriorStudioPage() {
       if (res.imageUrl) {
         console.log("✅ Image generated:", res.imageUrl);
         setCurrentRender(res.imageUrl);
-        setLatestRenders(prev => [res.imageUrl, ...prev.slice(0, 4)]); // Keep latest 5
+        setLatestRenders(prev => [res.imageUrl, ...prev.slice(0, 19)]); // Keep latest 20
       } else {
         console.warn("⚠️ Image generation returned null or failed.");
         setError("Image generation failed");
