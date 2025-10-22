@@ -47,6 +47,8 @@ import {
   geometries
 } from "@/lib/studio/variables"
 import { generateImageFromConfig } from "@/lib/api/generateImage"
+import { useRenderJob } from "@/hooks/useRenderJob"
+import { buildInteriorPrompt } from "@/lib/prompt/interior"
 
 const defaultConfig: InteriorConfig = {
   roomType: "living",
@@ -75,6 +77,7 @@ export default function InteriorStudioPage() {
   const [latestRenders, setLatestRenders] = useState<string[]>([])
   const [isRendering, setIsRendering] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { loading: renderLoading, error: renderError, run: runRender } = useRenderJob()
   const [imageState, setImageState] = useState<ImageState | null>(null)
 
   // Handle client-side initialization
@@ -143,31 +146,61 @@ export default function InteriorStudioPage() {
 
   const handleGenerate = async (config: Record<string, any>) => {
     setIsRendering(true);
+    setError(null);
 
     try {
-      // Sanitize invalid string-based image URLs before API call
-      if (
-        config.image &&
-        typeof config.image === "string" &&
-        !config.image.startsWith("http")
-      ) {
-        console.warn("⚠️ Ignoring invalid image string:", config.image);
-        config.image = null;
+      // Get the reference image URL - prefer uploaded file URL or existing image URL
+      let imageUrlInput: string | null = null;
+      
+      if (imageState?.previewUrl) {
+        imageUrlInput = imageState.previewUrl;
+      } else if (config.image && typeof config.image === "string" && config.image.startsWith("http")) {
+        imageUrlInput = config.image;
+      }
+      
+      if (!imageUrlInput) {
+        setError("Please upload a reference image first.");
+        setIsRendering(false);
+        return;
       }
 
-      const imageUrl = await generateImageFromConfig(config);
+      // Build prompt from the active selections
+      const prompt = buildInteriorPrompt({
+        roomType: config.roomType,
+        designStyle: config.designStyle,
+        colorPalette: config.colorPalette,
+        lighting: config.lighting,
+        materials: config.materials,
+        geometry: config.geometry,
+        camera: config.camera,
+        realism: typeof config.realism === "number" ? config.realism : undefined,
+        extras: config.extras,
+      });
 
-      if (imageUrl) {
-        console.log("✅ Image generated:", imageUrl);
-        setCurrentRender(imageUrl);
+      // Call the render API via the helper
+      const res = await runRender({
+        image: imageUrlInput,
+        prompt,
+        guidance_scale: 15,
+        prompt_strength: 0.8,
+        num_inference_steps: 50,
+      });
+
+      // Update the existing preview path
+      if (res.imageUrl) {
+        console.log("✅ Image generated:", res.imageUrl);
+        setCurrentRender(res.imageUrl);
+        setLatestRenders(prev => [res.imageUrl, ...prev.slice(0, 4)]); // Keep latest 5
       } else {
         console.warn("⚠️ Image generation returned null or failed.");
+        setError("Image generation failed");
       }
-    } catch (error) {
-      console.error("❌ Generation error:", error);
+    } catch (e: any) {
+      console.error("❌ Generation error:", e);
+      setError(e?.message ?? "Generation failed");
+    } finally {
+      setIsRendering(false);
     }
-
-    setIsRendering(false);
   };
 
   const handleThumbnailClick = (renderUrl: string) => {
@@ -375,12 +408,22 @@ export default function InteriorStudioPage() {
           </div>
           
           <div className="pt-4 border-t border-border">
+            {error && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-md">
+                <p className="text-sm text-red-400">{error}</p>
+              </div>
+            )}
+            {renderError && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-md">
+                <p className="text-sm text-red-400">{renderError}</p>
+              </div>
+            )}
             <Button 
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium"
               onClick={() => handleGenerate(config)}
-              disabled={isRendering}
+              disabled={isRendering || renderLoading}
             >
-              {isRendering ? "Generating..." : "Generate"}
+              {(isRendering || renderLoading) ? "Generating..." : "Generate"}
             </Button>
           </div>
         </div>
