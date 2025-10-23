@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { createSupabaseForRoute } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,8 +16,7 @@ export async function DELETE(_req: Request, ctx: { params?: Record<string, strin
     }
 
     // Auth user (RLS requires authenticated)
-    const cookieStore = cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const supabase = await createSupabaseForRoute();
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr && DEV) console.log("[Delete API] auth.getUser error:", authErr.message);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

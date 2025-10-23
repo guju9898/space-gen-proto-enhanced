@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { z } from "zod";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { createSupabaseForRoute } from "@/lib/supabase/server";
 import { createPrediction } from "@/lib/replicate";
 
 export const runtime = "nodejs";
@@ -45,8 +44,7 @@ export async function POST(req: Request) {
     if (DEV) console.log("[SpaceGen API] Incoming image_url:", input.image);
 
     // ── Auth
-    const cookieStore = cookies(); // (sync is fine)
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const supabase = await createSupabaseForRoute();
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr && DEV) console.log("[SpaceGen API] auth.getUser error:", authErr.message);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

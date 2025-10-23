@@ -6,7 +6,7 @@ function isAllowedOrigin(origin: string | null) {
   if (!origin) return true; // dev leniency
   try {
     const u = new URL(origin);
-    return u.host === "localhost:3000";
+    return u.hostname === "localhost" && (u.port === "3000" || u.port === "3001" || !u.port);
   } catch {
     return false;
   }
