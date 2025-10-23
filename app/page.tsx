@@ -19,6 +19,9 @@ export default function Home() {
           <Link href="/gallery" className="text-sm text-muted-foreground hover:text-white">
             Gallery
           </Link>
+          <Link href="/my-renders" className="text-sm text-muted-foreground hover:text-white">
+            My Renders
+          </Link>
           {/* TODO: create /pricing page */}
           <Link href="/pricing" className="text-sm text-muted-foreground hover:text-white">
             Pricing

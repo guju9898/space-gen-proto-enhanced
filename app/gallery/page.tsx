@@ -20,6 +20,9 @@ export default function GalleryPage() {
           <Link href="/gallery" className="text-sm text-white hover:text-primary/90">
             Gallery
           </Link>
+          <Link href="/my-renders" className="text-sm text-muted-foreground hover:text-white">
+            My Renders
+          </Link>
           {/* TODO: change href to /pricing when implemented */}
           <Link href="/pricing" className="text-sm text-muted-foreground hover:text-white">
             Pricing

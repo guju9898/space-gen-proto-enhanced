@@ -147,8 +147,7 @@ export default function InteriorStudioPage() {
         reader.readAsDataURL(file)
       })
 
-      setImageState({ file, previewUrl })
-      handleConfigChange("image", base64)
+      setImageState({ file, previewUrl }) // preview only (no base64 persisted)
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to upload image')
@@ -170,15 +169,17 @@ export default function InteriorStudioPage() {
 
       // Normalize the image source using the new helper
       const publicImageUrl = await ensurePublicImageUrl({
-        rawUrl: imageState?.previewUrl || config.image,
-        file: imageState?.file || null,
+        rawUrl: config.image ?? null,       // must be http(s) if present
+        file: imageState?.file ?? null,     // primary path for local uploads
         userId: user.id,
       });
 
       // Validate the result is a public URL
       if (!isPublicHttpUrl(publicImageUrl)) {
-        throw new Error("Please provide a public image URL or select a file to upload.");
+        throw new Error("The image is not publicly accessible over HTTP(S).");
       }
+
+      devLog("Normalized public URL:", publicImageUrl);
 
       // Build prompt from the active selections
       const prompt = buildInteriorPrompt({
