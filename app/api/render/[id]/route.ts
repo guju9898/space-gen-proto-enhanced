@@ -1,59 +1,96 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { getPrediction } from "@/lib/replicate";
+import { z } from "zod";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-interface Normalized {
-  id: string;
-  status: "starting"|"processing"|"queued"|"succeeded"|"failed"|"canceled";
-  output?: string[];
-  error?: string | null;
+const ParamsSchema = z.object({ id: z.string().min(6) });
+
+/**
+ * Replicate client—keep it simple to avoid extra imports
+ */
+async function fetchPrediction(predictionId: string) {
+  const token = process.env.REPLICATE_API_TOKEN;
+  if (!token) throw new Error("Missing REPLICATE_API_TOKEN");
+  const res = await fetch(`https://api.replicate.com/v1/predictions/${predictionId}`, {
+    headers: {
+      Authorization: `Token ${token}`,
+      "Content-Type": "application/json",
+    },
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    const txt = await res.text().catch(() => "");
+    throw new Error(`Replicate fetch failed (${res.status}): ${txt || res.statusText}`);
+  }
+  return res.json();
 }
 
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(_: Request, ctx: { params: { id: string } }) {
+  const DEV = process.env.NEXT_PUBLIC_DEBUG?.toLowerCase() === "true";
   try {
-    const DEV = process.env.NEXT_PUBLIC_DEBUG?.toLowerCase() === "true";
-    
-    const { id } = params;
-    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    // 0) Params
+    const parsed = ParamsSchema.safeParse(ctx.params);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid prediction id" }, { status: 400 });
+    }
+    const predictionId = parsed.data.id;
 
-    const pred = await getPrediction(id);
-    
-    if (DEV) console.log("[SpaceGen API] Prediction id:", id, "status:", pred.status);
+    // 1) Auth user (RLS requires authenticated)
+    const cookieStore = cookies();
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const { data: { user }, error: authErr } = await supabase.auth.getUser();
+    if (authErr && DEV) console.log("[Status API] auth.getUser error:", authErr.message);
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const outputArray =
-      Array.isArray(pred.output) ? pred.output
-      : pred.output ? [pred.output]
-      : [];
+    // 2) Replicate status
+    const prediction = await fetchPrediction(predictionId);
 
-    // attempt to update the render row when succeeded
-    if (pred.status === "succeeded" && outputArray.length > 0) {
-      const cookieStore = await cookies();
-      const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
-      // best-effort update: find row by prediction_id inside config JSON
-      await supabase
-        .from("renders")
-        .update({
-          result_image_url: outputArray[0],
-          // keep minimal status while preserving prediction_id
-          config: { prediction_id: id, status: pred.status },
-        })
-        .contains("config", { prediction_id: id }); // JSON containment filter
+    // Replicate status mapping
+    const status: string = prediction?.status ?? "processing";
+    // Handle output shape (array or string)
+    let imageUrl: string | null = null;
+    if (status === "succeeded") {
+      const out = prediction.output;
+      if (Array.isArray(out) && out.length > 0 && typeof out[0] === "string") {
+        imageUrl = out[0];
+      } else if (typeof out === "string") {
+        imageUrl = out;
+      } else if (out?.images && Array.isArray(out.images) && out.images[0]) {
+        imageUrl = out.images[0];
+      }
     }
 
-    const payload: Normalized = {
-      id: pred.id,
-      status: pred.status,
-      output: outputArray,
-      error: pred.error ?? null,
-    };
-    return NextResponse.json(payload, { status: 200 });
+    // 3) Self-healing upsert on every poll so /my-renders always sees it
+    //    Requires columns: user_id, prediction_id, status, image_url, prompt, type
+    const { error: upsertErr } = await supabase
+      .from("renders")
+      .upsert(
+        {
+          user_id: user.id,
+          prediction_id: predictionId,
+          status,
+          image_url: imageUrl, // null until succeeded
+          // leave prompt/type untouched if your schema doesn't require them here
+        },
+        { onConflict: "prediction_id" }
+      );
+
+    if (upsertErr && DEV) console.log("[Status API] renders upsert error:", upsertErr.message);
+    if (DEV) console.log("[Status API] prediction:", predictionId, "→", status, imageUrl || "");
+
+    // 4) Respond to UI
+    return NextResponse.json({
+      id: predictionId,
+      status,
+      imageUrl,
+      raw: DEV ? prediction : undefined,
+    }, { status: 200 });
   } catch (e: any) {
     const DEV = process.env.NEXT_PUBLIC_DEBUG?.toLowerCase() === "true";
-    if (DEV) console.log("[SpaceGen API] Error:", e?.message || "Render status failed");
-    return NextResponse.json({ error: e?.message || "Render status failed" }, { status: 502 });
+    if (DEV) console.log("[Status API] Error:", e?.message || "Status check failed");
+    return NextResponse.json({ error: e?.message || "Status check failed" }, { status: 502 });
   }
 }
