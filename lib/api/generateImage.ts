@@ -23,7 +23,7 @@ export async function generateImageFromConfig(config: RenderRequestConfig) {
 
   const started = Date.now();
   let out: string[] = [];
-  while (Date.now() - started < 60000) {
+  while (Date.now() - started < 180000) {
     const r = await fetch(`/api/render/${id}`);
     const data = await r.json();
     if (data.status === "succeeded" && data.output?.length) {
@@ -33,9 +33,16 @@ export async function generateImageFromConfig(config: RenderRequestConfig) {
     if (data.status === "failed" || data.status === "canceled") {
       throw new Error(data.error || "Render failed");
     }
-    await new Promise((s) => setTimeout(s, 2000));
+    await new Promise((s) => setTimeout(s, 2500));
   }
-  if (!out.length) throw new Error("Render is taking longer than expected. Please try again shortly.");
+  if (!out.length) {
+    return {
+      timedOut: true,
+      id,
+      prompt,
+      timestamp: new Date().toISOString(),
+    };
+  }
 
   return {
     imageUrl: out[0],

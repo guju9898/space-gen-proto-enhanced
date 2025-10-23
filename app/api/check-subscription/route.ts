@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { createRouteSupabase } from "@/lib/supabase/createRouteClient";
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseAdmin = createClient(
@@ -10,11 +9,12 @@ const supabaseAdmin = createClient(
 );
 
 export async function GET() {
-  const cookieStore = await cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+  const supabase = await createRouteSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const { data, error: subErr } = await supabaseAdmin
     .from("subscriptions")

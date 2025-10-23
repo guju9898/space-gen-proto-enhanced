@@ -205,6 +205,13 @@ export default function InteriorStudioPage() {
 
       devLog("Render job created:", res?.imageUrl ?? res);
 
+      // Handle timeout case
+      if (res.timedOut) {
+        console.log("⏰ Render is taking longer than expected. It will appear in My Renders shortly.");
+        setError(null); // Don't show error for timeout
+        return; // Exit early, don't block navigation
+      }
+
       // Update the existing preview path
       if (res.imageUrl) {
         console.log("✅ Image generated:", res.imageUrl);

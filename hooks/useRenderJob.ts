@@ -23,6 +23,10 @@ export function useRenderJob() {
     setLoading(true);
     try {
       const res = await generateImageFromConfig(input);
+      if (res.timedOut) {
+        // Don't set error - this is a non-fatal timeout
+        return res; // { timedOut: true, id, prompt, timestamp }
+      }
       setImageUrl(res.imageUrl);
       return res; // { imageUrl, prompt, timestamp }
     } catch (e: any) {

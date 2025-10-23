@@ -19,7 +19,7 @@ try {
 
 const PAGE_SIZE = 9;
 const AUTO_OPEN_ON_COMPLETE = false;
-const ENABLE_REALTIME = process.env.NEXT_PUBLIC_ENABLE_REALTIME === "true";
+const ENABLE_REALTIME = process.env.NEXT_PUBLIC_ENABLE_REALTIME !== "false";
 
 interface RendersDashboardProps {
   userId: string;

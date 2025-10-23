@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { createRouteSupabase } from "@/lib/supabase/createRouteClient";
 
 function isAllowedOrigin(origin: string | null) {
   if (!origin) return true; // dev leniency
@@ -10,6 +9,25 @@ function isAllowedOrigin(origin: string | null) {
   } catch {
     return false;
   }
+}
+
+export async function GET() {
+  const supabase = await createRouteSupabase();
+
+  // If you previously used getSession, keep it:
+  const { data: sessionData } = await supabase.auth.getSession();
+  const { data: userData } = await supabase.auth.getUser();
+
+  if (!userData.user) {
+    return NextResponse.json({ authenticated: false }, { status: 401 });
+  }
+
+  return NextResponse.json({
+    authenticated: true,
+    user: userData.user,
+    // expose what you previously returned; keep shape stable
+    session: sessionData.session ?? null,
+  });
 }
 
 export async function POST(req: Request) {
@@ -22,9 +40,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing tokens" }, { status: 400 });
   }
 
-  // Next 15: cookies() is async
-  const cookieStore = await cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+  const supabase = await createRouteSupabase();
 
   const { error } = await supabase.auth.setSession({ access_token, refresh_token });
   if (error) return NextResponse.json({ error: error.message }, { status: 401 });
@@ -37,8 +53,7 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "Forbidden origin" }, { status: 403 });
   }
 
-  const cookieStore = await cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+  const supabase = await createRouteSupabase();
 
   await supabase.auth.signOut(); // clears sb-* cookies
   return NextResponse.json({ ok: true });
