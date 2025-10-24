@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E2E Render Test</title>
+    <style>
+        body { font-family: monospace; margin: 20px; background: #1a1a1a; color: #fff; }
+        .log { background: #2a2a2a; padding: 10px; margin: 5px 0; border-radius: 4px; }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .warning { color: #fbbf24; }
+        .info { color: #60a5fa; }
+        button { padding: 10px 20px; margin: 5px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:disabled { background: #6b7280; cursor: not-allowed; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { border: 1px solid #444; padding: 8px; text-align: left; }
+        th { background: #333; }
+    </style>
+</head>
+<body>
+    <h1>🚀 E2E Render Test</h1>
+    <p>This page will test the complete render flow and collect telemetry data.</p>
+    
+    <div>
+        <button id="startTest" onclick="startTest()">Start Render Test</button>
+        <button id="clearLog" onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <div id="log"></div>
+    
+    <div id="summary" style="display: none;">
+        <h2>📊 Telemetry Summary</h2>
+        <table id="summaryTable">
+            <tr><th>Metric</th><th>Value</th></tr>
+        </table>
+    </div>
+
+    <script>
+        let telemetry = {
+            t0: 0,
+            postLatency: 0,
+            postResponse: null,
+            pollingEvents: [],
+            dbRowFirstSeen: null,
+            dbRowFirstStatus: null,
+            statusSucceeded: null,
+            timeoutToast: false
+        };
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toISOString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log ${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            document.getElementById('summary').style.display = 'none';
+        }
+
+        async function makeRequest(url, options = {}) {
+            const start = Date.now();
+            try {
+                const response = await fetch(url, options);
+                const end = Date.now();
+                const json = await response.json().catch(() => ({}));
+                return {
+                    response,
+                    json,
+                    latency: end - start,
+                    timestamp: end
+                };
+            } catch (error) {
+                const end = Date.now();
+                return {
+                    response: null,
+                    json: { error: error.message },
+                    latency: end - start,
+                    timestamp: end,
+                    error
+                };
+            }
+        }
+
+        async function startTest() {
+            const startBtn = document.getElementById('startTest');
+            startBtn.disabled = true;
+            startBtn.textContent = 'Testing...';
+            
+            try {
+                await runRenderTest();
+            } catch (error) {
+                log(`❌ Test failed: ${error.message}`, 'error');
+            } finally {
+                startBtn.disabled = false;
+                startBtn.textContent = 'Start Render Test';
+            }
+        }
+
+        async function runRenderTest() {
+            log('🚀 Starting E2E Render Test', 'info');
+            log('=' .repeat(50), 'info');
+
+            // 1) Render start
+            log('\\n1️⃣ RENDER START', 'info');
+            log('POST /api/render', 'info');
+            
+            const t0 = Date.now();
+            telemetry.t0 = t0;
+            log(`T0: ${new Date(t0).toISOString()}`, 'info');
+
+            const postResult = await makeRequest('/api/render', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267',
+                    prompt: 'modern living room, clean design, professional interior rendering',
+                    guidance_scale: 15,
+                    prompt_strength: 0.8,
+                    num_inference_steps: 50
+                })
+            });
+
+            telemetry.postLatency = postResult.latency;
+            telemetry.postResponse = postResult.json;
+            
+            log(`Response time: ${postResult.latency}ms`, 'info');
+            log(`HTTP Status: ${postResult.response?.status || 'ERROR'}`, postResult.response?.status === 200 ? 'success' : 'error');
+            log(`Returned JSON keys: ${Object.keys(postResult.json).join(', ')}`, 'info');
+
+            if (!postResult.response?.ok || !postResult.json.id) {
+                log('❌ POST /api/render failed - cannot continue test', 'error');
+                log('Note: You need to be logged in to test the render flow', 'warning');
+                showSummary();
+                return;
+            }
+
+            const predictionId = postResult.json.id;
+            log(`Prediction ID: ${predictionId}`, 'success');
+
+            // 2) Polling loop
+            log('\\n2️⃣ POLLING LOOP', 'info');
+            log('GET /api/render/[id]', 'info');
+            
+            const maxPollingTime = 4 * 60 * 1000; // 4 minutes
+            const pollingInterval = 2500; // 2.5 seconds
+            let pollCount = 0;
+
+            while (Date.now() - t0 < maxPollingTime) {
+                pollCount++;
+                const pollResult = await makeRequest(`/api/render/${predictionId}`);
+                const elapsed = pollResult.timestamp - t0;
+                
+                const event = {
+                    timestamp: pollResult.timestamp,
+                    elapsed,
+                    status: pollResult.response?.status || 0,
+                    jsonStatus: pollResult.json.status || 'unknown'
+                };
+                
+                telemetry.pollingEvents.push(event);
+                
+                log(`Poll #${pollCount}: +${elapsed}ms | Status: ${event.status} | JSON.status: ${event.jsonStatus}`, 'info');
+                
+                if (event.jsonStatus === 'succeeded') {
+                    telemetry.statusSucceeded = pollResult.timestamp;
+                    log(`✅ Render succeeded after ${elapsed}ms`, 'success');
+                    break;
+                }
+                
+                if (event.jsonStatus === 'failed' || event.jsonStatus === 'canceled') {
+                    log(`❌ Render failed with status: ${event.jsonStatus}`, 'error');
+                    break;
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, pollingInterval));
+            }
+
+            if (telemetry.pollingEvents.length > 0) {
+                const lastEvent = telemetry.pollingEvents[telemetry.pollingEvents.length - 1];
+                if (lastEvent.jsonStatus !== 'succeeded') {
+                    log(`⏰ Polling stopped after ${lastEvent.elapsed}ms (timeout or max attempts)`, 'warning');
+                    telemetry.timeoutToast = true;
+                }
+            }
+
+            // 3) My Renders check (simulate what the UI would see)
+            log('\\n3️⃣ MY RENDERS CHECK', 'info');
+            log('Checking if render appears in My Renders...', 'info');
+            
+            if (telemetry.pollingEvents.length > 0) {
+                const firstPoll = telemetry.pollingEvents[0];
+                telemetry.dbRowFirstSeen = firstPoll.timestamp;
+                telemetry.dbRowFirstStatus = firstPoll.jsonStatus;
+                log(`First DB row visible: +${firstPoll.elapsed}ms | Status: ${firstPoll.jsonStatus}`, 'info');
+            }
+
+            if (telemetry.statusSucceeded) {
+                const succeededElapsed = telemetry.statusSucceeded - t0;
+                log(`Status=succeeded in UI: +${succeededElapsed}ms`, 'success');
+            }
+
+            showSummary();
+        }
+
+        function showSummary() {
+            const summaryDiv = document.getElementById('summary');
+            const table = document.getElementById('summaryTable');
+            
+            // Clear existing rows except header
+            while (table.rows.length > 1) {
+                table.deleteRow(1);
+            }
+            
+            // Add summary rows
+            const rows = [
+                ['POST latency', `${telemetry.postLatency}ms`],
+                ['Time to first DB row', telemetry.dbRowFirstSeen ? `${telemetry.dbRowFirstSeen - telemetry.t0}ms` : 'N/A'],
+                ['Time to status=succeeded', telemetry.statusSucceeded ? `${telemetry.statusSucceeded - telemetry.t0}ms` : 'N/A'],
+                ['Timeout toast appeared', telemetry.timeoutToast ? 'Yes' : 'No'],
+                ['Total polling events', telemetry.pollingEvents.length.toString()]
+            ];
+            
+            rows.forEach(([metric, value]) => {
+                const row = table.insertRow();
+                row.insertCell(0).textContent = metric;
+                row.insertCell(1).textContent = value;
+            });
+            
+            if (telemetry.postResponse?.id) {
+                const row = table.insertRow();
+                row.insertCell(0).textContent = 'Prediction ID';
+                row.insertCell(1).textContent = telemetry.postResponse.id;
+            }
+            
+            summaryDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

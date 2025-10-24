@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSupabaseForRoute } from "@/lib/supabase/server";
+import { createRouteSupabase } from "@/lib/supabase/createRouteClient";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,7 +32,7 @@ export async function GET(_req: Request, ctx: { params?: Record<string, string> 
       return NextResponse.json({ error: "Missing or invalid prediction id" }, { status: 422 });
     }
 
-    const supabase = await createSupabaseForRoute();
+    const supabase = await createRouteSupabase();
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr && DEV) console.log("[Status API] auth.getUser error:", authErr.message);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -1,20 +1,42 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+// middleware.ts
+import { NextResponse, type NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 
-export const config = { matcher: ["/studio/:path*"] };
+const PROTECTED = [/^\/my-renders(\/.*)?$/, /^\/studio(\/.*)?$/];
 
-export function middleware(req: NextRequest) {
-  // Detect the auth-helpers cookies, e.g. sb-<projectRef>-auth-token
-  const hasAuthCookie = req.cookies
-    .getAll()
-    .some((c) => /sb-.*-auth-token/.test(c.name));
+export async function middleware(req: NextRequest) {
+  const url = req.nextUrl.clone();
+  const res = NextResponse.next();
 
-  if (!hasAuthCookie) {
-    const url = req.nextUrl.clone();
+  // Next 15 cookie adapter using req/res (no await here)
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get: (name: string) => req.cookies.get(name)?.value,
+        set: (name: string, value: string, options: any) => {
+          res.cookies.set({ name, value, ...options });
+        },
+        remove: (name: string, options: any) => {
+          res.cookies.set({ name, value: "", ...options });
+        },
+      },
+    }
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
+  const needsAuth = PROTECTED.some((re) => re.test(url.pathname));
+
+  if (needsAuth && !user) {
     url.pathname = "/auth/login";
-    url.search = `?redirect=${encodeURIComponent(req.nextUrl.pathname + req.nextUrl.search)}`;
+    url.searchParams.set("redirect", req.nextUrl.pathname);
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
+  return res;
 }
+
+export const config = {
+  matcher: ["/my-renders", "/my-renders/:path*", "/studio", "/studio/:path*"],
+};

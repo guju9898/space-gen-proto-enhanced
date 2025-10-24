@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createSupabaseForRoute } from "@/lib/supabase/server";
+import { createRouteSupabase } from "@/lib/supabase/createRouteClient";
 import { createPrediction } from "@/lib/replicate";
 
 export const runtime = "nodejs";
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     if (DEV) console.log("[SpaceGen API] Incoming image_url:", input.image);
 
     // ── Auth
-    const supabase = await createSupabaseForRoute();
+    const supabase = await createRouteSupabase();
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr && DEV) console.log("[SpaceGen API] auth.getUser error:", authErr.message);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

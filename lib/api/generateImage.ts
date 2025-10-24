@@ -12,6 +12,7 @@ export async function generateImageFromConfig(config: RenderRequestConfig) {
   const res = await fetch("/api/render", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include", // IMPORTANT
     body: JSON.stringify(config),
   });
   if (!res.ok) {
@@ -24,7 +25,10 @@ export async function generateImageFromConfig(config: RenderRequestConfig) {
   const started = Date.now();
   let out: string[] = [];
   while (Date.now() - started < 180000) {
-    const r = await fetch(`/api/render/${id}`);
+    const r = await fetch(`/api/render/${id}`, {
+      method: "GET",
+      credentials: "include", // IMPORTANT
+    });
     const data = await r.json();
     if (data.status === "succeeded" && data.output?.length) {
       out = data.output;
