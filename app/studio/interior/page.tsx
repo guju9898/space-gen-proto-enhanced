@@ -253,9 +253,9 @@ export default function InteriorStudioPage() {
         <FormSection title="Room Settings" icon={Layout}>
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Room Type</label>
+              <label className="text-sm font-medium text-white">Room Type</label>
               <select
-                className="w-full mt-1"
+                className="w-full mt-1 bg-gray-800 text-white border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 value={config.roomType}
                 onChange={(e) => handleConfigChange("roomType", e.target.value)}
               >
@@ -446,13 +446,16 @@ export default function InteriorStudioPage() {
                 <p className="text-sm text-red-400">{renderError}</p>
               </div>
             )}
-            <Button 
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium"
+            <button 
+              className="w-full md:w-auto h-14 text-base font-semibold text-white rounded-lg shadow-lg bg-gradient-to-r from-[#FF6A00] to-[#7F00FF] hover:shadow-xl hover:shadow-purple-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              style={{
+                background: "linear-gradient(45deg, #FF6A00, #7F00FF)",
+              }}
               onClick={() => handleGenerate(config)}
               disabled={isRendering || renderLoading}
             >
-              {(isRendering || renderLoading) ? "Generating..." : "Generate"}
-            </Button>
+              {(isRendering || renderLoading) ? "Generating..." : "Render Design"}
+            </button>
           </div>
         </div>
       </div>
@@ -460,7 +463,7 @@ export default function InteriorStudioPage() {
   )
 
   const previewContent = (
-    <div className="bg-card rounded-lg border border-border p-6">
+    <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 min-h-screen md:min-h-0 h-full">
       <StudioPreview
         currentRender={currentRender}
         latestRenders={latestRenders}

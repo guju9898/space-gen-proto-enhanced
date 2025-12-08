@@ -122,7 +122,10 @@ export function RendersDashboard({ userId, initial }: RendersDashboardProps) {
     setRenders((prev) => prev.filter((r) => r.id !== id));
 
     try {
-      const response = await fetch(`/api/renders/${id}`, { method: "DELETE" });
+      const response = await fetch(`/api/renders/${id}`, { 
+        method: "DELETE",
+        credentials: "include"
+      });
       if (!response.ok) {
         throw new Error("Delete failed");
       }

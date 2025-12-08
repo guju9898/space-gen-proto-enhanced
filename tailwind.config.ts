@@ -53,9 +53,26 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        violet: {
+          700: "#7F00FF",
+        },
+        orange: {
+          500: "#FF6A00",
+        },
+        gray: {
+          900: "#0B0B0B",
+          800: "#1E1E1E",
+          700: "#2C2C2C",
+          600: "#3D3D3D",
+          400: "#9CA3AF",
+        },
+      },
+      backgroundImage: {
+        "gradient-cta": "linear-gradient(45deg, #FF6A00, #7F00FF)",
       },
       borderRadius: {
-        lg: "var(--radius)",
+        lg: "8px",
+        xl: "12px",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },

@@ -93,8 +93,21 @@ export async function POST(req: Request) {
     // ── Immediate upsert so /my-renders can see the job
     const status = prediction?.status ?? "starting";
     const userId = user.id;
-    const prompt = input?.prompt ?? null;
+    
+    // Ensure we have a non-null prompt string for DB
+    const prompt = input?.prompt?.trim() || JSON.stringify(input);
     const type = input?.type ?? "interior";
+
+    // DEBUG: Log before upsert
+    console.log("[DEBUG] user.id:", userId);
+    console.log("[DEBUG] upsert payload keys:", Object.keys({
+      user_id: userId,
+      prediction_id: prediction.id,
+      status,
+      prompt,
+      type,
+      image_url: null,
+    }));
 
     const { data: upsertData, error: insertErr } = await supabase
       .from("renders")
@@ -103,7 +116,7 @@ export async function POST(req: Request) {
           user_id: userId,
           prediction_id: prediction.id,   // requires column + unique index (partial ok)
           status,
-          prompt,
+          prompt,                         // now guaranteed to be non-null string
           type,
           image_url: null,                 // will be filled by status route on success
         },
@@ -112,6 +125,9 @@ export async function POST(req: Request) {
       .select("id")
       .single()
       .throwOnError();                     // ← make failures loud
+
+    // DEBUG: Log after upsert
+    console.log("[DEBUG] upsert result:", { upsertError: insertErr?.message, rowId: upsertData?.id });
 
     if (DEV) console.log("[renders] upsert on create → row id:", upsertData?.id);
 

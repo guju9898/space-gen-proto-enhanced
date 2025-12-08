@@ -37,7 +37,7 @@ export default function Home() {
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <Link href="/auth/login" className="text-sm text-white hover:text-primary/90">
+          <Link href="/auth/sign-in" className="text-sm text-white hover:text-primary/90">
             Login
           </Link>
           <Link

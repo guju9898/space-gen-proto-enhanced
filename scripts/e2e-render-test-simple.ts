@@ -145,7 +145,7 @@ async function main() {
     console.log("- All endpoints correctly return 401 Unauthorized when not authenticated");
     console.log("- This confirms the authentication middleware is working properly");
     console.log("- To test the full render flow, you would need to:");
-    console.log("  1. Log in via the browser at http://localhost:3000/auth/login");
+    console.log("  1. Log in via the browser at http://localhost:3000/auth/sign-in");
     console.log("  2. Visit http://localhost:3000/studio/interior");
     console.log("  3. Trigger a render and observe the telemetry in browser DevTools");
     

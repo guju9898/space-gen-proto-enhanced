@@ -7,17 +7,22 @@ interface RenderButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
   loading?: boolean;
 }
 
-export function RenderButton({ loading, className, children, ...props }: RenderButtonProps) {
+export function RenderButton({ loading, className, children, animated, ...props }: RenderButtonProps & { animated?: boolean }) {
   return (
     <button
       className={cn(
-        "w-full px-6 py-3 text-lg font-medium text-white rounded-md shadow-md",
-        "bg-gradient-to-r from-primary via-purple-600 to-indigo-600",
-        "hover:opacity-90 transition-opacity",
+        "w-full h-14 text-base font-semibold text-white rounded-lg shadow-lg",
+        "bg-gradient-to-r from-[#FF6A00] to-[#7F00FF]",
+        "hover:shadow-xl hover:shadow-purple-500/50 transition-all",
         "disabled:opacity-50 disabled:cursor-not-allowed",
         "flex items-center justify-center gap-2",
+        animated && "animate-pulse",
+        "md:w-auto",
         className
       )}
+      style={{
+        background: "linear-gradient(45deg, #FF6A00, #7F00FF)",
+      }}
       disabled={loading}
       {...props}
     >

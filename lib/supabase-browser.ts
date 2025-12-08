@@ -1,24 +1,20 @@
 "use client";
-import { createClient } from "@supabase/supabase-js";
 
-let _client: ReturnType<typeof createClient> | null = null;
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
-/** Minimal v2 client; manual URL handling on callback; no duplicate GoTrue instances. */
-export function getSupabaseBrowserClient() {
+/**
+ * Browser-side singleton that mirrors the old API used in components like AuthCookieSync.
+ * Internally delegates to @supabase/auth-helpers-nextjs to avoid cookie format mismatches.
+ */
+let _client: SupabaseClient | null = null;
+
+export function getSupabaseBrowserClient(): SupabaseClient {
   if (_client) return _client;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-  _client = createClient(url, anon, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: false,
-      cookieOptions: {
-        secure: process.env.NODE_ENV === "production", // NOT secure in dev
-        sameSite: "lax",
-        path: "/",
-      },
-    },
-  });
+  _client = createClientComponentClient();
   return _client;
 }
+
+
+
+

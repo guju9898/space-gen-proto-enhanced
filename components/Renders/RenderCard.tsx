@@ -12,7 +12,9 @@ interface RenderCardProps {
 export function RenderCard({ render, onDelete }: RenderCardProps) {
   const handleDownload = async () => {
     try {
-      const response = await fetch(`/api/renders/${render.id}/download`);
+      const response = await fetch(`/api/renders/${render.id}/download`, {
+        credentials: "include"
+      });
       if (response.ok) {
         // If it's a redirect, the browser will handle it
         if (response.redirected) {

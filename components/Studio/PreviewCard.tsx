@@ -1,6 +1,7 @@
 import { ImageIcon, Upload } from "lucide-react"
 import { Tips } from "./Tips"
 import { Button } from "@/components/ui/button"
+import { getImageSrc, getImageFallback } from "@/lib/images/getImageSrc"
 
 interface PreviewCardProps {
   imageUrl?: string
@@ -22,9 +23,13 @@ export function PreviewCard({ imageUrl, label, tips, onUpload }: PreviewCardProp
       <div className="aspect-video bg-muted rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 p-6">
         {imageUrl ? (
           <img
-            src={imageUrl}
+            src={getImageSrc(imageUrl)}
             alt="Current interior"
             className="w-full h-full object-cover rounded-xl"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = getImageFallback(imageUrl);
+            }}
           />
         ) : (
           <>

@@ -21,14 +21,13 @@ async function fetchPrediction(predictionId: string) {
   return res.json();
 }
 
-export async function GET(_req: Request, ctx: { params?: Record<string, string> }) {
+export async function GET(_req: Request, context: { params: Promise<{ id: string }> }) {
   const DEV = process.env.NEXT_PUBLIC_DEBUG?.toLowerCase() === "true";
   try {
-    const rawParams = ctx?.params ?? {};
-    if (DEV) console.log("[Status API] raw params:", rawParams);
+    const { id } = await context.params;  // Next 15: params is a Promise
+    if (DEV) console.log("[Status API] prediction id:", id);
 
-    const predictionId = rawParams?.id;
-    if (!predictionId || typeof predictionId !== "string") {
+    if (!id || typeof id !== "string") {
       return NextResponse.json({ error: "Missing or invalid prediction id" }, { status: 422 });
     }
 
@@ -37,7 +36,7 @@ export async function GET(_req: Request, ctx: { params?: Record<string, string> 
     if (authErr && DEV) console.log("[Status API] auth.getUser error:", authErr.message);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const prediction = await fetchPrediction(predictionId);
+    const prediction = await fetchPrediction(id);
     const status: string = prediction?.status ?? "processing";
 
     let imageUrl: string | null = null;
@@ -48,23 +47,29 @@ export async function GET(_req: Request, ctx: { params?: Record<string, string> 
       else if (out?.images && Array.isArray(out.images) && out.images[0]) imageUrl = out.images[0];
     }
 
-    const { error: upsertErr } = await supabase
-      .from("renders")
-      .upsert(
-        {
-          user_id: user.id,
-          prediction_id: predictionId,
-          status,
-          image_url: imageUrl,
-        },
-        { onConflict: "prediction_id" }
-      );
+    // Update existing row with status and output_url, do NOT overwrite prompt
+    if (status === "succeeded") {
+      await supabase
+        .from("renders")
+        .update({ status: "succeeded", image_url: imageUrl })
+        .eq("prediction_id", id);
+    } else if (status === "failed" || status === "canceled") {
+      await supabase
+        .from("renders")
+        .update({ status })
+        .eq("prediction_id", id);
+    } else {
+      // For processing/starting states, update status only
+      await supabase
+        .from("renders")
+        .update({ status })
+        .eq("prediction_id", id);
+    }
 
-    if (upsertErr && DEV) console.log("[Status API] renders upsert error:", upsertErr.message);
-    if (DEV) console.log("[Status API] →", predictionId, status, imageUrl || "");
+    if (DEV) console.log("[Status API] →", id, status, imageUrl || "");
 
     return NextResponse.json(
-      { id: predictionId, status, imageUrl },
+      { id, status, imageUrl },
       { status: 200 }
     );
   } catch (e: any) {

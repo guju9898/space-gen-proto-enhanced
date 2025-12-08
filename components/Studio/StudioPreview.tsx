@@ -4,6 +4,8 @@ import { Loader2, Image as ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
+import { getImageSrc, getImageFallback } from "@/lib/images/getImageSrc"
+import { logImageDebug } from "@/lib/debug/imageDebug"
 
 interface StudioPreviewProps {
   currentRender: string | null
@@ -45,11 +47,15 @@ function RenderThumbnail({
       onClick={onClick}
       className="relative w-[120px] group"
     >
-      <div className="aspect-[4/3] rounded-md overflow-hidden transition-shadow hover:shadow-lg">
+      <div className="aspect-[4/3] rounded-lg overflow-hidden transition-shadow hover:shadow-lg shadow-md">
         <img 
-          src={url} 
+          src={getImageSrc(url)} 
           alt="Previous render" 
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover rounded-lg"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = getImageFallback(url);
+          }}
         />
       </div>
     </button>
@@ -80,6 +86,16 @@ export function StudioPreview({
         isRendering: rendering,
         latestRendersCount: latestRenders.length
       });
+      
+      // Debug current render URL
+      if (currentRender) {
+        logImageDebug(currentRender, 'Current Render');
+      }
+      
+      // Debug latest renders
+      latestRenders.forEach((url, index) => {
+        logImageDebug(url, `Latest Render ${index + 1}`);
+      });
     }
   }, [currentRender, rendering, latestRenders]);
 
@@ -87,10 +103,10 @@ export function StudioPreview({
   if (!mounted) {
     return (
       <div className="space-y-6">
-        <div className="aspect-[4/3] rounded-md overflow-hidden bg-muted">
-          <div className="w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-border rounded-md">
-            <ImageIcon className="w-8 h-8 text-muted-foreground mb-2" />
-            <p className="text-sm text-muted-foreground">Loading preview...</p>
+        <div className="aspect-[16/9] rounded-lg overflow-hidden bg-gray-900 shadow-lg">
+          <div className="w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-gray-700 rounded-lg bg-gray-800">
+            <ImageIcon className="w-8 h-8 text-gray-500 mb-2" />
+            <p className="text-sm text-gray-400">Loading preview...</p>
           </div>
         </div>
       </div>
@@ -101,27 +117,27 @@ export function StudioPreview({
     <div className="space-y-6">
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Your Current Render</h3>
+          <h3 className="text-lg font-semibold text-white">Your Current Render</h3>
         </div>
         <div className="space-y-3">
           {rendering && <RenderStatus isRendering={true} />}
           {currentRender && !rendering && <RenderStatus isRendering={false} />}
-          <div className="aspect-[4/3] rounded-md overflow-hidden bg-muted">
+          <div className="aspect-[16/9] rounded-lg overflow-hidden bg-gray-900 shadow-lg">
             {currentRender ? (
               <img
-                src={currentRender}
+                src={getImageSrc(currentRender)}
                 alt="Current render"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover rounded-lg"
                 onError={(e) => {
                   console.error('❌ Image failed to load:', currentRender);
                   const target = e.target as HTMLImageElement;
-                  target.src = '/placeholder.png';
+                  target.src = getImageFallback(currentRender);
                 }}
               />
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-border rounded-md">
-                <ImageIcon className="w-8 h-8 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">No render yet</p>
+              <div className="w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-gray-700 rounded-lg bg-gray-800">
+                <ImageIcon className="w-8 h-8 text-gray-500 mb-2" />
+                <p className="text-sm text-gray-400">No renders yet</p>
               </div>
             )}
           </div>
@@ -130,7 +146,7 @@ export function StudioPreview({
 
       {latestRenders.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Previous Renders</h3>
+          <h3 className="text-lg font-semibold text-white">Previous Renders</h3>
           <div className="grid grid-cols-2 gap-4">
             {latestRenders.map((url, index) => (
               <RenderThumbnail

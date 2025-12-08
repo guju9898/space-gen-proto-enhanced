@@ -1,6 +1,5 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createRouteSupabase } from "@/lib/supabase/server";
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseAdmin = createClient(
@@ -10,12 +9,11 @@ const supabaseAdmin = createClient(
 );
 
 export default async function StudioPage() {
-  const cookieStore = await cookies();
-  const supabase = createServerComponentClient({ cookies: () => cookieStore });
+  const supabase = await createRouteSupabase();
 
   const { data: { user }, error } = await supabase.auth.getUser();
   if (!user || error) {
-    redirect("/auth/login?redirect=/studio");
+    redirect("/auth/sign-in?redirectTo=/studio");
   }
 
   // Check subscription status using admin client

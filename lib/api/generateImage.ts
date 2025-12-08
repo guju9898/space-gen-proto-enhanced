@@ -1,3 +1,6 @@
+import { fetchWithRetryPost, fetchWithRetryJson } from "./fetchWithRetry";
+import { logImageDebug } from "@/lib/debug/imageDebug";
+
 export interface RenderRequestConfig {
   image: string;
   prompt: string;
@@ -9,29 +12,30 @@ export interface RenderRequestConfig {
 }
 
 export async function generateImageFromConfig(config: RenderRequestConfig) {
-  const res = await fetch("/api/render", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include", // IMPORTANT
-    body: JSON.stringify(config),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error || "Failed to create render job");
-  }
-  const { id, status, prompt } = await res.json();
+  // Create render job with retry
+  const { id, status, prompt } = await fetchWithRetryPost<{
+    id: string;
+    status: string;
+    prompt: string;
+  }>("/api/render", config);
+  
   if (!id) throw new Error("No prediction id returned");
 
   const started = Date.now();
   let out: string[] = [];
   while (Date.now() - started < 180000) {
-    const r = await fetch(`/api/render/${id}`, {
-      method: "GET",
-      credentials: "include", // IMPORTANT
-    });
-    const data = await r.json();
-    if (data.status === "succeeded" && data.output?.length) {
-      out = data.output;
+    // Poll status with retry
+    const data = await fetchWithRetryJson<{
+      id: string;
+      status: string;
+      imageUrl?: string;
+      error?: string;
+    }>(`/api/render/${id}`);
+    
+    if (data.status === "succeeded" && data.imageUrl) {
+      console.log("✅ Render succeeded, got imageUrl:", data.imageUrl);
+      logImageDebug(data.imageUrl, "Generated Image");
+      out = [data.imageUrl];
       break;
     }
     if (data.status === "failed" || data.status === "canceled") {

@@ -34,27 +34,39 @@ export function RequestSummary({ tags, config, icon: Icon, onRemove, onClearAll 
     .map(([key, value]) => value as string);
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {Icon && <Icon className="w-4 h-4 text-muted-foreground" />}
-      {displayTags.map((tag, index) => (
-        <Badge 
-          key={`${tag}-${index}`} 
-          variant="secondary"
-          onClick={onRemove ? () => onRemove(tag) : undefined}
-          className={onRemove ? "cursor-pointer" : undefined}
-        >
-          {tag}
-        </Badge>
-      ))}
-      {onClearAll && displayTags.length > 0 && (
-        <Badge 
-          variant="outline" 
-          onClick={onClearAll}
-          className="cursor-pointer hover:bg-destructive/10"
-        >
-          Clear All
-        </Badge>
-      )}
+    <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 min-h-screen md:min-h-0 h-full">
+      <div className="flex flex-col h-full">
+        <h3 className="text-lg font-semibold mb-4 text-white">Request Summary</h3>
+        <div className="flex flex-wrap gap-2 mb-6">
+          {Icon && <Icon className="w-4 h-4 text-gray-400" />}
+          {displayTags.length > 0 ? (
+            displayTags.map((tag, index) => (
+              <span
+                key={`${tag}-${index}`}
+                onClick={onRemove ? () => onRemove(tag) : undefined}
+                className={`
+                  px-3 py-1.5 rounded-full text-sm font-medium
+                  bg-gray-700 text-white
+                  hover:bg-gray-600 transition-colors
+                  ${onRemove ? "cursor-pointer" : ""}
+                `}
+              >
+                {tag}
+              </span>
+            ))
+          ) : (
+            <p className="text-sm text-gray-400">No tags selected</p>
+          )}
+        </div>
+        {onClearAll && displayTags.length > 0 && (
+          <button
+            onClick={onClearAll}
+            className="mt-auto px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
+          >
+            Clear All
+          </button>
+        )}
+      </div>
     </div>
   );
 }

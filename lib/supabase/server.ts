@@ -1,17 +1,8 @@
-import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
+// Back-compat shim so old imports keep working.
+// Re-exports the unified server helper and the legacy-named factory.
+export { getSupabaseServerClient } from "@/lib/supabase-server";
+export { createRouteSupabase } from "@/lib/supabase/createRouteClient";
+export type {} from "@supabase/supabase-js"; // no-op, keeps TS happy if types were imported
 
-export async function createSupabaseForRoute() {
-  const cookieStore = await cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get: (name) => cookieStore.get(name)?.value,
-        set: (name, value, options) => cookieStore.set({ name, value, ...options }),
-        remove: (name, _opts) => cookieStore.set({ name, value: "", ..._opts }),
-      },
-    }
-  );
-}
+
+

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import SafeImage from "@/components/SafeImage"
 import { Info, Loader2, ChevronRight } from "lucide-react"
+import { getImageSrc, getImageFallback } from "@/lib/images/getImageSrc"
 
 interface RenderPreviewProps {
   renderImage: string | null
@@ -77,13 +78,17 @@ export default function RenderPreview({
             )}
             {/* Only render the Image component when imageSource is a valid string */}
             <SafeImage
-              src={imageSource}
+              src={getImageSrc(imageSource)}
               alt="Generated design"
               fill
               className={`object-contain transition-opacity duration-300 ${
                 isImageLoaded ? "opacity-100" : "opacity-0"
               }`}
               onLoad={() => setIsImageLoaded(true)}
+              onError={() => {
+                // Fallback handled by SafeImage component
+                setIsImageLoaded(true);
+              }}
               sizes="(max-width: 1200px) 100vw, 800px"
             />
           </div>

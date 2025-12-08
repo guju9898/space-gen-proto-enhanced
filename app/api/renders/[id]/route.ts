@@ -1,22 +1,21 @@
 import { NextResponse } from "next/server";
-import { createSupabaseForRoute } from "@/lib/supabase/server";
+import { createRouteSupabase } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function DELETE(_req: Request, ctx: { params?: Record<string, string> }) {
+export async function DELETE(_req: Request, context: { params: Promise<{ id: string }> }) {
   const DEV = process.env.NEXT_PUBLIC_DEBUG?.toLowerCase() === "true";
   try {
-    const rawParams = ctx?.params ?? {};
-    if (DEV) console.log("[Delete API] raw params:", rawParams);
+    const { id } = await context.params;  // Next 15: params is a Promise
+    if (DEV) console.log("[Delete API] render id:", id);
 
-    const renderId = rawParams?.id;
-    if (!renderId || typeof renderId !== "string") {
+    if (!id || typeof id !== "string") {
       return NextResponse.json({ error: "Missing or invalid render id" }, { status: 422 });
     }
 
     // Auth user (RLS requires authenticated)
-    const supabase = await createSupabaseForRoute();
+    const supabase = await createRouteSupabase();
     const { data: { user }, error: authErr } = await supabase.auth.getUser();
     if (authErr && DEV) console.log("[Delete API] auth.getUser error:", authErr.message);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -25,7 +24,7 @@ export async function DELETE(_req: Request, ctx: { params?: Record<string, strin
     const { data: render, error: fetchErr } = await supabase
       .from("renders")
       .select("id, user_id")
-      .eq("id", renderId)
+      .eq("id", id)
       .single();
 
     if (fetchErr) {
@@ -43,7 +42,7 @@ export async function DELETE(_req: Request, ctx: { params?: Record<string, strin
     const { error: deleteErr } = await supabase
       .from("renders")
       .delete()
-      .eq("id", renderId)
+      .eq("id", id)
       .eq("user_id", user.id); // Double-check ownership
 
     if (deleteErr) {
@@ -51,7 +50,7 @@ export async function DELETE(_req: Request, ctx: { params?: Record<string, strin
       return NextResponse.json({ error: "Failed to delete render" }, { status: 500 });
     }
 
-    if (DEV) console.log("[Delete API] → deleted render:", renderId);
+    if (DEV) console.log("[Delete API] → deleted render:", id);
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (e: any) {
     const DEV = process.env.NEXT_PUBLIC_DEBUG?.toLowerCase() === "true";

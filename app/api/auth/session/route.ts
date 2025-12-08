@@ -1,60 +1,51 @@
 import { NextResponse } from "next/server";
 import { createRouteSupabase } from "@/lib/supabase/createRouteClient";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+/** allow localhost + NEXT_PUBLIC_DOMAIN for dev */
 function isAllowedOrigin(origin: string | null) {
-  if (!origin) return true; // dev leniency
+  if (!origin) return true;
   try {
     const u = new URL(origin);
-    return u.hostname === "localhost" && (u.port === "3000" || u.port === "3001" || !u.port);
+    const allowed = new Set([
+      "http://localhost:3000",
+      process.env.NEXT_PUBLIC_DOMAIN,
+    ]);
+    return allowed.has(u.origin);
   } catch {
     return false;
   }
 }
 
-export async function GET() {
-  const supabase = await createRouteSupabase();
-
-  // If you previously used getSession, keep it:
-  const { data: sessionData } = await supabase.auth.getSession();
-  const { data: userData } = await supabase.auth.getUser();
-
-  if (!userData.user) {
-    return NextResponse.json({ authenticated: false }, { status: 401 });
-  }
-
-  return NextResponse.json({
-    authenticated: true,
-    user: userData.user,
-    // expose what you previously returned; keep shape stable
-    session: sessionData.session ?? null,
-  });
-}
-
 export async function POST(req: Request) {
-  if (!isAllowedOrigin(req.headers.get("origin"))) {
-    return NextResponse.json({ error: "Forbidden origin" }, { status: 403 });
-  }
-
-  const { access_token, refresh_token } = await req.json().catch(() => ({} as any));
-  if (!access_token || !refresh_token) {
-    return NextResponse.json({ error: "Missing tokens" }, { status: 400 });
+  const origin = req.headers.get("origin");
+  if (!isAllowedOrigin(origin)) {
+    return NextResponse.json({ error: "origin not allowed" }, { status: 400 });
   }
 
   const supabase = await createRouteSupabase();
 
-  const { error } = await supabase.auth.setSession({ access_token, refresh_token });
-  if (error) return NextResponse.json({ error: error.message }, { status: 401 });
-
-  return NextResponse.json({ ok: true });
-}
-
-export async function DELETE(req: Request) {
-  if (!isAllowedOrigin(req.headers.get("origin"))) {
-    return NextResponse.json({ error: "Forbidden origin" }, { status: 403 });
+  let code: string | null = null;
+  try {
+    const body = await req.json().catch(() => ({}));
+    // accept ?code=… or body.code
+    const url = new URL(req.url);
+    code = (body?.code as string) ?? url.searchParams.get("code");
+  } catch {
+    /* ignore */
   }
 
-  const supabase = await createRouteSupabase();
+  if (!code) {
+    return NextResponse.json({ error: "missing code" }, { status: 400 });
+  }
 
-  await supabase.auth.signOut(); // clears sb-* cookies
-  return NextResponse.json({ ok: true });
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  // cookies are set by the server client’s cookie adapter
+  return NextResponse.json({ ok: true, user: data.user ?? null });
 }

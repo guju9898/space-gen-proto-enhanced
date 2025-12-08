@@ -8,7 +8,7 @@ export default function SignOutButton() {
     const supabase = getSupabaseBrowserClient();
     await supabase.auth.signOut();
     await fetch("/api/auth/session", { method: "DELETE" });
-    router.replace("/auth/login");
+    router.replace("/auth/sign-in");
   };
   return (
     <button onClick={onClick} className="text-sm underline">
