@@ -1,4 +1,4 @@
-// middleware.ts
+// proxy.ts
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
@@ -21,11 +21,11 @@ function getRefFromSbCookieName(name: string): string {
   return name.startsWith("sb-") ? name.slice(3).split("-")[0] : "";
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const url = req.nextUrl.clone();
   const res = NextResponse.next();
 
-  // Next 15: cookie adapter uses req/res; no await cookies() in middleware
+  // Next 15: cookie adapter uses req/res; no await cookies() in proxy
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -53,10 +53,10 @@ export async function middleware(req: NextRequest) {
   const envRef = getRefFromEnvUrl();
 
   if (process.env.NODE_ENV === "development") {
-    console.log("[MW]", { path: url.pathname, cookieRefs, envRef });
+    console.log("[PROXY]", { path: url.pathname, cookieRefs, envRef });
     // Warn only if we have sb-* cookies and none match envRef
     if (cookieRefs.length > 0 && !cookieRefs.includes(envRef)) {
-      console.warn(`[MW] SUPABASE PROJECT MISMATCH: cookie refs ${cookieRefs.join(",")} vs env ref ${envRef}`);
+      console.warn(`[PROXY] SUPABASE PROJECT MISMATCH: cookie refs ${cookieRefs.join(",")} vs env ref ${envRef}`);
     }
   }
 
@@ -66,7 +66,7 @@ export async function middleware(req: NextRequest) {
   } = await supabase.auth.getUser();
 
   // If you ever need to debug further:
-  // console.log("[MW] auth.getUser() ->", user?.id ?? null, "error:", error?.message ?? null);
+  // console.log("[PROXY] auth.getUser() ->", user?.id ?? null, "error:", error?.message ?? null);
 
   const needsAuth = PROTECTED.some((re) => re.test(url.pathname));
 
@@ -79,7 +79,8 @@ export async function middleware(req: NextRequest) {
   return res;
 }
 
-// Limit middleware to protected routes (avoids running on assets, etc.)
+// Limit proxy to protected routes (avoids running on assets, etc.)
+// Note: In Next.js 16+, the proxy pattern replaces middleware but uses the same config
 export const config = {
   matcher: [
     // run on app pages, NOT on API/Next internals

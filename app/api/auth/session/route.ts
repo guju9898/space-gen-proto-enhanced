@@ -27,25 +27,35 @@ export async function POST(req: Request) {
 
   const supabase = await createRouteSupabase();
 
-  let code: string | null = null;
   try {
     const body = await req.json().catch(() => ({}));
-    // accept ?code=… or body.code
-    const url = new URL(req.url);
-    code = (body?.code as string) ?? url.searchParams.get("code");
-  } catch {
-    /* ignore */
-  }
+    
+    // This endpoint only handles token-based flows (magic links)
+    // OAuth/PKCE code exchange MUST happen client-side where PKCE verifier cookie is available
+    const access_token = body?.access_token as string | undefined;
+    const refresh_token = body?.refresh_token as string | undefined;
 
-  if (!code) {
-    return NextResponse.json({ error: "missing code" }, { status: 400 });
+    if (access_token && refresh_token) {
+      // Magic link flow: set session directly with tokens
+      const { data, error } = await supabase.auth.setSession({
+        access_token,
+        refresh_token,
+      });
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+      }
+      // cookies are set by the server client's cookie adapter
+      return NextResponse.json({ ok: true, user: data.user ?? null });
+    } else {
+      return NextResponse.json(
+        { error: "missing access_token/refresh_token. Code exchange must happen client-side." },
+        { status: 400 }
+      );
+    }
+  } catch (e: any) {
+    return NextResponse.json(
+      { error: e?.message ?? "invalid request" },
+      { status: 400 }
+    );
   }
-
-  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
-  }
-
-  // cookies are set by the server client’s cookie adapter
-  return NextResponse.json({ ok: true, user: data.user ?? null });
 }

@@ -17,7 +17,7 @@ export default function SignupPage() {
       options: {
         emailRedirectTo:
           typeof window !== "undefined"
-            ? `${window.location.origin}/auth/callback?redirectTo=%2Fonboarding`
+            ? `${window.location.origin}/auth/callback`
             : undefined,
       },
     });

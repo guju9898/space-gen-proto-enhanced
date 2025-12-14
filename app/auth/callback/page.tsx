@@ -1,125 +1,94 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 function CallbackInner() {
   const router = useRouter();
   const search = useSearchParams();
-  const [message, setMessage] = useState("Finalizing sign-in...");
-
-  const redirectTo = useMemo(() => {
-    const raw = search?.get("redirectTo") || "/studio";
-    try {
-      const decoded = decodeURIComponent(raw);
-      return decoded.startsWith("/") ? decoded : "/studio";
-    } catch {
-      return "/studio";
-    }
-  }, [search]);
+  const [message, setMessage] = useState("Signing you in...");
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const supabase = getSupabaseBrowserClient();
-      const hash = (typeof window !== "undefined" && window.location.hash) || "";
-      const query = (typeof window !== "undefined" && window.location.search) || "";
-
-      const parseHash = (h: string) => {
-        const out: Record<string, string> = {};
-        const frag = h.startsWith("#") ? h.slice(1) : h;
-        for (const part of frag.split("&")) {
-          if (!part) continue;
-          const [k, v] = part.split("=");
-          if (!k) continue;
-          out[decodeURIComponent(k)] = v ? decodeURIComponent(v) : "";
-        }
-        return out;
-      };
-
-      const hashParams = parseHash(hash);
-      const access_token = hashParams["access_token"];
-      const refresh_token = hashParams["refresh_token"];
-      const error = hashParams["error"];
-      const error_code = hashParams["error_code"];
-      const error_description = hashParams["error_description"];
-
-      const qs = new URLSearchParams(query);
-      const code = qs.get("code");
-
-      // === AUTH DEBUG START ===
-      console.log("=== AUTH DEBUG START ===");
-      console.log({
-        pathname: typeof window !== "undefined" ? window.location.pathname : "",
-        hash,
-        query,
-        parsedHash: { ...hashParams, access_token: !!access_token, refresh_token: !!refresh_token },
-        codePresent: !!code,
-        hasSetSession: typeof supabase.auth.setSession === "function",
-        hasExchangeCodeForSession: typeof (supabase.auth as any).exchangeCodeForSession === "function",
-        redirectTo,
-      });
-      console.log("=== AUTH DEBUG END ===");
-      // === AUTH DEBUG END ===
-
       try {
-        if (error) {
-          setMessage(`Auth Error: ${error_code || error} – ${error_description || ""}`);
+        const supabase = getSupabaseBrowserClient();
+        
+        // Verify client is properly initialized with API key
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        
+        if (!supabaseUrl || !supabaseKey) {
+          setMessage("Error: Supabase environment variables not configured");
           return;
         }
 
-        // 1) Magic-link hash tokens
-        if (access_token && refresh_token && typeof supabase.auth.setSession === "function") {
-          const { error: setErr } = await supabase.auth.setSession({ access_token, refresh_token });
-          if (setErr) { setMessage(`Failed to set session: ${setErr.message}`); return; }
+        // Get token_hash and type from URL query parameters
+        // URL format: /auth/callback?token_hash=xxx&type=email
+        const token_hash = search?.get("token_hash");
+        const type = search?.get("type") || "email";
 
-          // Sync HTTP-only cookies for middleware
-          await fetch("/api/auth/session", {
+        // If no token_hash, show friendly error message
+        if (!token_hash) {
+          setMessage("Missing login token. Please request a new magic link.");
+          return;
+        }
+
+        // Verify the OTP token using Supabase's verifyOtp method
+        setMessage("Verifying your login link...");
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash,
+          type: type as "email",
+        });
+
+        if (error) {
+          console.error("OTP verification error:", error);
+          setMessage(`Login failed: ${error.message}. Please request a new magic link.`);
+          return;
+        }
+
+        if (!data.session) {
+          setMessage("Login failed: No session created. Please request a new magic link.");
+          return;
+        }
+
+        // Sync HTTP-only cookies for proxy via API route
+        if (data.session.access_token && data.session.refresh_token) {
+          setMessage("Completing sign-in...");
+          const sessionResponse = await fetch("/api/auth/session", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ access_token, refresh_token }),
+            body: JSON.stringify({
+              access_token: data.session.access_token,
+              refresh_token: data.session.refresh_token,
+            }),
           });
 
-          if (!cancelled) { setMessage("Signed in. Redirecting..."); router.replace(redirectTo); }
-          return;
-        }
-
-        // 2) OAuth/PKCE code
-        if (code && typeof (supabase.auth as any).exchangeCodeForSession === "function") {
-          const { error: xErr } = await (supabase.auth as any).exchangeCodeForSession(code);
-          if (xErr) { setMessage(`Failed to exchange code: ${xErr.message}`); return; }
-
-          const session = (await supabase.auth.getSession()).data.session;
-          if (session?.access_token && session?.refresh_token) {
-            await fetch("/api/auth/session", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                access_token: session.access_token,
-                refresh_token: session.refresh_token,
-              }),
-            });
+          if (!sessionResponse.ok) {
+            const errorData = await sessionResponse.json().catch(() => ({}));
+            console.error("Session sync error:", errorData);
+            setMessage(`Failed to complete sign-in: ${errorData.error || sessionResponse.statusText}`);
+            return;
           }
-
-          if (!cancelled) { setMessage("Signed in via code. Redirecting..."); router.replace(redirectTo); }
-          return;
         }
 
-        setMessage("No session tokens found in URL. Request a new magic link.");
+        // Success! Redirect to /studio/interior
+        if (!cancelled) {
+          setMessage("Signed in successfully! Redirecting...");
+          router.replace("/studio/interior");
+        }
       } catch (e: any) {
-        setMessage(`Unexpected error: ${e?.message || String(e)}`);
+        console.error("Callback error:", e);
+        setMessage(`Unexpected error: ${e?.message || String(e)}. Please try again.`);
       }
     })();
     return () => { cancelled = true; };
-  }, [redirectTo]);
+  }, [search, router]);
 
   return (
     <div className="mx-auto max-w-md p-6 text-sm text-gray-800">
       <p>{message}</p>
-      <p className="mt-2 text-xs text-gray-500">
-        Open DevTools → Console (Preserve log) and capture logs between === AUTH DEBUG START/END === if anything fails.
-      </p>
     </div>
   );
 }
