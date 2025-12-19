@@ -1,12 +1,15 @@
 {
-  "name": "my-v0-project",
+  "name": "space-gen",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.25.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "probe:render": "tsx scripts/probe-render-loop.ts",
+    "text:normalize": "node scripts/normalize-text.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -37,6 +40,9 @@
     "@radix-ui/react-toggle": "^1.1.1",
     "@radix-ui/react-toggle-group": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.6",
+    "@supabase/auth-helpers-nextjs": "^0.10.0",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.87.1",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -45,16 +51,18 @@
     "embla-carousel-react": "8.5.1",
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
-    "next": "15.2.4",
+    "next": "^15.0.8",
     "next-themes": "^0.4.4",
-    "react": "^18.2.0",
+    "react": "^18.3.1",
     "react-day-picker": "^9.0.0",
-    "react-dom": "^18.2.0",
+    "react-dom": "^18.3.1",
     "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.54.1",
     "react-resizable-panels": "^2.1.7",
     "recharts": "2.15.0",
+    "replicate": "^1.4.0",
     "sonner": "^1.7.1",
+    "stripe": "^19.1.0",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6",
@@ -66,6 +74,7 @@
     "@types/react-dom": "^18",
     "postcss": "^8",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.20.6",
     "typescript": "^5"
   }
 }
