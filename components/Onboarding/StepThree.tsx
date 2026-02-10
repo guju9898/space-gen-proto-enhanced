@@ -5,53 +5,31 @@ interface Plan {
   name: string
   price: number
   credits: number
-  period: string
-  isPopular?: boolean
   description: string
+  isPopular?: boolean
 }
 
 interface StepThreeProps {
   selectedPlan: string | null
   onSelectPlan: (planId: string) => void
-  billingCycle: "monthly" | "yearly"
-  onChangeBillingCycle: (cycle: "monthly" | "yearly") => void
 }
 
-export default function StepThree({ selectedPlan, onSelectPlan, billingCycle, onChangeBillingCycle }: StepThreeProps) {
-  // Mock plans data
+export default function StepThree({ selectedPlan, onSelectPlan }: StepThreeProps) {
   const plans: Plan[] = [
-    {
-      id: "temporary",
-      name: "Temporary",
-      price: 9.99,
-      credits: 50,
-      period: "One time charge",
-      description: "credits that last for 30 days",
-    },
-    {
-      id: "personal",
-      name: "Personal",
-      price: billingCycle === "monthly" ? 37.95 : 379.5,
-      credits: 250,
-      period: billingCycle === "monthly" ? "Monthly" : "Yearly",
-      isPopular: true,
-      description: "credits per month",
-    },
     {
       id: "professional",
       name: "Professional",
-      price: billingCycle === "monthly" ? 98 : 980,
-      credits: 800,
-      period: billingCycle === "monthly" ? "Monthly" : "Yearly",
-      description: "credits per month",
+      price: 98,
+      credits: 500,
+      description: "generations / credits per month",
+      isPopular: true,
     },
     {
       id: "business",
       name: "Business",
-      price: billingCycle === "monthly" ? 249 : 2490,
-      credits: 2500,
-      period: billingCycle === "monthly" ? "Monthly" : "Yearly",
-      description: "credits per month",
+      price: 349,
+      credits: 6000,
+      description: "generations / credits per month",
     },
   ]
 
@@ -60,34 +38,12 @@ export default function StepThree({ selectedPlan, onSelectPlan, billingCycle, on
       <div className="text-center mb-8">
         <h2 className="text-xl md:text-2xl font-bold mb-2">Choose Your Plan</h2>
         <p className="text-gray-400">
-          Find the perfect plan for your design needs, from trial access to advanced professional features
+          Select the plan that best fits your design needs
         </p>
       </div>
 
-      {/* Billing cycle toggle */}
-      <div className="flex justify-center mb-8">
-        <div className="bg-gray-800 p-1 rounded-md inline-flex">
-          <button
-            onClick={() => onChangeBillingCycle("monthly")}
-            className={`px-4 py-1.5 text-sm rounded ${
-              billingCycle === "monthly" ? "bg-gray-700 text-white" : "text-gray-400 hover:text-white"
-            }`}
-          >
-            Monthly
-          </button>
-          <button
-            onClick={() => onChangeBillingCycle("yearly")}
-            className={`px-4 py-1.5 text-sm rounded ${
-              billingCycle === "yearly" ? "bg-gray-700 text-white" : "text-gray-400 hover:text-white"
-            }`}
-          >
-            Yearly
-          </button>
-        </div>
-      </div>
-
       {/* Plans grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
         {plans.map((plan) => (
           <div
             key={plan.id}
@@ -103,10 +59,11 @@ export default function StepThree({ selectedPlan, onSelectPlan, billingCycle, on
             )}
 
             <h3 className="font-bold text-lg mb-1">{plan.name}</h3>
-            <p className="text-xs text-gray-400 mb-4">{plan.period}</p>
+            <p className="text-xs text-gray-400 mb-4">Monthly subscription</p>
 
             <div className="mb-4">
               <span className="text-2xl font-bold">${plan.price.toFixed(2)}</span>
+              <span className="text-sm text-gray-400"> / month</span>
             </div>
 
             <p className="text-sm text-gray-400 mb-6">

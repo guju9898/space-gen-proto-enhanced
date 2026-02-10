@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import Replicate from "replicate"
 import type { RenderRequest } from "@/types/studio"
+import { createSupabaseServerClient } from "@/lib/supabase/server"
 
 export const runtime = "nodejs"
 
@@ -11,24 +12,19 @@ const replicate = new Replicate({
 
 export async function POST(request: Request) {
   try {
-    // 🔒 HIDE SUPABASE FROM STATIC ANALYSIS
-    const supabasePkg = "@supabase/supabase-js"
-    const { createClient } = await import(supabasePkg)
-
-    const supabase = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    // Initialize Supabase server client (reads auth from cookies)
+    const supabase = await createSupabaseServerClient()
 
     const { renderType, config, sourceImage } =
       (await request.json()) as RenderRequest
 
-    // Authenticate user
+    // Authenticate user from cookies
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser()
 
-    if (!user) {
+    if (authError || !user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }

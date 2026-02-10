@@ -12,6 +12,7 @@ interface OnboardingLayoutProps {
   isLastStep?: boolean
   isFirstStep?: boolean
   title?: string
+  hideNext?: boolean
 }
 
 export default function OnboardingLayout({
@@ -23,6 +24,7 @@ export default function OnboardingLayout({
   isLastStep = false,
   isFirstStep = false,
   title,
+  hideNext = false,
 }: OnboardingLayoutProps) {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
@@ -69,13 +71,16 @@ export default function OnboardingLayout({
             <ArrowLeft size={16} />
             Back
           </button>
-          <button
-            onClick={onNext}
-            className="flex items-center gap-2 px-6 py-2 rounded-md bg-gradient-to-r from-[#ec4899] to-[#8b5cf6] hover:opacity-90 transition-opacity text-white"
-          >
-            {isLastStep ? "Complete" : "Next"}
-            {!isLastStep && <ArrowRight size={16} />}
-          </button>
+          {!hideNext && (
+            <button
+              onClick={onNext}
+              className="flex items-center gap-2 px-6 py-2 rounded-md bg-gradient-to-r from-[#ec4899] to-[#8b5cf6] hover:opacity-90 transition-opacity text-white"
+            >
+              {isLastStep ? "Complete" : "Next"}
+              {!isLastStep && <ArrowRight size={16} />}
+            </button>
+          )}
+          {hideNext && <div />}
         </div>
       </div>
     </div>

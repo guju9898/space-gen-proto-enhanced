@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, ReactNode } from "react"
 import { InteriorConfig, ExteriorConfig, LandscapeConfig, ProductConfig, StudioType } from "@/types/studio"
+import { interiorDefaults, landscapeDefaults, exteriorDefaults } from "@/lib/studio/defaults"
 
 interface DesignConfigContextType {
   interior: InteriorConfig;
@@ -14,39 +15,9 @@ interface DesignConfigContextType {
 }
 
 const defaultConfig = {
-  interior: {
-    roomType: "living",
-    designStyle: "modern",
-    colorPalette: "neutral",
-    lighting: "natural",
-    timeOfDay: "day",
-    mood: "calm",
-    architect: "foster",
-    lens: "wide",
-    typology: "open",
-    geometry: "rectangular",
-    image: null,
-    realism: 50
-  },
-  exterior: {
-    buildingType: "house",
-    architecturalStyle: "modern",
-    surroundingEnvironment: "urban",
-    timeOfDay: "day",
-    style: "modern",
-    colorPalette: "neutral",
-    lighting: "natural",
-    image: null,
-    realism: 50
-  },
-  landscape: {
-    gardenType: "residential",
-    style: "modern",
-    colorPalette: "neutral",
-    lighting: "natural",
-    image: null,
-    realism: 50
-  },
+  interior: interiorDefaults,
+  exterior: exteriorDefaults,
+  landscape: landscapeDefaults,
   product: {
     productType: "furniture",
     style: "modern",

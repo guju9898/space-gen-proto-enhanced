@@ -29,6 +29,14 @@ export interface ExteriorConfig {
   lighting: string;
   image: File | null;
   realism: number;
+  // Advanced Controls (optional, safe defaults)
+  advanced?: {
+    architectInfluence?: string;
+    lens?: string;
+    geometry?: string;
+    symmetry?: string;
+    mood?: string;
+  };
 }
 
 export interface LandscapeConfig {
@@ -38,6 +46,14 @@ export interface LandscapeConfig {
   lighting: string;
   image: File | null;
   realism: number;
+  // Advanced Controls (optional, safe defaults)
+  advanced?: {
+    architectInfluence?: string;
+    lens?: string;
+    geometry?: string;
+    symmetry?: string;
+    mood?: string;
+  };
 }
 
 export interface ProductConfig {

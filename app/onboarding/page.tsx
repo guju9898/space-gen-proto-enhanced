@@ -17,11 +17,6 @@ export default function OnboardingPage() {
   const [email, setEmail] = useState("")
   const [verificationStatus, setVerificationStatus] = useState<"pending" | "verified" | "failed">("pending")
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly")
-  const [cardNumber, setCardNumber] = useState("")
-  const [cardName, setCardName] = useState("")
-  const [expiryDate, setExpiryDate] = useState("")
-  const [cvv, setCvv] = useState("")
 
   // Step titles
   const stepTitles = ["Get Started", "Verify Email", "Choose Your Plan", "Payment Information", "Setup Complete"]
@@ -69,26 +64,16 @@ export default function OnboardingPage() {
           <StepThree
             selectedPlan={selectedPlan}
             onSelectPlan={handleSelectPlan}
-            billingCycle={billingCycle}
-            onChangeBillingCycle={setBillingCycle}
           />
         )
       case 4:
         return (
           <StepFour
-            cardNumber={cardNumber}
-            setCardNumber={setCardNumber}
-            cardName={cardName}
-            setCardName={setCardName}
-            expiryDate={expiryDate}
-            setExpiryDate={setExpiryDate}
-            cvv={cvv}
-            setCvv={setCvv}
-            selectedPlan={selectedPlan || "personal"}
+            selectedPlan={selectedPlan || "professional"}
           />
         )
       case 5:
-        return <StepFive selectedPlan={selectedPlan || "personal"} email={email} />
+        return <StepFive selectedPlan={selectedPlan || "professional"} email={email} />
       default:
         return null
     }
@@ -103,6 +88,7 @@ export default function OnboardingPage() {
       isFirstStep={currentStep === 1}
       isLastStep={currentStep === totalSteps}
       title={stepTitles[currentStep - 1]}
+      hideNext={currentStep === 4}
     >
       {renderStep()}
     </OnboardingLayout>

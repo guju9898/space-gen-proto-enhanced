@@ -2,6 +2,7 @@
 
 import { useDesignConfig } from '@/hooks/useDesignConfig';
 import { GlobalHeader } from './GlobalHeader';
+import { CheckoutSuccessDialog } from './CheckoutSuccessDialog';
 
 interface StudioLayoutProps {
   formContent: React.ReactNode;
@@ -21,18 +22,19 @@ export function StudioLayout({ formContent, previewContent, requestContent }: St
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-screen overflow-hidden">
       <GlobalHeader />
-      <main className="flex-1 overflow-auto">
-        <div className="container mx-auto px-6 py-8">
-          <div className="grid grid-cols-3 gap-6">
-            <div className="col-span-1">
+      <CheckoutSuccessDialog />
+      <main className="flex-1 overflow-hidden">
+        <div className="container mx-auto px-6 py-8 h-full">
+          <div className="grid grid-cols-3 gap-6 h-full">
+            <div className="col-span-1 overflow-y-auto overscroll-contain pr-2">
               {formContent}
             </div>
-            <div className="col-span-1">
+            <div className="col-span-1 overflow-hidden">
               {previewContent}
             </div>
-            <div className="col-span-1">
+            <div className="col-span-1 overflow-hidden">
               {requestContent}
             </div>
           </div>

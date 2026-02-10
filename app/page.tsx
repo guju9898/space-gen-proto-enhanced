@@ -1,6 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { ChevronDown, ChevronRight, Menu } from "lucide-react"
+import { LoginButton } from "@/components/auth/LoginButton"
 
 export default function Home() {
   return (
@@ -8,37 +9,41 @@ export default function Home() {
       {/* Header */}
       <header className="container mx-auto py-4 px-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Image src="/amethyst-flow.png" alt="Space Gen Logo" width={32} height={32} className="w-8 h-8" />
-          <span className="font-bold text-lg text-white">Space Gen</span>
+          <Image src="/amethyst-flow.png" alt="Renderspace Logo" width={32} height={32} className="w-8 h-8" />
+          <span className="font-bold text-lg text-white">Renderspace</span>
         </div>
 
         <nav className="hidden md:flex items-center gap-8">
-          <Link href="#" className="text-sm text-white hover:text-primary/90">
+          <Link href="/" className="text-sm text-white hover:text-primary/90">
             Home
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+          <Link href="/gallery" className="text-sm text-muted-foreground hover:text-white">
             Gallery
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+          <Link href="/my-renders" className="text-sm text-muted-foreground hover:text-white">
+            My Renders
+          </Link>
+          {/* TODO: create /pricing page */}
+          <Link href="/pricing" className="text-sm text-muted-foreground hover:text-white">
             Pricing
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+          {/* TODO: create /blog page */}
+          <Link href="/blog" className="text-sm text-muted-foreground hover:text-white">
             Blog
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+          {/* TODO: create /faq page */}
+          <Link href="/faq" className="text-sm text-muted-foreground hover:text-white">
             FAQ
           </Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <Link href="#" className="text-sm text-white hover:text-primary/90">
-            Login
-          </Link>
+          <LoginButton />
           <Link
-            href="#"
-            className="text-sm bg-gradient-to-r from-[#9747ff] to-[#8608fd] hover:opacity-90 text-white px-4 py-2 rounded-md"
+            href="/onboarding"
+            className="text-sm bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-4 py-2 rounded-md"
           >
-            Sign Up
+            Redesign Now
           </Link>
         </div>
 
@@ -49,50 +54,67 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">Redesign Your Space with AI</h1>
+        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">Visualize in Seconds. Win More Projects</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-          Transform your living and commercial spaces with our AI-powered design tool. Get professional designs in
-          minutes, not weeks.
+          Create client-ready interior, exterior, and landscape concepts in minutes — before plans, permits, or materials.
         </p>
         <Link
-          href="#"
-          className="inline-flex items-center gap-2 bg-gradient-to-r from-[#9747ff] to-[#8608fd] hover:opacity-90 text-white px-6 py-3 rounded-md font-medium"
+          href="/studio"
+          className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-6 py-3 rounded-md font-medium"
         >
-          Get Started <ChevronRight className="w-4 h-4" />
+          Redesign Your Space <ChevronRight className="w-4 h-4" />
         </Link>
+        <p className="text-xs text-muted-foreground mt-3 text-center">No credit card required</p>
 
-        {/* Image Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mt-16">
-          {[...Array(10)].map((_, i) => (
-            <div key={i} className="aspect-square overflow-hidden rounded-md">
-              <Image
-                src={`/modern-living-space.png?height=200&width=200&query=interior design ${i + 1}`}
-                alt={`Interior design ${i + 1}`}
-                width={200}
-                height={200}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ))}
+        {/* Featured Renders */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-16 max-w-4xl mx-auto">
+          <div className="rounded-lg overflow-hidden">
+            <Image
+              src="/landing/renders/interior-hero-01.png"
+              alt="Interior render"
+              width={400}
+              height={300}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="rounded-lg overflow-hidden">
+            <Image
+              src="/landing/renders/exterior-hero-01.png"
+              alt="Exterior render"
+              width={400}
+              height={300}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="rounded-lg overflow-hidden">
+            <Image
+              src="/landing/renders/landscape-hero-01.png"
+              alt="Landscape render"
+              width={400}
+              height={300}
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
+        <p className="text-xs text-muted-foreground mt-4 text-center">Generated in Renderspace AI</p>
       </section>
 
       {/* Space Gen Section */}
       <section className="container mx-auto px-4 py-16 text-center">
-        <h2 className="text-2xl md:text-3xl font-bold mb-2 text-primary">Space Gen:</h2>
+        <h2 className="text-2xl md:text-3xl font-bold mb-2 text-primary">Renderspace:</h2>
         <h3 className="text-2xl md:text-3xl font-bold mb-4 text-white">Transform, Redesign and Refine</h3>
         <h4 className="text-xl md:text-2xl font-bold mb-8 text-white">Your Personal and Commercial Spaces</h4>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-12">
-          Our AI-powered platform helps you visualize and transform any space with professional design recommendations
-          tailored to your style and needs.
+          Our AI-powered platform helps you create professional design visualizations quickly. Generate concept renders
+          tailored to your project needs.
         </p>
 
         {/* Featured Images */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <div className="rounded-xl overflow-hidden">
             <Image
-              src="/sunlit-plant-filled-living-room.png"
-              alt="Modern living room"
+              src="/landing/renders/renderspace-exterior-01.png"
+              alt="Renderspace exterior render"
               width={600}
               height={400}
               className="w-full h-full object-cover"
@@ -100,8 +122,8 @@ export default function Home() {
           </div>
           <div className="rounded-xl overflow-hidden">
             <Image
-              src="/cozy-cottage-garden.png"
-              alt="House exterior"
+              src="/landing/renders/renderspace-exterior-02.png"
+              alt="Renderspace exterior render"
               width={600}
               height={400}
               className="w-full h-full object-cover"
@@ -114,7 +136,7 @@ export default function Home() {
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-2xl md:text-3xl font-bold mb-8 text-white text-center">How It Works</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-12 text-center">
-          Redesign your space in just four easy steps
+          From concept to client alignment in minutes
         </p>
 
         <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -124,8 +146,8 @@ export default function Home() {
                 1
               </div>
               <div>
-                <h3 className="font-bold text-white mb-1">Choose Your Space</h3>
-                <p className="text-muted-foreground text-sm">Upload photos of the room or space you want to redesign</p>
+                <h3 className="font-bold text-white mb-1">Start from real constraints</h3>
+                <p className="text-muted-foreground text-sm">Upload a photo or reference and define the type of space you're working with — interior, exterior, or landscape.</p>
               </div>
             </div>
 
@@ -134,9 +156,9 @@ export default function Home() {
                 2
               </div>
               <div>
-                <h3 className="font-bold text-white mb-1">Select Your Style</h3>
+                <h3 className="font-bold text-white mb-1">Explore multiple directions instantly</h3>
                 <p className="text-muted-foreground text-sm">
-                  Choose from various design styles or create your own custom look
+                  Adjust style, mood, and key variables to generate multiple design directions in seconds.
                 </p>
               </div>
             </div>
@@ -146,9 +168,9 @@ export default function Home() {
                 3
               </div>
               <div>
-                <h3 className="font-bold text-white mb-1">Generate and Customize</h3>
+                <h3 className="font-bold text-white mb-1">Show options live with clients</h3>
                 <p className="text-muted-foreground text-sm">
-                  Our AI generates multiple design options that you can customize
+                  Generate and compare concepts in real time to guide conversations and get early buy-in.
                 </p>
               </div>
             </div>
@@ -158,16 +180,16 @@ export default function Home() {
                 4
               </div>
               <div>
-                <h3 className="font-bold text-white mb-1">Download and Implement</h3>
-                <p className="text-muted-foreground text-sm">Get detailed design plans and product recommendations</p>
+                <h3 className="font-bold text-white mb-1">Lock direction before committing</h3>
+                <p className="text-muted-foreground text-sm">Use aligned concepts as a visual reference before moving into detailed plans, pricing, or construction.</p>
               </div>
             </div>
           </div>
 
           <div className="bg-[#191f33] rounded-xl p-4">
             <Image
-              src="/ai-design-transformation.png"
-              alt="AI design interface"
+              src="/landing/renders/studio-ui.png"
+              alt="Renderspace Studio interface"
               width={600}
               height={400}
               className="w-full rounded-lg"
@@ -188,28 +210,11 @@ export default function Home() {
             <div className="flex gap-4 mb-4">
               <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#9747ff] to-[#8608fd] flex items-center justify-center">
                 <Image
-                  src="/placeholder.svg?height=24&width=24&query=home icon"
-                  alt="Home icon"
+                  src="/landing/renders/interior-hero-01.png"
+                  alt="Interior design"
                   width={24}
                   height={24}
-                />
-              </div>
-              <h3 className="text-xl font-bold text-white">Home Owners</h3>
-            </div>
-            <p className="text-muted-foreground">
-              Transform your living spaces with professional designs that match your style and budget. Get multiple
-              design options for any room in your home.
-            </p>
-          </div>
-
-          <div className="bg-[#191f33]/50 p-6 rounded-xl">
-            <div className="flex gap-4 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#9747ff] to-[#8608fd] flex items-center justify-center">
-                <Image
-                  src="/placeholder.svg?height=24&width=24&query=design icon"
-                  alt="Design icon"
-                  width={24}
-                  height={24}
+                  className="w-6 h-6 object-cover rounded-full"
                 />
               </div>
               <h3 className="text-xl font-bold text-white">Interior Designers</h3>
@@ -224,17 +229,18 @@ export default function Home() {
             <div className="flex gap-4 mb-4">
               <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#9747ff] to-[#8608fd] flex items-center justify-center">
                 <Image
-                  src="/placeholder.svg?height=24&width=24&query=real estate icon"
-                  alt="Real estate icon"
+                  src="/landing/renders/exterior-hero-01.png"
+                  alt="Exterior design"
                   width={24}
                   height={24}
+                  className="w-6 h-6 object-cover rounded-full"
                 />
               </div>
-              <h3 className="text-xl font-bold text-white">Real Estate Agents</h3>
+              <h3 className="text-xl font-bold text-white">Contractors</h3>
             </div>
             <p className="text-muted-foreground">
-              Help clients visualize properties with virtual staging. Show the potential of any space and close deals
-              faster with impressive visualizations.
+              Quickly generate concept visualizations to align with clients before breaking ground. Speed up project
+              approvals and reduce rework.
             </p>
           </div>
 
@@ -242,10 +248,30 @@ export default function Home() {
             <div className="flex gap-4 mb-4">
               <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#9747ff] to-[#8608fd] flex items-center justify-center">
                 <Image
-                  src="/placeholder.svg?height=24&width=24&query=architecture icon"
-                  alt="Architecture icon"
+                  src="/landing/renders/landscape-hero-01.png"
+                  alt="Landscape design"
                   width={24}
                   height={24}
+                  className="w-6 h-6 object-cover rounded-full"
+                />
+              </div>
+              <h3 className="text-xl font-bold text-white">Landscapers</h3>
+            </div>
+            <p className="text-muted-foreground">
+              Show clients outdoor design concepts on-site during consultations. Close more deals with instant
+              visualizations that demonstrate potential.
+            </p>
+          </div>
+
+          <div className="bg-[#191f33]/50 p-6 rounded-xl">
+            <div className="flex gap-4 mb-4">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#9747ff] to-[#8608fd] flex items-center justify-center">
+                <Image
+                  src="/landing/renders/exterior-hero-01.png"
+                  alt="Architecture"
+                  width={24}
+                  height={24}
+                  className="w-6 h-6 object-cover rounded-full"
                 />
               </div>
               <h3 className="text-xl font-bold text-white">Architects</h3>
@@ -259,65 +285,13 @@ export default function Home() {
       </section>
 
       {/* Pricing Section */}
-      <section className="container mx-auto px-4 py-16">
+      <section id="pricing" className="container mx-auto px-4 py-16">
         <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white text-center">Choose Your Plan</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-12 text-center">
           Find the perfect plan for your design needs, from one-time projects to professional use
         </p>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Temporary Plan */}
-          <div className="bg-[#191f33]/50 rounded-xl p-6 border border-[#343434]">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-white font-bold">Temporary</h3>
-                <p className="text-xs text-muted-foreground">One-time use</p>
-              </div>
-              <span className="px-2 py-1 bg-[#343434] rounded-full text-xs text-white">Basic</span>
-            </div>
-            <div className="mb-6">
-              <span className="text-3xl font-bold text-white">$9.99</span>
-            </div>
-            <ul className="space-y-2 mb-6">
-              <li className="text-sm text-muted-foreground">5 room designs</li>
-              <li className="text-sm text-muted-foreground">Standard resolution</li>
-              <li className="text-sm text-muted-foreground">Basic style options</li>
-            </ul>
-            <Link
-              href="#"
-              className="block text-center py-2 border border-[#343434] rounded-md text-white hover:bg-[#343434]/50 transition"
-            >
-              Get Started
-            </Link>
-          </div>
-
-          {/* Personal Plan */}
-          <div className="bg-[#191f33]/50 rounded-xl p-6 border border-[#343434] relative">
-            <div className="absolute -top-3 right-4 px-3 py-1 bg-gradient-to-r from-[#9747ff] to-[#8608fd] rounded-full text-xs text-white">
-              Popular
-            </div>
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-white font-bold">Personal</h3>
-                <p className="text-xs text-muted-foreground">Monthly subscription</p>
-              </div>
-            </div>
-            <div className="mb-6">
-              <span className="text-3xl font-bold text-white">$37.95</span>
-            </div>
-            <ul className="space-y-2 mb-6">
-              <li className="text-sm text-muted-foreground">20 room designs per month</li>
-              <li className="text-sm text-muted-foreground">HD resolution</li>
-              <li className="text-sm text-muted-foreground">Advanced style options</li>
-            </ul>
-            <Link
-              href="#"
-              className="block text-center py-2 bg-gradient-to-r from-[#9747ff] to-[#8608fd] rounded-md text-white hover:opacity-90 transition"
-            >
-              Get Started
-            </Link>
-          </div>
-
+        <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
           {/* Professional Plan */}
           <div className="bg-[#191f33]/50 rounded-xl p-6 border border-[#343434]">
             <div className="flex justify-between items-start mb-4">
@@ -330,15 +304,15 @@ export default function Home() {
               <span className="text-3xl font-bold text-white">$99</span>
             </div>
             <ul className="space-y-2 mb-6">
-              <li className="text-sm text-muted-foreground">50 room designs per month</li>
+              <li className="text-sm text-muted-foreground">500 generations / credits per month</li>
               <li className="text-sm text-muted-foreground">4K resolution</li>
               <li className="text-sm text-muted-foreground">All style options</li>
             </ul>
             <Link
-              href="#"
-              className="block text-center py-2 border border-[#343434] rounded-md text-white hover:bg-[#343434]/50 transition"
+              href="/onboarding"
+              className="block text-center py-2 bg-gradient-to-r from-orange-500 to-violet-700 rounded-md text-white hover:opacity-90 transition-all"
             >
-              Get Started
+              Redesign Your Space
             </Link>
           </div>
 
@@ -351,18 +325,18 @@ export default function Home() {
               </div>
             </div>
             <div className="mb-6">
-              <span className="text-3xl font-bold text-white">$249</span>
+              <span className="text-3xl font-bold text-white">$349</span>
             </div>
             <ul className="space-y-2 mb-6">
-              <li className="text-sm text-muted-foreground">Unlimited room designs</li>
+              <li className="text-sm text-muted-foreground">6000 generations / credits per month</li>
               <li className="text-sm text-muted-foreground">4K resolution</li>
               <li className="text-sm text-muted-foreground">Commercial license</li>
             </ul>
             <Link
-              href="#"
-              className="block text-center py-2 border border-[#343434] rounded-md text-white hover:bg-[#343434]/50 transition"
+              href="/onboarding"
+              className="block text-center py-2 bg-gradient-to-r from-orange-500 to-violet-700 rounded-md text-white hover:opacity-90 transition-all"
             >
-              Get Started
+              Redesign Your Space
             </Link>
           </div>
         </div>
@@ -372,43 +346,80 @@ export default function Home() {
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white text-center">Customer Stories</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-12 text-center">
-          See what our users are saying about Space Gen
+          See what our users are saying about Renderspace
         </p>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="bg-[#191f33]/50 p-6 rounded-xl">
-              <div className="flex items-center gap-4 mb-4">
-                <Image
-                  src={`/placeholder.svg?height=48&width=48&query=abstract avatar ${i}`}
-                  alt={`Customer ${i}`}
-                  width={48}
-                  height={48}
-                  className="rounded-full"
-                />
-                <div>
-                  <h3 className="text-white font-medium">Customer Name</h3>
-                  <p className="text-xs text-muted-foreground">Homeowner</p>
-                </div>
+        <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          <div className="bg-[#191f33]/50 p-6 rounded-xl">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#9747ff] to-[#8608fd] flex items-center justify-center">
+                <span className="text-white font-bold text-lg">CH</span>
               </div>
-              <p className="text-sm text-muted-foreground">
-                "Space Gen transformed my living room completely! The AI suggestions were spot on with my style
-                preferences, and I was able to implement the changes over a weekend. Highly recommend for anyone looking
-                to refresh their space."
-              </p>
+              <div>
+                <h3 className="text-white font-medium">Codey H</h3>
+                <p className="text-xs text-muted-foreground">Principal, CC Homes</p>
+              </div>
             </div>
-          ))}
+            <p className="text-sm text-muted-foreground">
+              "Renderspace has been great at helping us put together mood boards in a fraction on the time and costs as the Fiverr workers we used to use!"
+            </p>
+          </div>
+
+          <div className="bg-[#191f33]/50 p-6 rounded-xl">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#9747ff] to-[#8608fd] flex items-center justify-center">
+                <span className="text-white font-bold text-lg">AR</span>
+              </div>
+              <div>
+                <h3 className="text-white font-medium">Angel R</h3>
+                <p className="text-xs text-muted-foreground">Project Manager, Texas Backyard Kings</p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              "I've been able to double last years deal flow by showing customers concepts for their project on site rather than the back and forth with our in house design team. We've saved hours of rework and on track to add 50% revenue"
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Expectations Section */}
+      <section className="container mx-auto px-4 py-16">
+        <h2 className="text-2xl md:text-3xl font-bold mb-2 text-white text-center">Set Clear Expectations</h2>
+        <p className="text-muted-foreground max-w-2xl mx-auto mb-12 text-center">
+          Renderspace is designed to support early decision-making — not replace detailed design work.
+        </p>
+
+        <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          <div className="bg-[#191f33]/50 p-6 rounded-xl border border-[#343434]">
+            <h3 className="text-xl font-bold text-white mb-4">Best Used For</h3>
+            <ul className="space-y-3">
+              <li className="text-sm text-muted-foreground">Early-stage design concepts</li>
+              <li className="text-sm text-muted-foreground">Client alignment and approvals</li>
+              <li className="text-sm text-muted-foreground">Exploring multiple visual directions quickly</li>
+              <li className="text-sm text-muted-foreground">Sales conversations and project scoping</li>
+            </ul>
+          </div>
+
+          <div className="bg-[#191f33]/50 p-6 rounded-xl border border-[#343434]">
+            <h3 className="text-xl font-bold text-white mb-4">Not Intended For</h3>
+            <ul className="space-y-3">
+              <li className="text-sm text-muted-foreground">Construction drawings or permits</li>
+              <li className="text-sm text-muted-foreground">Final material specifications</li>
+              <li className="text-sm text-muted-foreground">Engineering or architectural documentation</li>
+              <li className="text-sm text-muted-foreground">Build-ready plans</li>
+            </ul>
+          </div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="container mx-auto px-4 py-16">
+      <section id="faq" className="container mx-auto px-4 py-16">
         <h2 className="text-2xl md:text-3xl font-bold mb-12 text-white text-center">FAQ</h2>
 
         <div className="max-w-3xl mx-auto space-y-4">
           {[
-            "Questions about using Space Gen?",
-            "How accurate are the AI designs?",
+            "Questions about using Renderspace?",
+            "What is Renderspace best used for?",
             "Can I customize the generated designs?",
             "What file formats do you support?",
             "How many designs can I generate?",
@@ -433,19 +444,19 @@ export default function Home() {
             <h2 className="text-2xl md:text-3xl font-bold mb-2 text-primary">Don't wait to Create.</h2>
             <h3 className="text-2xl md:text-3xl font-bold mb-4 text-white">Start Designing Your Ideal Space Now!</h3>
             <p className="text-muted-foreground mb-6">
-              Join thousands of satisfied customers who have transformed their spaces with our AI-powered design tool.
+              Join professionals using Renderspace to create concept visualizations and align with clients faster.
             </p>
             <Link
-              href="#"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-[#9747ff] to-[#8608fd] hover:opacity-90 text-white px-6 py-3 rounded-md font-medium"
+              href="/onboarding"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-6 py-3 rounded-md font-medium"
             >
-              Get Started <ChevronRight className="w-4 h-4" />
+              Redesign Your Space <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
           <div className="md:w-1/2">
             <Image
-              src="/placeholder.svg?height=300&width=500&query=modern porch design with furniture"
-              alt="Modern porch design"
+              src="/landing/renders/cta-render-01.png"
+              alt="Renderspace render"
               width={500}
               height={300}
               className="w-full rounded-lg"
@@ -459,27 +470,27 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center mb-8">
             <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <Image src="/amethyst-flow.png" alt="Space Gen Logo" width={32} height={32} className="w-8 h-8" />
-              <span className="font-bold text-lg text-white">Space Gen</span>
+              <Image src="/amethyst-flow.png" alt="Renderspace Logo" width={32} height={32} className="w-8 h-8" />
+              <span className="font-bold text-lg text-white">Renderspace</span>
             </div>
 
             <nav className="flex flex-wrap justify-center gap-6 mb-4 md:mb-0">
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="#privacy" className="text-sm text-muted-foreground hover:text-white">
                 Privacy Policy
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="#terms" className="text-sm text-muted-foreground hover:text-white">
                 Terms of Service
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="#about" className="text-sm text-muted-foreground hover:text-white">
                 About
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="#contact" className="text-sm text-muted-foreground hover:text-white">
                 Contact
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="#pricing" className="text-sm text-muted-foreground hover:text-white">
                 Pricing
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="#faq" className="text-sm text-muted-foreground hover:text-white">
                 FAQ
               </Link>
             </nav>
@@ -536,7 +547,7 @@ export default function Home() {
           </div>
 
           <div className="text-center text-xs text-muted-foreground">
-            <p>© 2023 Space Gen. All rights reserved.</p>
+            <p>© 2023 Renderspace. All rights reserved.</p>
           </div>
         </div>
       </footer>
