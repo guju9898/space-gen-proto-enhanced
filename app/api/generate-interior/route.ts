@@ -1,18 +1,37 @@
 import { NextResponse } from "next/server"
 import Replicate from "replicate"
+import { isString, isObject } from "@/lib/types/typeGuards"
 
 export const runtime = "nodejs"
 
 // Replicate can be instantiated at module level (safe)
+const replicateApiToken = process.env.REPLICATE_API_TOKEN
+if (!replicateApiToken) {
+  throw new Error("Missing REPLICATE_API_TOKEN")
+}
+
 const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN!,
+  auth: replicateApiToken,
 })
 
 export async function POST(request: Request) {
   try {
-    const { prompt, image, realism } = await request.json()
+    const body = await request.json() as unknown
 
-    if (!prompt) {
+    if (!isObject(body)) {
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 }
+      )
+    }
+
+    const { prompt, image, realism } = body as {
+      prompt?: unknown
+      image?: unknown
+      realism?: unknown
+    }
+
+    if (!isString(prompt)) {
       return NextResponse.json(
         { error: "Missing required field: prompt" },
         { status: 400 }
@@ -34,14 +53,11 @@ export async function POST(request: Request) {
     }
 
     // Add image if provided (must be a valid URL or base64 data URL)
-    if (image) {
-      // Check if it's a base64 data URL or HTTP(S) URL
-      if (typeof image === "string") {
-        if (image.startsWith("data:image/") || image.startsWith("http://") || image.startsWith("https://")) {
-          input.image = image
-        } else {
-          console.warn("⚠️ Invalid image format, ignoring image parameter")
-        }
+    if (isString(image)) {
+      if (image.startsWith("data:image/") || image.startsWith("http://") || image.startsWith("https://")) {
+        input.image = image
+      } else {
+        console.warn("⚠️ Invalid image format, ignoring image parameter")
       }
     }
 

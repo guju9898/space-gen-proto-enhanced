@@ -28,6 +28,7 @@ import { StudioPreview } from "@/components/Studio/StudioPreview"
 import { Button } from "@/components/ui/button"
 import { FirstPaidSessionHint } from "@/components/Studio/FirstPaidSessionHint"
 import { VariableSelect } from "@/components/ui/VariableSelect"
+import { isString } from "@/lib/types/typeGuards"
 import { ImageOptionGrid } from "@/components/Studio/ImageOptionGrid"
 import { GridPickerDialog } from "@/components/Studio/GridPickerDialog"
 import { SegmentedToggle } from "@/components/Studio/SegmentedToggle"
@@ -143,7 +144,7 @@ export default function ExteriorStudioPage() {
           reader.readAsDataURL(imageState.file!)
         })
         referenceImageUrl = base64
-      } else if (exteriorConfig.image && typeof exteriorConfig.image === "string" && exteriorConfig.image.startsWith("http")) {
+      } else if (isString(exteriorConfig.image) && exteriorConfig.image.startsWith("http")) {
         referenceImageUrl = exteriorConfig.image
       }
 
@@ -647,7 +648,7 @@ export default function ExteriorStudioPage() {
               </div>
             )}
             <div className="text-xs text-muted-foreground">
-              This render uses {imageState.file || (exteriorConfig.image && typeof exteriorConfig.image === "string" && exteriorConfig.image.startsWith("http")) ? "1.5" : "1.0"} credits
+              This render uses {imageState.file || (isString(exteriorConfig.image) && exteriorConfig.image.startsWith("http")) ? "1.5" : "1.0"} credits
             </div>
             <div className="text-xs text-muted-foreground italic">
               Credits are only deducted after a successful render appears.

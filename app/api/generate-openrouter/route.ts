@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { generateImageFromOpenRouter } from "@/lib/api/generateImageFromOpenRouter"
 import { enforceCredits, consumeCredit, recordRenderEvent } from "@/lib/usage/enforceCredits"
+import { isString, isObject } from "@/lib/types/typeGuards"
 
 export const runtime = "nodejs"
 
@@ -35,10 +36,24 @@ export async function POST(request: Request) {
       )
     }
 
-    const { prompt, image, renderType, renderId } = await request.json()
+    const body = await request.json() as unknown
+
+    if (!isObject(body)) {
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 }
+      )
+    }
+
+    const { prompt, image, renderType, renderId } = body as {
+      prompt?: unknown
+      image?: unknown
+      renderType?: unknown
+      renderId?: unknown
+    }
 
     // Validate renderId for idempotency
-    if (!renderId || typeof renderId !== "string") {
+    if (!isString(renderId)) {
       return NextResponse.json(
         { error: "renderId is required" },
         { status: 400 }
@@ -46,10 +61,10 @@ export async function POST(request: Request) {
     }
 
     // Calculate credit cost: base 1.0 + 0.5 if reference image is present
-    const hasReferenceImage = image && typeof image === "string" && image.trim() !== ""
+    const hasReferenceImage = isString(image) && image.trim() !== ""
     const creditCost = hasReferenceImage ? 1.5 : 1.0
 
-    if (!prompt || !renderType) {
+    if (!isString(prompt) || !isString(renderType)) {
       return NextResponse.json(
         { error: "Missing required fields: prompt and renderType" },
         { status: 400 }
@@ -65,7 +80,7 @@ export async function POST(request: Request) {
 
     const imageUrl = await generateImageFromOpenRouter({
       prompt,
-      image: image || null,
+      image: isString(image) ? image : null,
       renderType,
     })
 

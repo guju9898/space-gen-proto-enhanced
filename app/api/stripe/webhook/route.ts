@@ -4,7 +4,12 @@ import { createClient } from "@supabase/supabase-js"
 
 export const runtime = "nodejs"
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+if (!stripeSecretKey) {
+  throw new Error("Missing STRIPE_SECRET_KEY")
+}
+
+const stripe = new Stripe(stripeSecretKey)
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -34,10 +39,18 @@ export async function POST(request: Request) {
     }
 
     // Verify webhook signature
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+    if (!webhookSecret) {
+      return NextResponse.json(
+        { error: "Missing STRIPE_WEBHOOK_SECRET" },
+        { status: 500 }
+      )
+    }
+
     const event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      webhookSecret
     )
 
     // Handle event types

@@ -28,6 +28,7 @@ import { SegmentedToggle } from "@/components/Studio/SegmentedToggle"
 import { buildGeminiPrompt } from "@/lib/api/buildGeminiPrompt"
 import { cn } from "@/lib/utils"
 import { landscapeDefaults } from "@/lib/studio/defaults"
+import { isString } from "@/lib/types/typeGuards"
 import { getCreditErrorMessage } from "@/lib/usage/errorMessages"
 
 const gardenTypeOptions = [
@@ -142,7 +143,7 @@ export default function LandscapeStudioPage() {
           reader.readAsDataURL(imageState.file!)
         })
         referenceImageUrl = base64
-      } else if (landscapeConfig?.image && typeof landscapeConfig.image === "string" && landscapeConfig.image.startsWith("http")) {
+      } else if (isString(landscapeConfig?.image) && landscapeConfig.image.startsWith("http")) {
         referenceImageUrl = landscapeConfig.image
       }
 
@@ -753,7 +754,7 @@ export default function LandscapeStudioPage() {
               </div>
             )}
             <div className="text-xs text-muted-foreground">
-              This render uses {imageState.file || (landscapeConfig?.image && typeof landscapeConfig.image === "string" && landscapeConfig.image.startsWith("http")) ? "1.5" : "1.0"} credits
+              This render uses {imageState.file || (isString(landscapeConfig?.image) && landscapeConfig.image.startsWith("http")) ? "1.5" : "1.0"} credits
             </div>
             <div className="text-xs text-muted-foreground italic">
               Credits are only deducted after a successful render appears.

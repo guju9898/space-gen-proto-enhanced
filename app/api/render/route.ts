@@ -2,12 +2,18 @@ import { NextResponse } from "next/server"
 import Replicate from "replicate"
 import type { RenderRequest } from "@/types/studio"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
+import { isObject } from "@/lib/types/typeGuards"
 
 export const runtime = "nodejs"
 
 // Replicate can be instantiated at module level (safe)
+const replicateApiToken = process.env.REPLICATE_API_TOKEN
+if (!replicateApiToken) {
+  throw new Error("Missing REPLICATE_API_TOKEN")
+}
+
 const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN!,
+  auth: replicateApiToken,
 })
 
 export async function POST(request: Request) {
@@ -15,8 +21,16 @@ export async function POST(request: Request) {
     // Initialize Supabase server client (reads auth from cookies)
     const supabase = await createSupabaseServerClient()
 
-    const { renderType, config, sourceImage } =
-      (await request.json()) as RenderRequest
+    const body = await request.json() as unknown
+
+    if (!isObject(body)) {
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 }
+      )
+    }
+
+    const { renderType, config, sourceImage } = body as RenderRequest
 
     // Authenticate user from cookies
     const {

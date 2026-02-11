@@ -2,12 +2,18 @@ import { NextResponse } from "next/server"
 import Replicate from "replicate"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { enforceCredits, consumeCredit, recordRenderEvent } from "@/lib/usage/enforceCredits"
+import { isString, isObject } from "@/lib/types/typeGuards"
 
 export const runtime = "nodejs"
 
 // Replicate can be instantiated at module level (safe)
+const replicateApiToken = process.env.REPLICATE_API_TOKEN
+if (!replicateApiToken) {
+  throw new Error("Missing REPLICATE_API_TOKEN")
+}
+
 const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN!,
+  auth: replicateApiToken,
 })
 
 // Helper function to convert ReadableStream to base64 data URL
@@ -56,10 +62,24 @@ export async function POST(req: Request) {
     }
 
     // Parse request body after auth check
-    const { prompt, imageUrl, realism, renderId } = await req.json()
+    const body = await req.json() as unknown
+
+    if (!isObject(body)) {
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 }
+      )
+    }
+
+    const { prompt, imageUrl, realism, renderId } = body as {
+      prompt?: unknown
+      imageUrl?: unknown
+      realism?: unknown
+      renderId?: unknown
+    }
 
     // Validate prompt
-    if (!prompt || typeof prompt !== "string" || prompt.trim().length === 0) {
+    if (!isString(prompt) || prompt.trim().length === 0) {
       return NextResponse.json(
         { error: "prompt is required" },
         { status: 400 }
@@ -67,7 +87,7 @@ export async function POST(req: Request) {
     }
 
     // Validate imageUrl - must be a valid HTTP/HTTPS URL
-    if (!imageUrl || typeof imageUrl !== "string" || !imageUrl.startsWith("http")) {
+    if (!isString(imageUrl) || !imageUrl.startsWith("http")) {
       console.log("Interior generation blocked: no valid imageUrl provided")
       return NextResponse.json(
         { error: "imageUrl is required" },
@@ -76,7 +96,7 @@ export async function POST(req: Request) {
     }
 
     // Validate renderId for idempotency
-    if (!renderId || typeof renderId !== "string") {
+    if (!isString(renderId)) {
       return NextResponse.json(
         { error: "renderId is required" },
         { status: 400 }

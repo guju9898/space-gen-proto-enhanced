@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import Stripe from "stripe"
+import { isObject, isString } from "@/lib/types/typeGuards"
 
 export const runtime = "nodejs"
 
@@ -36,9 +37,23 @@ export async function POST(request: Request) {
     }
 
     // Parse request body
-    const body = await request.json()
-    planId = body.planId
-    const { src, rep } = body
+    const body = await request.json() as unknown
+
+    if (!isObject(body)) {
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 }
+      )
+    }
+
+    const bodyData = body as {
+      planId?: unknown
+      src?: unknown
+      rep?: unknown
+    }
+
+    planId = isString(bodyData.planId) ? bodyData.planId : undefined
+    const { src, rep } = bodyData
 
     // Validate planId
     if (!planId || !["professional", "business"].includes(planId)) {

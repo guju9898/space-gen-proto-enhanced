@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { StudioPreview } from "@/components/Studio/StudioPreview"
 import { ImageUpload } from "@/components/Studio/ImageUpload"
 import { FirstPaidSessionHint } from "@/components/Studio/FirstPaidSessionHint"
+import { isString } from "@/lib/types/typeGuards"
 import { 
   Home, 
   Palette, 
@@ -159,7 +160,7 @@ export default function InteriorStudioPage() {
 
   const handleGenerate = async (config: Record<string, any>) => {
     // Frontend guard: Interior Studio requires a reference image URL
-    const imageUrl = imageState?.uploadedUrl || (config.image && typeof config.image === "string" && 
+    const imageUrl = imageState?.uploadedUrl || (isString(config.image) && 
       config.image.startsWith("http") ? config.image : null)
     
     if (!imageUrl || !imageUrl.startsWith("http")) {
@@ -537,7 +538,7 @@ export default function InteriorStudioPage() {
             <Button 
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium"
               onClick={() => handleGenerate(config)}
-              disabled={isRendering || !(imageState?.uploadedUrl || (config.image && typeof config.image === "string" && 
+              disabled={isRendering || !(imageState?.uploadedUrl || (isString(config.image) && 
                 config.image.startsWith("http")))}
               className={cn(
                 "transition-all duration-150 ease-out",
