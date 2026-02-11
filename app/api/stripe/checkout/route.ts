@@ -7,7 +7,7 @@ export const runtime = "nodejs"
 // Validate Stripe secret key exists
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 if (!stripeSecretKey) {
-  throw new Error("STRIPE_SECRET_KEY environment variable is required")
+  throw new Error("STRIPE_SECRET_KEY is not set")
 }
 
 const stripe = new Stripe(stripeSecretKey)
