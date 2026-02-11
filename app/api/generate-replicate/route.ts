@@ -120,7 +120,12 @@ export async function POST(req: Request) {
       generatedImageUrl = await streamToBase64(result)
     } else if (Array.isArray(result) && typeof result[0] === "string") {
       generatedImageUrl = result[0]
-    } else if (result?.output instanceof ReadableStream) {
+    } else if (
+      typeof result === "object" &&
+      result !== null &&
+      "output" in result &&
+      result.output instanceof ReadableStream
+    ) {
       generatedImageUrl = await streamToBase64(result.output)
     } else {
       console.error("Unexpected Replicate output:", result)
