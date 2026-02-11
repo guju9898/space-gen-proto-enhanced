@@ -10,7 +10,10 @@ if (!stripeSecretKey) {
   throw new Error("STRIPE_SECRET_KEY is not set")
 }
 
-const stripe = new Stripe(stripeSecretKey)
+// Create guaranteed-string alias after guard
+const STRIPE_SECRET_KEY = stripeSecretKey
+
+const stripe = new Stripe(STRIPE_SECRET_KEY)
 
 export async function POST(request: Request) {
   try {
@@ -84,7 +87,7 @@ export async function POST(request: Request) {
     const cancelUrl = `${origin}/onboarding?step=3&billing=cancel`
 
     // DEBUG LOG (temporary - remove after verification)
-    const isLiveMode = stripeSecretKey.startsWith("sk_live_")
+    const isLiveMode = STRIPE_SECRET_KEY.startsWith("sk_live_")
     console.log("🔍 [STRIPE CHECKOUT DEBUG]")
     console.log("  planId:", planId)
     console.log("  priceId:", priceId)
