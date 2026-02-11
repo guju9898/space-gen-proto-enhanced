@@ -16,6 +16,8 @@ const STRIPE_SECRET_KEY = stripeSecretKey
 const stripe = new Stripe(STRIPE_SECRET_KEY)
 
 export async function POST(request: Request) {
+  let planId: string | undefined
+
   try {
     // Initialize Supabase server client (reads auth from cookies)
     const supabase = await createSupabaseServerClient()
@@ -34,7 +36,9 @@ export async function POST(request: Request) {
     }
 
     // Parse request body
-    const { planId, src, rep } = await request.json()
+    const body = await request.json()
+    planId = body.planId
+    const { src, rep } = body
 
     // Validate planId
     if (!planId || !["professional", "business"].includes(planId)) {
