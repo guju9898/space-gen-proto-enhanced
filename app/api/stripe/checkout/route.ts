@@ -10,9 +10,7 @@ if (!stripeSecretKey) {
   throw new Error("STRIPE_SECRET_KEY environment variable is required")
 }
 
-const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: "2024-12-18.acacia",
-})
+const stripe = new Stripe(stripeSecretKey)
 
 export async function POST(request: Request) {
   try {
