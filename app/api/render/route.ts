@@ -2,7 +2,6 @@ import { NextResponse } from "next/server"
 import Replicate from "replicate"
 import type { RenderRequest } from "@/types/studio"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
-import { isObject } from "@/lib/types/typeGuards"
 
 export const runtime = "nodejs"
 
@@ -16,21 +15,33 @@ const replicate = new Replicate({
   auth: replicateApiToken,
 })
 
+function isRenderRequest(body: unknown): body is RenderRequest {
+  return (
+    typeof body === "object" &&
+    body !== null &&
+    "renderType" in body &&
+    "config" in body &&
+    typeof (body as Record<string, unknown>).renderType === "string" &&
+    typeof (body as Record<string, unknown>).config === "object" &&
+    (body as Record<string, unknown>).config !== null
+  )
+}
+
 export async function POST(request: Request) {
   try {
     // Initialize Supabase server client (reads auth from cookies)
     const supabase = await createSupabaseServerClient()
 
-    const body = await request.json() as unknown
+    const body: unknown = await request.json()
 
-    if (!isObject(body)) {
+    if (!isRenderRequest(body)) {
       return NextResponse.json(
-        { error: "Invalid request body" },
+        { error: "Invalid render request body" },
         { status: 400 }
       )
     }
 
-    const { renderType, config, sourceImage } = body as RenderRequest
+    const { renderType, config, sourceImage } = body
 
     // Authenticate user from cookies
     const {
