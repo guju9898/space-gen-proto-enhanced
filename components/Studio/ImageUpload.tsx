@@ -7,9 +7,11 @@ import { Image as ImageIcon, Upload } from "lucide-react"
 interface ImageUploadProps {
   onUpload: (file: File, previewUrl: string) => void;
   currentPreview?: string | null;
+  accept?: string;
+  maxSize?: number;
 }
 
-export function ImageUpload({ onUpload, currentPreview }: ImageUploadProps) {
+export function ImageUpload({ onUpload, currentPreview, accept = "image/*", maxSize }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(currentPreview || null);
 
   // Cleanup preview URL on unmount
@@ -45,10 +47,9 @@ export function ImageUpload({ onUpload, currentPreview }: ImageUploadProps) {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: {
-      'image/*': ['.png', '.jpg', '.jpeg', '.gif']
-    },
-    maxFiles: 1
+    accept: accept ? { [accept]: ['.png', '.jpg', '.jpeg', '.gif'] } : undefined,
+    maxFiles: 1,
+    maxSize: maxSize ?? undefined
   });
 
   return (

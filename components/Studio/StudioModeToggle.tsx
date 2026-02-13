@@ -30,7 +30,7 @@ export function StudioModeToggle() {
     <div className="flex items-center space-x-2">
       {studioTypes.map((type) => {
         const Icon = type.icon
-        const isActive = pathname.startsWith(type.href)
+        const isActive = pathname?.startsWith(type.href)
         
         return (
           <Link

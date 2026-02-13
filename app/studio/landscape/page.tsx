@@ -200,7 +200,10 @@ export default function LandscapeStudioPage() {
 
   const handleRemoveTag = (key: string) => {
     if (key in landscapeDefaults) {
-      updateConfig({ [key]: landscapeDefaults[key as keyof LandscapeConfig] })
+      const typedKey = key as keyof typeof landscapeDefaults
+      updateConfig({
+        [typedKey]: landscapeDefaults[typedKey]
+      })
     }
   }
 
@@ -319,7 +322,7 @@ export default function LandscapeStudioPage() {
                           options={["0", "25", "50", "75", "100"]}
                           placeholder="Select planting density"
                           allowCustom={false}
-                          onChange={(value) => handleConfigChange("plantingDensity", value ? parseInt(value) : undefined)}
+                          onChange={(value) => handleConfigChange("plantingDensity", value ? parseInt(value, 10) : null)}
                         />
                       </div>
                     </div>
@@ -380,7 +383,7 @@ export default function LandscapeStudioPage() {
                           options={["0", "25", "50", "75", "100"]}
                           placeholder="Select lighting intensity"
                           allowCustom={false}
-                          onChange={(value) => handleConfigChange("lightingIntensity", value ? parseInt(value) : undefined)}
+                          onChange={(value) => handleConfigChange("lightingIntensity", value ? parseInt(value, 10) : null)}
                         />
                       </div>
                     </div>
@@ -552,7 +555,7 @@ export default function LandscapeStudioPage() {
                           </div>
                         </div>
                         <VariableSelect
-                          value={landscapeConfig?.advanced?.architectInfluence || "none"}
+                          value={landscapeConfig?.advanced?.architectInfluence ?? "none"}
                           options={["none", "foster", "gehry", "calatrava", "hadid", "koolhaas"]}
                           placeholder="Select architect influence"
                           allowCustom={false}
@@ -579,7 +582,7 @@ export default function LandscapeStudioPage() {
                           </div>
                         </div>
                         <VariableSelect
-                          value={landscapeConfig?.advanced?.lens || "standard"}
+                          value={landscapeConfig?.advanced?.lens ?? "standard"}
                           options={["standard", "wide", "telephoto", "fisheye", "ultra-wide"]}
                           placeholder="Select lens"
                           allowCustom={false}
@@ -609,7 +612,7 @@ export default function LandscapeStudioPage() {
                           </div>
                         </div>
                         <VariableSelect
-                          value={landscapeConfig?.advanced?.geometry || "balanced"}
+                          value={landscapeConfig?.advanced?.geometry ?? "balanced"}
                           options={["balanced", "rectangular", "curved", "angular", "organic"]}
                           placeholder="Select geometry"
                           allowCustom={false}
@@ -636,7 +639,7 @@ export default function LandscapeStudioPage() {
                           </div>
                         </div>
                         <VariableSelect
-                          value={landscapeConfig?.advanced?.symmetry || "subtle"}
+                          value={landscapeConfig?.advanced?.symmetry ?? "subtle"}
                           options={["subtle", "balanced", "asymmetrical", "symmetrical"]}
                           placeholder="Select symmetry"
                           allowCustom={false}
@@ -663,7 +666,7 @@ export default function LandscapeStudioPage() {
                           </div>
                         </div>
                         <VariableSelect
-                          value={landscapeConfig?.advanced?.mood || "neutral"}
+                          value={landscapeConfig?.advanced?.mood ?? "neutral"}
                           options={["neutral", "calm", "dramatic", "serene", "energetic"]}
                           placeholder="Select mood"
                           allowCustom={false}

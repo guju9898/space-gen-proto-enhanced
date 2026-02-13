@@ -5,9 +5,11 @@ import { cn } from "@/lib/utils"
 
 interface RenderButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
+  onRenderComplete?: (imageUrl: string) => void;
+  onRenderError?: (error: string) => void;
 }
 
-export function RenderButton({ loading, className, children, ...props }: RenderButtonProps) {
+export function RenderButton({ loading, className, children, onRenderComplete, onRenderError, ...props }: RenderButtonProps) {
   return (
     <button
       className={cn(

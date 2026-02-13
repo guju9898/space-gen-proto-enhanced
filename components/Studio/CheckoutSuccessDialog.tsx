@@ -17,7 +17,7 @@ export function CheckoutSuccessDialog() {
 
   useEffect(() => {
     const checkSuccess = async () => {
-      const billingSuccess = searchParams.get("billing") === "success"
+      const billingSuccess = searchParams?.get("billing") === "success"
       
       if (!billingSuccess) {
         setIsChecking(false)
@@ -28,11 +28,10 @@ export function CheckoutSuccessDialog() {
       const hasShownSuccess = sessionStorage.getItem("checkout_success_shown")
       if (hasShownSuccess) {
         // Clean up URL param but don't show dialog
-        const newSearchParams = new URLSearchParams(searchParams.toString())
+        const newSearchParams = new URLSearchParams(searchParams?.toString() ?? "")
         newSearchParams.delete("billing")
-        const cleanUrl = newSearchParams.toString() 
-          ? `${pathname}?${newSearchParams.toString()}`
-          : pathname
+        const base = pathname ?? ""
+        const cleanUrl = newSearchParams.toString() ? `${base}?${newSearchParams.toString()}` : base
         router.replace(cleanUrl)
         setIsChecking(false)
         return
@@ -100,11 +99,10 @@ export function CheckoutSuccessDialog() {
   const handleDismiss = () => {
     setIsOpen(false)
     // Remove query param from URL
-    const newSearchParams = new URLSearchParams(searchParams.toString())
+    const newSearchParams = new URLSearchParams(searchParams?.toString() ?? "")
     newSearchParams.delete("billing")
-    const cleanUrl = newSearchParams.toString() 
-      ? `${pathname}?${newSearchParams.toString()}`
-      : pathname
+    const base = pathname ?? ""
+    const cleanUrl = newSearchParams.toString() ? `${base}?${newSearchParams.toString()}` : base
     router.replace(cleanUrl)
   }
 

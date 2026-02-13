@@ -34,7 +34,7 @@ export function Header() {
               href={item.href}
               className={cn(
                 "text-sm font-medium transition-colors hover:text-foreground/80",
-                pathname.startsWith(item.href)
+                pathname?.startsWith(item.href)
                   ? "text-foreground"
                   : "text-foreground/60"
               )}

@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useDesignConfig } from "@/hooks/useDesignConfig"
 import ImageSelector from "./ImageSelector"
-import DropdownSelector from "./DropdownSelector"
+import { DropdownSelector } from "./DropdownSelector"
 import TagSelector from "./TagSelector"
 import SliderControl from "./SliderControl"
 import { Palette, Clock, Home, Layers } from "lucide-react"
@@ -128,7 +128,7 @@ export default function ExteriorVariablesPanel({ onGenerateDesign }: ExteriorVar
         <h3 className="text-sm font-medium mb-3 text-white">Exterior type</h3>
         <ImageSelector
           options={exteriorTypes}
-          value={exterior.exteriorType}
+          value={exterior.exteriorType ?? null}
           onChange={(value) => updateExteriorConfig("exteriorType", value)}
         />
       </div>
@@ -138,7 +138,7 @@ export default function ExteriorVariablesPanel({ onGenerateDesign }: ExteriorVar
         <h3 className="text-sm font-medium mb-3 text-white">Architectural style</h3>
         <ImageSelector
           options={architecturalStyles}
-          value={exterior.architecturalStyle}
+          value={exterior.architecturalStyle ?? null}
           onChange={(value) => updateExteriorConfig("architecturalStyle", value)}
         />
       </div>
@@ -148,10 +148,10 @@ export default function ExteriorVariablesPanel({ onGenerateDesign }: ExteriorVar
         <h3 className="text-sm font-medium mb-2 text-white">Color Palette</h3>
         <DropdownSelector
           options={colorPalettes}
-          value={exterior.colorPalette}
+          value={exterior.colorPalette ?? ""}
           onChange={(value) => updateExteriorConfig("colorPalette", value)}
           placeholder="Select color palette"
-          icon={<Palette className="text-zinc-400" />}
+          icon={Palette}
         />
       </div>
 
@@ -160,10 +160,10 @@ export default function ExteriorVariablesPanel({ onGenerateDesign }: ExteriorVar
         <h3 className="text-sm font-medium mb-2 text-white">Time of Day</h3>
         <DropdownSelector
           options={timeOfDayOptions}
-          value={exterior.timeOfDay}
+          value={exterior.timeOfDay ?? ""}
           onChange={(value) => updateExteriorConfig("timeOfDay", value)}
           placeholder="Select time of day"
-          icon={<Clock className="text-zinc-400" />}
+          icon={Clock}
         />
       </div>
 
@@ -172,10 +172,10 @@ export default function ExteriorVariablesPanel({ onGenerateDesign }: ExteriorVar
         <h3 className="text-sm font-medium mb-2 text-white">Roof Style</h3>
         <DropdownSelector
           options={roofStyleOptions}
-          value={exterior.roofStyle}
+          value={exterior.roofStyle ?? ""}
           onChange={(value) => updateExteriorConfig("roofStyle", value)}
           placeholder="Select roof style"
-          icon={<Home className="text-zinc-400" />}
+          icon={Home}
         />
       </div>
 
@@ -184,7 +184,7 @@ export default function ExteriorVariablesPanel({ onGenerateDesign }: ExteriorVar
         <h3 className="text-sm font-medium mb-3 text-white">Exterior Materials</h3>
         <TagSelector
           options={exteriorMaterialOptions}
-          selectedValues={exterior.exteriorMaterials || []}
+          selectedValues={Array.isArray(exterior.exteriorMaterials) ? exterior.exteriorMaterials : (exterior.exteriorMaterials ? [exterior.exteriorMaterials] : [])}
           onChange={(values) => updateExteriorConfig("exteriorMaterials", values)}
           maxSelections={3}
         />
@@ -195,7 +195,7 @@ export default function ExteriorVariablesPanel({ onGenerateDesign }: ExteriorVar
         <h3 className="text-sm font-medium mb-3 text-white">Exterior Accents</h3>
         <TagSelector
           options={exteriorAccentOptions}
-          selectedValues={exterior.exteriorAccents || []}
+          selectedValues={Array.isArray(exterior.exteriorAccents) ? exterior.exteriorAccents : (exterior.exteriorAccents ? [exterior.exteriorAccents] : [])}
           onChange={(values) => updateExteriorConfig("exteriorAccents", values)}
           maxSelections={3}
         />
@@ -206,10 +206,10 @@ export default function ExteriorVariablesPanel({ onGenerateDesign }: ExteriorVar
         <h3 className="text-sm font-medium mb-2 text-white">Focal Point</h3>
         <DropdownSelector
           options={focalPointOptions}
-          value={exterior.focalPoint}
+          value={exterior.focalPoint ?? ""}
           onChange={(value) => updateExteriorConfig("focalPoint", value)}
           placeholder="Select focal point"
-          icon={<Layers className="text-zinc-400" />}
+          icon={Layers}
         />
       </div>
 
@@ -218,7 +218,7 @@ export default function ExteriorVariablesPanel({ onGenerateDesign }: ExteriorVar
         <h3 className="text-sm font-medium mb-3 text-white">Views</h3>
         <TagSelector
           options={viewOptions}
-          selectedValues={exterior.views || []}
+          selectedValues={Array.isArray((exterior as unknown as Record<string, unknown>).views) ? (exterior as unknown as Record<string, unknown>).views as string[] : (exterior.exteriorViews ? [exterior.exteriorViews] : [])}
           onChange={(values) => updateExteriorConfig("views", values)}
           maxSelections={2}
         />

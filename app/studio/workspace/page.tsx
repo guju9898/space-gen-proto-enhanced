@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Info } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Info, LayoutGrid, Sun } from "lucide-react"
 import { DesignConfigProvider, useDesignConfig } from "@/hooks/useDesignConfig"
 import DesignStyleModal from "@/components/Studio/DesignStyleModal"
 import TipsModal from "@/components/Studio/TipsModal"
@@ -68,9 +68,11 @@ const materialOptions = [
 
 function StudioWorkspace() {
   if (typeof window === "undefined") return null;
-  const { config, updateConfig, resetConfig } = useDesignConfig()
+  const { config, updateConfig, resetConfig, setActiveStudio } = useDesignConfig()
+  const currentConfig = config.interior
   const [uploadedImage, setUploadedImage] = useState<string | null>("/studio/bedroom-preview.jpg")
   const [isUploading, setIsUploading] = useState(false)
+  useEffect(() => { setActiveStudio("interior") }, [setActiveStudio])
   const [showStyleModal, setShowStyleModal] = useState(false)
   const [showTipsModal, setShowTipsModal] = useState(false)
   const [renderImage, setRenderImage] = useState<string | null>(null)
@@ -160,8 +162,8 @@ function StudioWorkspace() {
         <div className="px-4 mb-4">
           <ImageUploadPanel
             currentImage={uploadedImage}
-            onImageUpload={handleImageUpload}
-            onImageRemove={handleImageRemove}
+            onUpload={handleImageUpload}
+            onRemove={handleImageRemove}
             isUploading={isUploading}
           />
         </div>
@@ -173,7 +175,7 @@ function StudioWorkspace() {
             <h3 className="text-white font-medium mb-2">Room type</h3>
             <ImageSelector
               options={roomTypes}
-              value={config?.roomType ?? null}
+              value={currentConfig?.roomType ?? null}
               onChange={(value) => updateConfig("roomType", value)}
             />
           </div>
@@ -183,8 +185,8 @@ function StudioWorkspace() {
             <h3 className="text-white font-medium mb-2">Design style</h3>
             <div className="flex items-center justify-between">
               <div className="text-sm text-zinc-400">
-                {config?.designStyle
-                  ? `Selected: ${config.designStyle.charAt(0).toUpperCase() + config.designStyle.slice(1)}`
+                {currentConfig?.designStyle
+                  ? `Selected: ${currentConfig.designStyle.charAt(0).toUpperCase() + currentConfig.designStyle.slice(1)}`
                   : "No style selected"}
               </div>
               <button
@@ -201,25 +203,10 @@ function StudioWorkspace() {
             <h3 className="text-white font-medium mb-2">Composition</h3>
             <DropdownSelector
               options={compositionOptions}
-              value={config?.composition ?? ""}
-              onChange={(value) => updateConfig("composition", value)}
+              value={currentConfig?.compositionStyle ?? ""}
+              onChange={(value) => updateConfig("compositionStyle", value)}
               placeholder="Select composition"
-              icon={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-zinc-400"
-                >
-                  <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                  <circle cx="9" cy="9" r="2" />
-                  <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                </svg>
-              }
+              icon={LayoutGrid}
             />
           </div>
 
@@ -228,7 +215,7 @@ function StudioWorkspace() {
             <h3 className="text-white font-medium mb-2">Mood</h3>
             <DropdownSelector
               options={moodOptions}
-              value={config?.mood ?? ""}
+              value={currentConfig?.mood ?? ""}
               onChange={(value) => updateConfig("mood", value)}
               placeholder="Select mood"
             />
@@ -239,7 +226,7 @@ function StudioWorkspace() {
             <h3 className="text-white font-medium mb-2">Color palette</h3>
             <ColorPaletteSelector
               options={colorPalettes}
-              value={config?.colorPalette ?? null}
+              value={currentConfig?.colorPalette ?? null}
               onChange={(value) => updateConfig("colorPalette", value)}
             />
           </div>
@@ -249,31 +236,10 @@ function StudioWorkspace() {
             <h3 className="text-white font-medium mb-2">Lighting</h3>
             <DropdownSelector
               options={lightingOptions}
-              value={config?.lighting ?? ""}
+              value={currentConfig?.lighting ?? ""}
               onChange={(value) => updateConfig("lighting", value)}
               placeholder="Select lighting"
-              icon={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-zinc-400"
-                >
-                  <circle cx="12" cy="12" r="4" />
-                  <path d="M12 2v2" />
-                  <path d="M12 20v2" />
-                  <path d="m4.93 4.93 1.41 1.41" />
-                  <path d="m17.66 17.66 1.41 1.41" />
-                  <path d="M2 12h2" />
-                  <path d="M20 12h2" />
-                  <path d="m6.34 17.66-1.41 1.41" />
-                  <path d="m19.07 4.93-1.41 1.41" />
-                </svg>
-              }
+              icon={Sun}
             />
           </div>
 
@@ -282,7 +248,7 @@ function StudioWorkspace() {
             <h3 className="text-white font-medium mb-2">Materials</h3>
             <TagSelector
               options={materialOptions}
-              selectedValues={config?.materials || []}
+              selectedValues={((currentConfig as unknown as Record<string, unknown>)?.materials as string[] | undefined) || []}
               onChange={(values) => updateConfig("materials", values)}
               maxSelections={3}
             />
@@ -295,7 +261,7 @@ function StudioWorkspace() {
               min={0}
               max={100}
               step={10}
-              value={config?.realism || 50}
+              value={currentConfig?.realism ?? 50}
               onChange={(value) => updateConfig("realism", value)}
               labels={["Stylized", "Photorealistic"]}
             />
@@ -315,12 +281,12 @@ function StudioWorkspace() {
 
       {/* Right Column - Request Summary */}
       <div className="w-[320px] p-6">
-        <RequestSummary onOpenInfo={() => console.log("Open request info")} />
+        <RequestSummary />
 
         {/* Render Button */}
         <div className="absolute bottom-6 right-6 left-[calc(360px+800px+24px)]">
           <RenderButton
-            disabled={!config?.roomType || !config?.designStyle || isRendering}
+            disabled={!currentConfig?.roomType || !currentConfig?.designStyle || isRendering}
             onRenderComplete={handleRenderComplete}
             onRenderError={handleRenderError}
           />
@@ -332,7 +298,7 @@ function StudioWorkspace() {
         isOpen={showStyleModal}
         onClose={() => setShowStyleModal(false)}
         onSelectStyle={handleSelectStyle}
-        selectedStyle={config?.designStyle ?? null}
+        selectedStyle={currentConfig?.designStyle ?? null}
       />
 
       <TipsModal isOpen={showTipsModal} onClose={() => setShowTipsModal(false)} />

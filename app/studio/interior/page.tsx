@@ -227,7 +227,10 @@ export default function InteriorStudioPage() {
 
   const handleRemoveTag = (key: string) => {
     if (key in interiorDefaults) {
-      updateConfig({ [key]: interiorDefaults[key as keyof InteriorConfig] })
+      const typedKey = key as keyof typeof interiorDefaults
+      updateConfig({
+        [typedKey]: interiorDefaults[typedKey]
+      })
     }
   }
 
@@ -393,7 +396,7 @@ export default function InteriorStudioPage() {
                   options={["0", "25", "50", "75", "100"]}
                   placeholder="Select symmetry level"
                   allowCustom={false}
-                  onChange={(value) => handleConfigChange("symmetryLevel", value ? parseInt(value) : undefined)}
+                  onChange={(value) => handleConfigChange("symmetryLevel", value ? parseInt(value, 10) : null)}
                 />
               </div>
               <div>
@@ -536,17 +539,17 @@ export default function InteriorStudioPage() {
           <FirstPaidSessionHint className="mt-4" />
           <div className="pt-4 border-t border-border">
             <Button 
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium"
-              onClick={() => handleGenerate(config)}
-              disabled={isRendering || !(imageState?.uploadedUrl || (isString(config.image) && 
-                config.image.startsWith("http")))}
               className={cn(
+                "w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium",
                 "transition-all duration-150 ease-out",
                 "hover:shadow-md hover:shadow-primary/20",
                 "active:scale-[0.98]",
                 "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none",
                 isRendering && "cursor-wait"
               )}
+              onClick={() => handleGenerate(config)}
+              disabled={isRendering || !(imageState?.uploadedUrl || (isString(config.image) && 
+                config.image.startsWith("http")))}
             >
               {isRendering ? "Generating..." : "Generate"}
             </Button>

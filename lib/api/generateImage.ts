@@ -1,6 +1,6 @@
 interface GenerateImageOptions {
   prompt: string;
-  initImage?: string | null;
+  initImage?: string | File | null;
   realism?: number;
   width?: number;
   height?: number;

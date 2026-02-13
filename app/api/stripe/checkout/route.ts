@@ -8,13 +8,15 @@ export const runtime = "nodejs"
 // Validate Stripe secret key exists
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 if (!stripeSecretKey) {
-  throw new Error("STRIPE_SECRET_KEY is not set")
+  throw new Error("Missing STRIPE_SECRET_KEY")
 }
 
 // Create guaranteed-string alias after guard
-const STRIPE_SECRET_KEY = stripeSecretKey
+const STRIPE_SECRET_KEY: string = stripeSecretKey
 
-const stripe = new Stripe(STRIPE_SECRET_KEY)
+const stripe = new Stripe(STRIPE_SECRET_KEY, {
+  apiVersion: "2025-10-29.clover",
+})
 
 export async function POST(request: Request) {
   let planId: string | undefined
@@ -130,8 +132,8 @@ export async function POST(request: Request) {
       metadata: {
         userId: user.id,
         planId,
-        ...(src && { src }),
-        ...(rep && { rep }),
+        ...(src ? { src: isObject(src) ? JSON.stringify(src) : String(src) } : {}),
+        ...(rep ? { rep: isObject(rep) ? JSON.stringify(rep) : String(rep) } : {}),
       },
       success_url: successUrl,
       cancel_url: cancelUrl,

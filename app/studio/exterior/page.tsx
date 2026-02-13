@@ -201,7 +201,10 @@ export default function ExteriorStudioPage() {
 
   const handleRemoveTag = (key: string) => {
     if (key in exteriorDefaults) {
-      updateConfig({ [key]: exteriorDefaults[key as keyof ExteriorConfig] })
+      const typedKey = key as keyof typeof exteriorDefaults
+      updateConfig({
+        [typedKey]: exteriorDefaults[typedKey]
+      })
     }
   }
 
@@ -418,7 +421,7 @@ export default function ExteriorStudioPage() {
                       options={["0", "25", "50", "75", "100"]}
                       placeholder="Select symmetry level"
                       allowCustom={false}
-                      onChange={(value) => handleConfigChange("symmetryLevel")(value ? parseInt(value) : undefined)}
+                      onChange={(value) => handleConfigChange("symmetryLevel")(value ? parseInt(value, 10) : null)}
                     />
                   </div>
                 </div>
@@ -455,7 +458,7 @@ export default function ExteriorStudioPage() {
                   </div>
                 </div>
                 <VariableSelect
-                  value={exteriorConfig.advanced?.architectInfluence || "none"}
+                  value={exteriorConfig.advanced?.architectInfluence ?? "none"}
                   options={["none", "foster", "gehry", "calatrava", "hadid", "koolhaas"]}
                   placeholder="Select architect influence"
                   allowCustom={false}
@@ -482,7 +485,7 @@ export default function ExteriorStudioPage() {
                   </div>
                 </div>
                 <VariableSelect
-                  value={exteriorConfig.advanced?.lens || "standard"}
+                  value={exteriorConfig.advanced?.lens ?? "standard"}
                   options={["standard", "wide", "telephoto", "fisheye", "ultra-wide"]}
                   placeholder="Select lens"
                   allowCustom={false}
@@ -512,7 +515,7 @@ export default function ExteriorStudioPage() {
                   </div>
                 </div>
                 <VariableSelect
-                  value={exteriorConfig.advanced?.geometry || "balanced"}
+                  value={exteriorConfig.advanced?.geometry ?? "balanced"}
                   options={["balanced", "rectangular", "curved", "angular", "organic"]}
                   placeholder="Select geometry"
                   allowCustom={false}
@@ -539,7 +542,7 @@ export default function ExteriorStudioPage() {
                   </div>
                 </div>
                 <VariableSelect
-                  value={exteriorConfig.advanced?.symmetry || "subtle"}
+                  value={exteriorConfig.advanced?.symmetry ?? "subtle"}
                   options={["subtle", "balanced", "asymmetrical", "symmetrical"]}
                   placeholder="Select symmetry"
                   allowCustom={false}
@@ -566,7 +569,7 @@ export default function ExteriorStudioPage() {
                   </div>
                 </div>
                 <VariableSelect
-                  value={exteriorConfig.advanced?.mood || "neutral"}
+                  value={exteriorConfig.advanced?.mood ?? "neutral"}
                   options={["neutral", "calm", "dramatic", "serene", "energetic"]}
                   placeholder="Select mood"
                   allowCustom={false}

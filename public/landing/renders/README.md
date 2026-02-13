@@ -52,3 +52,4 @@ After adding images, verify they're accessible at:
 - `http://localhost:3000/landing/renders/interior-hero-01.png`
 - etc.
 
+

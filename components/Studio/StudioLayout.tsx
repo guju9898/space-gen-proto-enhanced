@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from 'react';
 import { useDesignConfig } from '@/hooks/useDesignConfig';
 import { GlobalHeader } from './GlobalHeader';
 import { CheckoutSuccessDialog } from './CheckoutSuccessDialog';
@@ -24,7 +25,9 @@ export function StudioLayout({ formContent, previewContent, requestContent }: St
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <GlobalHeader />
-      <CheckoutSuccessDialog />
+      <Suspense fallback={null}>
+        <CheckoutSuccessDialog />
+      </Suspense>
       <main className="flex-1 overflow-hidden">
         <div className="container mx-auto px-6 py-8 h-full">
           <div className="grid grid-cols-3 gap-6 h-full">

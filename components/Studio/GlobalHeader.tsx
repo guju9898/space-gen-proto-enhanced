@@ -41,7 +41,7 @@ export function GlobalHeader() {
                   key={type}
                   href={path}
                   className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${
-                    pathname.startsWith(path)
+                    pathname?.startsWith(path)
                       ? 'bg-background text-foreground shadow-sm'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
@@ -61,7 +61,7 @@ export function GlobalHeader() {
                 key={path}
                 href={path}
                 className={`text-sm font-medium transition-colors ${
-                  pathname.startsWith(path)
+                  pathname?.startsWith(path)
                     ? 'text-foreground border-b-2 border-primary'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
