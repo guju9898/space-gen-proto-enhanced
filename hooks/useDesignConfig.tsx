@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, ReactNode } from "react"
 import { InteriorConfig, ExteriorConfig, LandscapeConfig, ProductConfig, StudioType } from "@/types/studio"
+import { interiorDefaults, landscapeDefaults, exteriorDefaults, productDefaults } from "@/lib/studio/defaults"
 
 interface DesignConfigContextType {
   interior: InteriorConfig;
@@ -13,49 +14,17 @@ interface DesignConfigContextType {
   setActiveStudio: (studio: StudioType) => void;
 }
 
-const defaultConfig = {
-  interior: {
-    roomType: "living",
-    designStyle: "modern",
-    colorPalette: "neutral",
-    lighting: "natural",
-    timeOfDay: "day",
-    mood: "calm",
-    architect: "foster",
-    lens: "wide",
-    typology: "open",
-    geometry: "rectangular",
-    image: null,
-    realism: 50
-  },
-  exterior: {
-    buildingType: "house",
-    architecturalStyle: "modern",
-    surroundingEnvironment: "urban",
-    timeOfDay: "day",
-    style: "modern",
-    colorPalette: "neutral",
-    lighting: "natural",
-    image: null,
-    realism: 50
-  },
-  landscape: {
-    gardenType: "residential",
-    style: "modern",
-    colorPalette: "neutral",
-    lighting: "natural",
-    image: null,
-    realism: 50
-  },
-  product: {
-    productType: "furniture",
-    style: "modern",
-    colorPalette: "neutral",
-    material: "wood",
-    image: null,
-    realism: 50
-  }
-} as const
+const defaultConfig: {
+  interior: InteriorConfig;
+  exterior: ExteriorConfig;
+  landscape: LandscapeConfig;
+  product: ProductConfig;
+} = {
+  interior: interiorDefaults,
+  exterior: exteriorDefaults,
+  landscape: landscapeDefaults,
+  product: productDefaults
+}
 
 const DesignConfigContext = createContext<DesignConfigContextType | undefined>(undefined)
 
@@ -64,13 +33,16 @@ export function DesignConfigProvider({ children }: { children: ReactNode }) {
   const [activeStudio, setActiveStudio] = useState<StudioType>("interior")
 
   const updateConfig = (updates: Partial<InteriorConfig | ExteriorConfig | LandscapeConfig | ProductConfig>) => {
-    setConfig(prev => ({
-      ...prev,
-      [activeStudio]: {
-        ...prev[activeStudio],
-        ...updates
+    setConfig(prev => {
+      const studioKey = activeStudio as keyof typeof defaultConfig
+      return {
+        ...prev,
+        [studioKey]: {
+          ...prev[studioKey],
+          ...updates
+        }
       }
-    }))
+    })
   }
 
   const value = {
@@ -125,4 +97,4 @@ export function useProductConfig() {
     config: context.product,
     updateConfig: (updates: Partial<ProductConfig>) => context.updateConfig(updates)
   }
-} 
+}

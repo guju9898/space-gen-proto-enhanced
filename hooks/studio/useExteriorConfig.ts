@@ -1,5 +1,13 @@
 import { useDesignConfig } from "@/hooks/useDesignConfig";
-import { ExteriorConfig } from "@/types/studio";
+import { ExteriorConfig, AdvancedConfig } from "@/types/studio";
+
+const exteriorAdvancedDefaults: AdvancedConfig = {
+  architectInfluence: "none",
+  lens: "standard",
+  geometry: "balanced",
+  symmetry: "subtle",
+  mood: "neutral"
+};
 
 const defaultConfig: ExteriorConfig = {
   buildingType: "house",
@@ -9,24 +17,27 @@ const defaultConfig: ExteriorConfig = {
   style: "modern",
   colorPalette: "neutral",
   lighting: "natural",
-  image: null
+  image: null,
+  realism: 50,
+  advanced: exteriorAdvancedDefaults
 };
 
 export function useExteriorConfig() {
-  const { config, updateConfig, resetConfig } = useDesignConfig();
+  const { exterior, updateConfig, setActiveStudio } = useDesignConfig();
   
-  if (!config?.exterior) {
+  if (!exterior) {
     console.warn('Exterior config is not initialized');
     return {
       config: defaultConfig,
-      updateConfig: () => {},
-      resetConfig: () => {}
+      updateConfig: () => {}
     };
   }
 
   return {
-    config: config.exterior,
-    updateConfig: (updates: Partial<ExteriorConfig>) => updateConfig('exterior', updates),
-    resetConfig: () => resetConfig('exterior')
+    config: exterior,
+    updateConfig: (updates: Partial<ExteriorConfig>) => {
+      setActiveStudio('exterior');
+      updateConfig(updates);
+    }
   };
 } 

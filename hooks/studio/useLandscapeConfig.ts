@@ -1,29 +1,40 @@
 import { useDesignConfig } from "@/hooks/useDesignConfig";
-import { LandscapeConfig } from "@/types/studio";
+import { LandscapeConfig, AdvancedConfig } from "@/types/studio";
+
+const landscapeAdvancedDefaults: AdvancedConfig = {
+  architectInfluence: "none",
+  lens: "standard",
+  geometry: "balanced",
+  symmetry: "subtle",
+  mood: "neutral"
+};
 
 const defaultConfig: LandscapeConfig = {
-  gardenType: "residential",
+  gardenType: "Residential",
   style: "modern",
   colorPalette: "neutral",
-  lighting: "natural",
-  image: null
+  lighting: "Daylight",
+  image: null,
+  realism: 50,
+  advanced: landscapeAdvancedDefaults
 };
 
 export function useLandscapeConfig() {
-  const { config, updateConfig, resetConfig } = useDesignConfig();
+  const { landscape, updateConfig, setActiveStudio } = useDesignConfig();
   
-  if (!config?.landscape) {
+  if (!landscape) {
     console.warn('Landscape config is not initialized');
     return {
       config: defaultConfig,
-      updateConfig: () => {},
-      resetConfig: () => {}
+      updateConfig: () => {}
     };
   }
 
   return {
-    config: config.landscape,
-    updateConfig: (updates: Partial<LandscapeConfig>) => updateConfig('landscape', updates),
-    resetConfig: () => resetConfig('landscape')
+    config: landscape,
+    updateConfig: (updates: Partial<LandscapeConfig>) => {
+      setActiveStudio('landscape');
+      updateConfig(updates);
+    }
   };
 } 

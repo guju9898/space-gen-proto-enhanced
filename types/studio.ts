@@ -4,6 +4,14 @@ export interface BaseRenderConfig {
   image: File | null;
 }
 
+export interface AdvancedConfig {
+  architectInfluence?: string;
+  lens?: string;
+  geometry?: string;
+  symmetry?: string;
+  mood?: string;
+}
+
 export interface InteriorConfig {
   roomType: string;
   designStyle: string;
@@ -15,8 +23,19 @@ export interface InteriorConfig {
   lens: string;
   typology: string;
   geometry: string;
-  image: File | null;
   realism: number;
+  image: File | null;
+  roomLayout?: string;
+  cameraAngle?: string;
+  viewType?: string;
+  compositionStyle?: string;
+  focalPoint?: string;
+  framing?: string;
+  negativeSpace?: string;
+  patternsRepetition?: string;
+  symmetryLevel?: number;
+  flooring?: string;
+  textures?: string;
 }
 
 export interface ExteriorConfig {
@@ -29,14 +48,18 @@ export interface ExteriorConfig {
   lighting: string;
   image: File | null;
   realism: number;
-  // Advanced Controls (optional, safe defaults)
-  advanced?: {
-    architectInfluence?: string;
-    lens?: string;
-    geometry?: string;
-    symmetry?: string;
-    mood?: string;
-  };
+  advanced: AdvancedConfig;
+  exteriorType?: string;
+  cameraAngle?: string;
+  exteriorMaterials?: string;
+  roofStyle?: string;
+  outdoorFurnishings?: string;
+  exteriorAccents?: string;
+  exteriorViews?: string;
+  focalPoint?: string;
+  symmetryType?: string;
+  symmetryLevel?: number;
+  landscapingElements?: string;
 }
 
 export interface LandscapeConfig {
@@ -46,14 +69,28 @@ export interface LandscapeConfig {
   lighting: string;
   image: File | null;
   realism: number;
-  // Advanced Controls (optional, safe defaults)
-  advanced?: {
-    architectInfluence?: string;
-    lens?: string;
-    geometry?: string;
-    symmetry?: string;
-    mood?: string;
-  };
+  advanced: AdvancedConfig;
+  themeStyle?: string;
+  timeOfDay?: string;
+  plantTypes?: string;
+  plantingDensity?: number;
+  topography?: string;
+  outdoorFurniture?: string;
+  seatingFeature?: string;
+  structures?: string;
+  lightingIntensity?: number;
+  playActivityArea?: string;
+  interactiveElements?: string;
+  wallMaterials?: string;
+  climateZone?: string;
+  weather?: string;
+  scale?: string;
+  geometry?: string;
+  gardenGeometry?: string;
+  cameraAngle?: string;
+  wildlifeElements?: string;
+  hardscaping?: string;
+  waterFeature?: string;
 }
 
 export interface ProductConfig {

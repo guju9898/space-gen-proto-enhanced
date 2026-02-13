@@ -3,29 +3,35 @@ import { InteriorConfig } from "@/types/studio";
 
 const defaultConfig: InteriorConfig = {
   roomType: "living",
-  style: "modern",
+  designStyle: "modern",
   colorPalette: "neutral",
   lighting: "natural",
-  mood: "cozy",
   timeOfDay: "day",
+  mood: "calm",
+  architect: "foster",
+  lens: "wide",
+  typology: "open",
+  geometry: "rectangular",
+  realism: 50,
   image: null
 };
 
 export function useInteriorConfig() {
-  const { config, updateConfig, resetConfig } = useDesignConfig();
+  const { interior, updateConfig, setActiveStudio } = useDesignConfig();
   
-  if (!config?.interior) {
+  if (!interior) {
     console.warn('Interior config is not initialized');
     return {
       config: defaultConfig,
-      updateConfig: () => {},
-      resetConfig: () => {}
+      updateConfig: () => {}
     };
   }
 
   return {
-    config: config.interior,
-    updateConfig: (updates: Partial<InteriorConfig>) => updateConfig('interior', updates),
-    resetConfig: () => resetConfig('interior')
+    config: interior,
+    updateConfig: (updates: Partial<InteriorConfig>) => {
+      setActiveStudio('interior');
+      updateConfig(updates);
+    }
   };
 } 

@@ -1,4 +1,4 @@
-import { InteriorConfig, LandscapeConfig, ExteriorConfig } from "@/types/studio"
+import { InteriorConfig, ExteriorConfig, LandscapeConfig, ProductConfig, AdvancedConfig } from "@/types/studio"
 
 export const interiorDefaults: InteriorConfig = {
   roomType: "living",
@@ -15,6 +15,14 @@ export const interiorDefaults: InteriorConfig = {
   image: null
 }
 
+const landscapeAdvancedDefaults: AdvancedConfig = {
+  architectInfluence: "none",
+  lens: "standard",
+  geometry: "balanced",
+  symmetry: "subtle",
+  mood: "neutral"
+}
+
 export const landscapeDefaults: LandscapeConfig = {
   gardenType: "Residential",
   style: "modern",
@@ -22,13 +30,15 @@ export const landscapeDefaults: LandscapeConfig = {
   lighting: "Daylight",
   image: null,
   realism: 50,
-  advanced: {
-    architectInfluence: "none",
-    lens: "standard",
-    geometry: "balanced",
-    symmetry: "subtle",
-    mood: "neutral"
-  }
+  advanced: landscapeAdvancedDefaults
+}
+
+const exteriorAdvancedDefaults: AdvancedConfig = {
+  architectInfluence: "none",
+  lens: "standard",
+  geometry: "balanced",
+  symmetry: "subtle",
+  mood: "neutral"
 }
 
 export const exteriorDefaults: ExteriorConfig = {
@@ -41,13 +51,15 @@ export const exteriorDefaults: ExteriorConfig = {
   lighting: "natural",
   image: null,
   realism: 50,
-  advanced: {
-    architectInfluence: "none",
-    lens: "standard",
-    geometry: "balanced",
-    symmetry: "subtle",
-    mood: "neutral"
-  }
+  advanced: exteriorAdvancedDefaults
 }
 
+export const productDefaults: ProductConfig = {
+  productType: "furniture",
+  style: "modern",
+  colorPalette: "neutral",
+  material: "wood",
+  image: null,
+  realism: 50
+}
 
