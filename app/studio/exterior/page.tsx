@@ -36,6 +36,8 @@ import { buildGeminiPrompt } from "@/lib/api/buildGeminiPrompt"
 import { cn } from "@/lib/utils"
 import { exteriorDefaults } from "@/lib/studio/defaults"
 import { getCreditErrorMessage } from "@/lib/usage/errorMessages"
+import { useAuth } from "@/components/auth/AuthContext"
+import { usePathname } from "next/navigation"
 
 const architecturalStyleOptions = [
   { value: "modern", label: "Modern", icon: Layout },
@@ -57,6 +59,8 @@ interface ImageState {
 
 export default function ExteriorStudioPage() {
   const { exterior, updateConfig, setActiveStudio } = useDesignConfig()
+  const { openLoginModal } = useAuth()
+  const pathname = usePathname()
   const [mounted, setMounted] = useState(false)
   const [currentRender, setCurrentRender] = useState<string | null>(null)
   const [latestRenders, setLatestRenders] = useState<string[]>([])
@@ -152,6 +156,7 @@ export default function ExteriorStudioPage() {
 
       const response = await fetch('/api/generate-openrouter', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -164,12 +169,16 @@ export default function ExteriorStudioPage() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await response.json().catch(() => ({}))
         console.error('API error:', errorData)
-        // Map API error codes to user-friendly messages
-        const errorMessage = response.status === 402 
-          ? getCreditErrorMessage(errorData.error)
-          : (errorData.error || 'Failed to generate image')
+        if (response.status === 401) {
+          openLoginModal(pathname ?? '/studio/exterior')
+          throw new Error('Please log in to generate images.')
+        }
+        const errorMessage =
+          response.status === 402
+            ? getCreditErrorMessage(errorData.error)
+            : (errorData.error || 'Failed to generate image')
         throw new Error(errorMessage)
       }
 

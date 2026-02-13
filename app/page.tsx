@@ -1,11 +1,16 @@
 import Image from "next/image"
 import Link from "next/link"
+import { Suspense } from "react"
 import { ChevronDown, ChevronRight, Menu } from "lucide-react"
 import { LoginButton } from "@/components/auth/LoginButton"
+import { LoginRedirectHandler } from "@/components/auth/LoginRedirectHandler"
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Suspense fallback={null}>
+        <LoginRedirectHandler />
+      </Suspense>
       {/* Header */}
       <header className="container mx-auto py-4 px-4 flex items-center justify-between">
         <div className="flex items-center gap-2">

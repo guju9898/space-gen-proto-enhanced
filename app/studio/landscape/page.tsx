@@ -30,6 +30,8 @@ import { cn } from "@/lib/utils"
 import { landscapeDefaults } from "@/lib/studio/defaults"
 import { isString } from "@/lib/types/typeGuards"
 import { getCreditErrorMessage } from "@/lib/usage/errorMessages"
+import { useAuth } from "@/components/auth/AuthContext"
+import { usePathname } from "next/navigation"
 
 const gardenTypeOptions = [
   { value: "Residential", label: "Residential" },
@@ -64,6 +66,8 @@ interface ImageState {
 
 export default function LandscapeStudioPage() {
   const { landscape, updateConfig, setActiveStudio } = useDesignConfig()
+  const { openLoginModal } = useAuth()
+  const pathname = usePathname()
   const [mounted, setMounted] = useState(false)
   const [currentRender, setCurrentRender] = useState<string | null>(null)
   const [latestRenders, setLatestRenders] = useState<string[]>([])
@@ -151,6 +155,7 @@ export default function LandscapeStudioPage() {
 
       const response = await fetch('/api/generate-openrouter', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -163,12 +168,16 @@ export default function LandscapeStudioPage() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await response.json().catch(() => ({}))
         console.error('API error:', errorData)
-        // Map API error codes to user-friendly messages
-        const errorMessage = response.status === 402 
-          ? getCreditErrorMessage(errorData.error)
-          : (errorData.error || 'Failed to generate image')
+        if (response.status === 401) {
+          openLoginModal(pathname ?? '/studio/landscape')
+          throw new Error('Please log in to generate images.')
+        }
+        const errorMessage =
+          response.status === 402
+            ? getCreditErrorMessage(errorData.error)
+            : (errorData.error || 'Failed to generate image')
         throw new Error(errorMessage)
       }
 

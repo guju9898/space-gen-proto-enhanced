@@ -2,10 +2,13 @@
 
 import { useDesignConfig } from '@/hooks/useDesignConfig';
 import { StudioType } from '@/types/studio';
-import { Home, Building2, Trees, ChevronDown, Globe } from 'lucide-react';
+import { Home, Building2, Trees, ChevronDown, Globe, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/components/auth/AuthContext';
+import { createClient } from '@/lib/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +31,13 @@ const navLinks = [
 export function GlobalHeader() {
   const { config, setActiveStudio } = useDesignConfig();
   const pathname = usePathname();
+  const { user, openLoginModal } = useAuth();
+
+  const handleLogOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = '/';
+  };
 
   return (
     <header className="bg-background border-b border-border">
@@ -71,7 +81,7 @@ export function GlobalHeader() {
             ))}
           </div>
 
-          {/* Right: Language & Profile */}
+          {/* Right: Language & Profile / Login */}
           <div className="flex items-center gap-6">
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground">
@@ -86,20 +96,29 @@ export function GlobalHeader() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="/avatars/martin.jpg" />
-                  <AvatarFallback>M</AvatarFallback>
-                </Avatar>
-                <span className="text-sm font-medium">Martin</span>
-                <ChevronDown className="w-4 h-4 text-muted-foreground" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Log Out</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.user_metadata?.avatar_url} />
+                    <AvatarFallback>{(user.email?.[0] ?? user.user_metadata?.name?.[0] ?? 'U').toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium">{user.user_metadata?.name ?? user.email ?? 'Account'}</span>
+                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogOut}>Log Out</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => openLoginModal(pathname ?? '/studio/interior')}>
+                <LogIn className="w-4 h-4 mr-2" />
+                Login
+              </Button>
+            )}
           </div>
         </nav>
       </div>
