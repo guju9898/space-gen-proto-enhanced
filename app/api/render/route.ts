@@ -5,15 +5,11 @@ import { createSupabaseServerClient } from "@/lib/supabase/server"
 
 export const runtime = "nodejs"
 
-// Replicate can be instantiated at module level (safe)
-const replicateApiToken = process.env.REPLICATE_API_TOKEN
-if (!replicateApiToken) {
-  throw new Error("Missing REPLICATE_API_TOKEN")
+function getReplicateClient(): Replicate | null {
+  const token = process.env.REPLICATE_API_TOKEN
+  if (!token) return null
+  return new Replicate({ auth: token })
 }
-
-const replicate = new Replicate({
-  auth: replicateApiToken,
-})
 
 function isRenderRequest(body: unknown): body is RenderRequest {
   return (
@@ -29,6 +25,13 @@ function isRenderRequest(body: unknown): body is RenderRequest {
 
 export async function POST(request: Request) {
   try {
+    const replicate = getReplicateClient()
+    if (!replicate) {
+      return NextResponse.json(
+        { error: "Render service is not configured (missing REPLICATE_API_TOKEN)" },
+        { status: 503 }
+      )
+    }
     // Initialize Supabase server client (reads auth from cookies)
     const supabase = await createSupabaseServerClient()
 

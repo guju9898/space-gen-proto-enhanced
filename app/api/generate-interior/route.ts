@@ -4,18 +4,21 @@ import { isString, isObject } from "@/lib/types/typeGuards"
 
 export const runtime = "nodejs"
 
-// Replicate can be instantiated at module level (safe)
-const replicateApiToken = process.env.REPLICATE_API_TOKEN
-if (!replicateApiToken) {
-  throw new Error("Missing REPLICATE_API_TOKEN")
+function getReplicateClient(): Replicate | null {
+  const token = process.env.REPLICATE_API_TOKEN
+  if (!token) return null
+  return new Replicate({ auth: token })
 }
-
-const replicate = new Replicate({
-  auth: replicateApiToken,
-})
 
 export async function POST(request: Request) {
   try {
+    const replicate = getReplicateClient()
+    if (!replicate) {
+      return NextResponse.json(
+        { error: "Image generation is not configured (missing REPLICATE_API_TOKEN)" },
+        { status: 503 }
+      )
+    }
     const body = await request.json() as unknown
 
     if (!isObject(body)) {
