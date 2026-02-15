@@ -69,7 +69,7 @@ export default function TipsModal({
       <div ref={modalRef} className="bg-zinc-900 rounded-lg shadow-lg max-w-md w-full overflow-hidden animate-fade-in">
         <div className="p-4 bg-black flex justify-between items-center">
           <h2 className="text-lg font-medium text-white">{title}</h2>
-          <button onClick={onClose} className="text-zinc-400 hover:text-white transition-colors">
+          <button onClick={() => onClose()} className="text-zinc-400 hover:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>

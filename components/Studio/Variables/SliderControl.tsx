@@ -80,7 +80,7 @@ export default function SliderControl({
 
   return (
     <div className={`w-full ${disabled ? "opacity-50" : ""}`}>
-      <div ref={sliderRef} className="relative h-2 bg-zinc-700 rounded-full cursor-pointer" onClick={handleSliderClick}>
+      <div ref={sliderRef} className="relative h-2 bg-zinc-700 rounded-full cursor-pointer" onClick={(e) => handleSliderClick(e)}>
         <div
           className="absolute h-full bg-gradient-to-r from-[#F97066] to-[#AD74FF] rounded-full"
           style={{ width: `${percentage}%` }}

@@ -194,7 +194,7 @@ export default function SubscriptionPage() {
               )}
 
               <Button
-                onClick={handleManageBilling}
+                onClick={() => handleManageBilling()}
                 disabled={isOpeningPortal}
                 className="w-full bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-opacity"
               >

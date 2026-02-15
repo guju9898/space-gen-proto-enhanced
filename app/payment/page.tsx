@@ -71,7 +71,7 @@ export default function PaymentPage() {
             <p className="text-2xl font-bold mb-6">${planDetails.price} / month</p>
 
             <button
-              onClick={handleOpenPaymentForm}
+              onClick={() => handleOpenPaymentForm()}
               disabled={isProcessing}
               className="w-full bg-gradient-to-r from-purple-600 to-pink-500 hover:opacity-90 text-white py-3 rounded-md transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             >

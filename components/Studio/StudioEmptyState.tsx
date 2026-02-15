@@ -195,7 +195,7 @@ export default function StudioEmptyState({
           {/* Render Button */}
           <div className="mt-auto">
             <button
-              onClick={onRenderDesign}
+              onClick={() => onRenderDesign()}
               disabled={!currentImage}
               className={`w-full py-3 rounded-md flex items-center justify-center gap-2 transition-colors ${
                 currentImage
@@ -243,7 +243,7 @@ export default function StudioEmptyState({
       <div className="w-full md:w-80 p-4 md:p-6 border-t md:border-t-0 md:border-l border-zinc-800">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-medium">Request</h2>
-          <button onClick={onOpenRequestInfo} className="text-zinc-400 hover:text-white">
+          <button onClick={() => onOpenRequestInfo()} className="text-zinc-400 hover:text-white">
             <Info className="w-5 h-5" />
           </button>
         </div>

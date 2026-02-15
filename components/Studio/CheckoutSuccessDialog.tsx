@@ -137,7 +137,7 @@ export function CheckoutSuccessDialog() {
 
         <DialogFooter>
           <Button
-            onClick={handleDismiss}
+            onClick={() => handleDismiss()}
             className="w-full bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-opacity"
           >
             Start your first render

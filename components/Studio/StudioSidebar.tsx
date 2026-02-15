@@ -47,7 +47,7 @@ export default function StudioSidebar({
         <div className="hidden md:block">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-sm font-medium">Your current interior</h2>
-            <button onClick={onOpenTipsInfo} className="text-zinc-400 hover:text-white">
+            <button onClick={() => onOpenTipsInfo()} className="text-zinc-400 hover:text-white">
               <div className="flex items-center">
                 <span className="mr-1 text-xs">Tips</span>
                 <Info className="w-4 h-4" />

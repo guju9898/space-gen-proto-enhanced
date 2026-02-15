@@ -174,7 +174,7 @@ export default function DesignControlsPanel({ designType = "interior", onGenerat
       {/* Generate Button */}
       <div className="pt-4">
         <button
-          onClick={handleGenerateDesign}
+          onClick={() => handleGenerateDesign()}
           className="w-full py-3 rounded-md bg-gradient-to-r from-purple-600 to-pink-500 hover:opacity-90 text-white font-medium flex items-center justify-center gap-2 transition-colors"
         >
           <svg

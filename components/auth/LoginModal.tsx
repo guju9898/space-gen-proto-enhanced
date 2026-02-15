@@ -111,7 +111,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-semibold text-white">Log in</h2>
             <button
-              onClick={handleClose}
+              onClick={() => handleClose()}
               className="text-muted-foreground hover:text-white transition-colors rounded-sm opacity-70 hover:opacity-100"
             >
               <X className="h-4 w-4" />
@@ -136,7 +136,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
               </div>
               <Button
                 variant="outline"
-                onClick={handleClose}
+                onClick={() => handleClose()}
                 className="w-full mt-6 border-[#1a1a1a] text-muted-foreground hover:text-white hover:bg-[#1a1a1a]"
               >
                 Close
@@ -188,7 +188,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
               <Button
                 type="button"
                 variant="outline"
-                onClick={handleGoogleSignIn}
+                onClick={() => handleGoogleSignIn()}
                 disabled={state === "submitting"}
                 className={cn(
                   "w-full border-[#1a1a1a] text-white hover:bg-[#1a1a1a]",

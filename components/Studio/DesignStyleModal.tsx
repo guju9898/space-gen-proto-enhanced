@@ -73,7 +73,7 @@ export default function DesignStyleModal({ isOpen, onClose, onSelectStyle, selec
             <h2 className="text-lg font-medium text-white">Design style</h2>
             <p className="text-sm text-zinc-400">Select design style that you want to apply to your interior</p>
           </div>
-          <button onClick={onClose} className="text-zinc-400 hover:text-white transition-colors p-1" aria-label="Close">
+          <button onClick={() => onClose()} className="text-zinc-400 hover:text-white transition-colors p-1" aria-label="Close">
             <X className="w-5 h-5" />
           </button>
         </div>

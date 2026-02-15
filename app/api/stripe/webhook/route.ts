@@ -4,29 +4,39 @@ import { createClient } from "@supabase/supabase-js"
 
 export const runtime = "nodejs"
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY
-if (!stripeSecretKey) {
-  throw new Error("Missing STRIPE_SECRET_KEY")
+/** Env and clients are read inside the handler so the build never fails when secrets are unset (e.g. Vercel build). */
+function getStripe(): Stripe | null {
+  const key = process.env.STRIPE_SECRET_KEY
+  if (!key) return null
+  return new Stripe(key)
 }
 
-const stripe = new Stripe(stripeSecretKey)
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!supabaseUrl || !supabaseServiceRoleKey) {
-  throw new Error("Missing Supabase configuration for webhook")
+function getSupabase() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!supabaseUrl || !supabaseServiceRoleKey) return null
+  return createClient(supabaseUrl, supabaseServiceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
 }
-
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-})
 
 export async function POST(request: Request) {
   try {
+    const stripe = getStripe()
+    if (!stripe) {
+      return NextResponse.json(
+        { error: "Webhook not configured (missing STRIPE_SECRET_KEY)" },
+        { status: 503 }
+      )
+    }
+    const supabase = getSupabase()
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "Webhook not configured (missing Supabase env)" },
+        { status: 503 }
+      )
+    }
+
     // Get raw body and signature
     const body = await request.text()
     const signature = request.headers.get("stripe-signature")
@@ -38,12 +48,11 @@ export async function POST(request: Request) {
       )
     }
 
-    // Verify webhook signature
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
     if (!webhookSecret) {
       return NextResponse.json(
         { error: "Missing STRIPE_WEBHOOK_SECRET" },
-        { status: 500 }
+        { status: 503 }
       )
     }
 

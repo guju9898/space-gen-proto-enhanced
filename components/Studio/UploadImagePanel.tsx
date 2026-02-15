@@ -99,7 +99,7 @@ export default function UploadImagePanel({
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        onClick={handleClick}
+        onClick={() => handleClick()}
       >
         <input
           type="file"
@@ -134,7 +134,7 @@ export default function UploadImagePanel({
       {!currentImage && !isUploading && (
         <div className="flex items-center justify-center mt-4">
           <button
-            onClick={handleClick}
+            onClick={() => handleClick()}
             className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-md transition-colors"
           >
             Upload image

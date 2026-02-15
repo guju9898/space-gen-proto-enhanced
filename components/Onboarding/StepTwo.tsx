@@ -48,7 +48,7 @@ export default function StepTwo({ email, verificationStatus, onVerified }: StepT
           </div>
 
           <button
-            onClick={handleResendVerification}
+            onClick={() => handleResendVerification()}
             disabled={isVerifying}
             className={`px-6 py-2 rounded-md transition-colors ${
               isVerifying ? "bg-gray-700 text-gray-400 cursor-not-allowed" : "bg-gray-800 hover:bg-gray-700 text-white"

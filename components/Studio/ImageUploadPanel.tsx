@@ -36,7 +36,7 @@ export default function ImageUploadPanel({
             className="object-cover"
           />
           <button
-            onClick={onRemove}
+            onClick={() => onRemove()}
             className="absolute top-2 right-2 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
           >
             <X className="w-4 h-4 text-white" />

@@ -5,23 +5,23 @@ import { isObject, isString } from "@/lib/types/typeGuards"
 
 export const runtime = "nodejs"
 
-// Validate Stripe secret key exists
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY
-if (!stripeSecretKey) {
-  throw new Error("Missing STRIPE_SECRET_KEY")
+function getStripe(): Stripe | null {
+  const key = process.env.STRIPE_SECRET_KEY
+  if (!key) return null
+  return new Stripe(key, { apiVersion: "2025-10-29.clover" })
 }
-
-// Create guaranteed-string alias after guard
-const STRIPE_SECRET_KEY: string = stripeSecretKey
-
-const stripe = new Stripe(STRIPE_SECRET_KEY, {
-  apiVersion: "2025-10-29.clover",
-})
 
 export async function POST(request: Request) {
   let planId: string | undefined
 
   try {
+    const stripe = getStripe()
+    if (!stripe) {
+      return NextResponse.json(
+        { error: "Checkout not configured (missing STRIPE_SECRET_KEY)" },
+        { status: 503 }
+      )
+    }
     // Initialize Supabase server client (reads auth from cookies)
     const supabase = await createSupabaseServerClient()
 
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
     const cancelUrl = `${origin}/onboarding?step=3&billing=cancel`
 
     // DEBUG LOG (temporary - remove after verification)
-    const isLiveMode = STRIPE_SECRET_KEY.startsWith("sk_live_")
+    const isLiveMode = (process.env.STRIPE_SECRET_KEY ?? "").startsWith("sk_live_")
     console.log("🔍 [STRIPE CHECKOUT DEBUG]")
     console.log("  planId:", planId)
     console.log("  priceId:", priceId)

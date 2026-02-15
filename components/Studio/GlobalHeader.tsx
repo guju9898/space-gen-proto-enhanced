@@ -110,7 +110,7 @@ export function GlobalHeader() {
                   <DropdownMenuItem asChild>
                     <Link href="/profile">Profile</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogOut}>Log Out</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleLogOut()}>Log Out</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (

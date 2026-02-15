@@ -4,16 +4,21 @@ import Stripe from "stripe"
 
 export const runtime = "nodejs"
 
-// Validate Stripe secret key exists
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY
-if (!stripeSecretKey) {
-  throw new Error("STRIPE_SECRET_KEY environment variable is required")
+function getStripe(): Stripe | null {
+  const key = process.env.STRIPE_SECRET_KEY
+  if (!key) return null
+  return new Stripe(key)
 }
-
-const stripe = new Stripe(stripeSecretKey)
 
 export async function POST(request: Request) {
   try {
+    const stripe = getStripe()
+    if (!stripe) {
+      return NextResponse.json(
+        { error: "Billing not configured (missing STRIPE_SECRET_KEY)" },
+        { status: 503 }
+      )
+    }
     // Initialize Supabase server client (reads auth from cookies)
     const supabase = await createSupabaseServerClient()
 

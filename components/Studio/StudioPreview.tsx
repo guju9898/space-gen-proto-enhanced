@@ -42,7 +42,7 @@ function RenderThumbnail({
 }) {
   return (
     <button
-      onClick={onClick}
+      onClick={() => onClick?.()}
       className="relative w-[120px] group"
     >
       <div className="aspect-[4/3] rounded-md overflow-hidden transition-shadow hover:shadow-lg">

@@ -81,7 +81,7 @@ export function RequestSummary({ tags, config, icon: Icon, onRemove, onClearAll 
       {onClearAll && displayTags.length > 0 && (
         <Badge 
           variant="outline" 
-          onClick={onClearAll}
+          onClick={() => onClearAll()}
           className={cn(
             "cursor-pointer transition-all duration-150 ease-out",
             "hover:bg-destructive/10 hover:border-destructive/20"

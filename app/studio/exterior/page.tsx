@@ -678,7 +678,7 @@ export default function ExteriorStudioPage() {
                 "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none",
                 isRendering && "cursor-wait"
               )}
-              onClick={handleRender}
+              onClick={() => handleRender()}
               disabled={isRendering}
             >
               {isRendering ? "Rendering..." : "Render Design"}

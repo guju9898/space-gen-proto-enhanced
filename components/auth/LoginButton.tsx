@@ -7,7 +7,7 @@ export function LoginButton() {
 
   return (
     <button
-      onClick={openLoginModal}
+      onClick={() => openLoginModal()}
       className="text-sm text-white hover:text-primary/90 transition-colors"
     >
       Login

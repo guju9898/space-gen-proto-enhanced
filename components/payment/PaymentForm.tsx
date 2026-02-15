@@ -102,7 +102,7 @@ export default function PaymentForm({ planName, planPrice, billingPeriod, onClos
           <div className="flex-1 p-6 md:p-8">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold">{planName} plan</h2>
-              <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors" aria-label="Close">
+              <button onClick={() => onClose()} className="text-gray-400 hover:text-white transition-colors" aria-label="Close">
                 <X size={20} />
               </button>
             </div>
@@ -184,7 +184,7 @@ export default function PaymentForm({ planName, planPrice, billingPeriod, onClos
 
             <button
               type="submit"
-              onClick={handleSubmit}
+              onClick={(e) => handleSubmit(e)}
               disabled={isSubmitting}
               className="w-full bg-zinc-800 hover:bg-zinc-700 text-white py-3 rounded transition-colors mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
             >

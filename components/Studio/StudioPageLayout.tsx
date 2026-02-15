@@ -56,7 +56,7 @@ export function Tag({ label, value, onRemove, required, icon: Icon }: {
       <span className="text-muted-foreground">{value}</span>
       {!required && onRemove && (
         <button
-          onClick={onRemove}
+          onClick={() => onRemove?.()}
           className="ml-2 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
         >
           ×

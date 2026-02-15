@@ -60,7 +60,7 @@ export default function OnboardingLayout({
         {/* Navigation buttons */}
         <div className="flex justify-between w-full">
           <button
-            onClick={onBack}
+            onClick={() => onBack()}
             disabled={isFirstStep}
             className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
               isFirstStep
@@ -73,7 +73,7 @@ export default function OnboardingLayout({
           </button>
           {!hideNext && (
             <button
-              onClick={onNext}
+              onClick={() => onNext()}
               className="flex items-center gap-2 px-6 py-2 rounded-md bg-gradient-to-r from-[#ec4899] to-[#8b5cf6] hover:opacity-90 transition-opacity text-white"
             >
               {isLastStep ? "Complete" : "Next"}
