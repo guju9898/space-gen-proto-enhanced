@@ -66,7 +66,7 @@ interface ImageState {
 
 export default function LandscapeStudioPage() {
   const { landscape, updateConfig, setActiveStudio } = useDesignConfig()
-  const { openLoginModal } = useAuth()
+  const { status: authStatus, openLoginModal } = useAuth()
   const pathname = usePathname()
   const [mounted, setMounted] = useState(false)
   const [currentRender, setCurrentRender] = useState<string | null>(null)
@@ -124,6 +124,14 @@ export default function LandscapeStudioPage() {
   }
 
   const handleRender = async () => {
+    if (authStatus === "initializing") {
+      return
+    }
+    if (authStatus === "unauthenticated") {
+      openLoginModal(pathname ?? "/studio/landscape")
+      return
+    }
+
     console.log('[GENERATOR] Using OpenRouter Nano Banana for landscape')
     setError(null)
     setIsRendering(true);
@@ -785,9 +793,13 @@ export default function LandscapeStudioPage() {
                 isRendering && "cursor-wait"
               )}
               onClick={() => handleRender()}
-              disabled={isRendering}
+              disabled={authStatus === "initializing" || isRendering}
             >
-              {isRendering ? "Rendering..." : "Render Design"}
+              {authStatus === "initializing"
+                ? "Checking..."
+                : isRendering
+                  ? "Rendering..."
+                  : "Render Design"}
             </Button>
           </div>
         </div>

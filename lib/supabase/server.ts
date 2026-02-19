@@ -1,18 +1,22 @@
 import { createServerClient } from "@supabase/ssr"
+import type { CookieMethodsServerDeprecated, CookieOptions } from "@supabase/ssr"
 import { cookies } from "next/headers"
 
 /**
- * SERVER-SIDE SUPABASE CLIENT (FOR API ROUTES)
- * 
- * This client reads authentication from cookies set by Supabase SSR.
- * Use this in API routes to authenticate users from their browser session.
- * 
- * IMPORTANT: This uses the anon key, NOT the service role key.
- * It reads cookies that were set by the client-side login flow.
+ * SERVER-SIDE SUPABASE CLIENT (FOR API ROUTES & AUTH CALLBACK)
+ *
+ * This client reads and writes authentication cookies via the provided
+ * Next.js cookie store. Use in route handlers and the auth callback so
+ * session cookies are handled correctly for magic link and OAuth.
+ *
+ * IMPORTANT: Caller must pass the result of `cookies()` (Promise of the cookie store).
+ * Uses the anon key, NOT the service role key.
  */
-export async function createSupabaseServerClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+export async function createSupabaseServerClient(
+  cookieStore: ReturnType<typeof cookies>
+) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error(
@@ -20,32 +24,29 @@ export async function createSupabaseServerClient() {
     )
   }
 
-  const cookieStore = await cookies()
+  const store = await cookieStore
+
+  const cookieMethods: CookieMethodsServerDeprecated = {
+    get(name: string) {
+      return store.get(name)?.value
+    },
+    set(name: string, value: string, options: CookieOptions) {
+      store.set({
+        name,
+        value,
+        ...options,
+      })
+    },
+    remove(name: string, options: CookieOptions) {
+      store.set({
+        name,
+        value: "",
+        ...options,
+      })
+    },
+  }
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value
-      },
-      set(name: string, value: string, options: any) {
-        try {
-          cookieStore.set(name, value, options)
-        } catch (error) {
-          // Cookie setting may fail in some contexts (e.g., middleware)
-          // This is expected and can be ignored
-        }
-      },
-      remove(name: string, options: any) {
-        try {
-          cookieStore.delete(name)
-        } catch (error) {
-          // Cookie removal may fail in some contexts
-          // This is expected and can be ignored
-        }
-      },
-    },
+    cookies: cookieMethods,
   })
 }
-
-
-

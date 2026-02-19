@@ -59,7 +59,7 @@ interface ImageState {
 
 export default function ExteriorStudioPage() {
   const { exterior, updateConfig, setActiveStudio } = useDesignConfig()
-  const { openLoginModal } = useAuth()
+  const { status: authStatus, openLoginModal } = useAuth()
   const pathname = usePathname()
   const [mounted, setMounted] = useState(false)
   const [currentRender, setCurrentRender] = useState<string | null>(null)
@@ -125,6 +125,14 @@ export default function ExteriorStudioPage() {
   }
 
   const handleRender = async () => {
+    if (authStatus === "initializing") {
+      return
+    }
+    if (authStatus === "unauthenticated") {
+      openLoginModal(pathname ?? "/studio/exterior")
+      return
+    }
+
     console.log('[GENERATOR] Using OpenRouter Nano Banana for exterior')
     setError(null)
     setIsRendering(true);
@@ -679,9 +687,13 @@ export default function ExteriorStudioPage() {
                 isRendering && "cursor-wait"
               )}
               onClick={() => handleRender()}
-              disabled={isRendering}
+              disabled={authStatus === "initializing" || isRendering}
             >
-              {isRendering ? "Rendering..." : "Render Design"}
+              {authStatus === "initializing"
+                ? "Checking..."
+                : isRendering
+                  ? "Rendering..."
+                  : "Render Design"}
             </Button>
           </div>
         </div>

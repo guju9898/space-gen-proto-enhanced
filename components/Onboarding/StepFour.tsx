@@ -49,6 +49,7 @@ export default function StepFour({ selectedPlan }: StepFourProps) {
       // Create checkout session
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

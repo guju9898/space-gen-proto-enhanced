@@ -87,7 +87,9 @@ export default function ProfilePage() {
         }
 
         // Fetch credits data
-        const creditsResponse = await fetch("/api/credits/status")
+        const creditsResponse = await fetch("/api/credits/status", {
+          credentials: "include",
+        })
         if (creditsResponse.ok) {
           const creditsData = await creditsResponse.json()
           setCredits({
@@ -115,6 +117,7 @@ export default function ProfilePage() {
     try {
       const response = await fetch("/api/stripe/portal", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

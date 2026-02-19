@@ -22,17 +22,10 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
   const [state, setState] = useState<ModalState>("idle")
   const [error, setError] = useState<string | null>(null)
 
-  const nextPath = redirectAfterLogin || "/studio/interior"
   const callbackUrl =
     typeof window !== "undefined"
       ? `${window.location.origin}/auth/callback`
       : "/auth/callback"
-
-  /** Set cookie so callback can redirect after magic link (Supabase often strips query params from email link) */
-  const setRedirectCookie = (path: string) => {
-    if (typeof document === "undefined") return
-    document.cookie = `auth_redirect_next=${encodeURIComponent(path)}; path=/; max-age=600; SameSite=Lax`
-  }
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,7 +37,11 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
     }
 
     setState("submitting")
-    setRedirectCookie(nextPath)
+
+    // Set redirect cookie before calling signInWithOtp
+    if (typeof document !== "undefined") {
+      document.cookie = `auth_redirect_next=${redirectAfterLogin || "/studio/interior"}; path=/; max-age=600; SameSite=Lax`
+    }
 
     try {
       const supabase = createClient()
@@ -71,7 +68,11 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
   const handleGoogleSignIn = async () => {
     setError(null)
     setState("submitting")
-    setRedirectCookie(nextPath)
+
+    // Set redirect cookie before calling signInWithOAuth
+    if (typeof document !== "undefined") {
+      document.cookie = `auth_redirect_next=${redirectAfterLogin || "/studio/interior"}; path=/; max-age=600; SameSite=Lax`
+    }
 
     try {
       const supabase = createClient()

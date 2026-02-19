@@ -56,6 +56,8 @@ import { buildPrompt } from "@/lib/api/generateImage"
 import { cn } from "@/lib/utils"
 import { interiorDefaults } from "@/lib/studio/defaults"
 import { getCreditErrorMessage } from "@/lib/usage/errorMessages"
+import { useAuth } from "@/components/auth/AuthContext"
+import { usePathname } from "next/navigation"
 
 interface ImageState {
   file: File | null;
@@ -65,6 +67,8 @@ interface ImageState {
 
 export default function InteriorStudioPage() {
   const { config, updateConfig } = useInteriorConfig()
+  const { status: authStatus, openLoginModal } = useAuth()
+  const pathname = usePathname()
   const [mounted, setMounted] = useState(false)
   const [currentRender, setCurrentRender] = useState<string | null>(null)
   const [latestRenders, setLatestRenders] = useState<string[]>([])
@@ -159,6 +163,14 @@ export default function InteriorStudioPage() {
   }
 
   const handleGenerate = async (config: Record<string, any>) => {
+    if (authStatus === "initializing") {
+      return
+    }
+    if (authStatus === "unauthenticated") {
+      openLoginModal(pathname ?? "/studio/interior")
+      return
+    }
+
     // Frontend guard: Interior Studio requires a reference image URL
     const imageUrl = imageState?.uploadedUrl || (isString(config.image) && 
       config.image.startsWith("http") ? config.image : null)
@@ -180,6 +192,7 @@ export default function InteriorStudioPage() {
 
       const response = await fetch("/api/generate-replicate", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt: finalPrompt,
@@ -191,6 +204,10 @@ export default function InteriorStudioPage() {
 
       if (!response.ok) {
         const err = await response.json()
+        if (response.status === 401) {
+          openLoginModal(pathname ?? "/studio/interior")
+          throw new Error("Please log in to generate images.")
+        }
         // Map API error codes to user-friendly messages
         const errorMessage = response.status === 402 
           ? getCreditErrorMessage(err.error)
@@ -548,10 +565,17 @@ export default function InteriorStudioPage() {
                 isRendering && "cursor-wait"
               )}
               onClick={() => handleGenerate(config)}
-              disabled={isRendering || !(imageState?.uploadedUrl || (isString(config.image) && 
-                config.image.startsWith("http")))}
+              disabled={
+                authStatus === "initializing" ||
+                isRendering ||
+                !(imageState?.uploadedUrl || (isString(config.image) && config.image.startsWith("http")))
+              }
             >
-              {isRendering ? "Generating..." : "Generate"}
+              {authStatus === "initializing"
+                ? "Checking..."
+                : isRendering
+                  ? "Generating..."
+                  : "Generate"}
             </Button>
           </div>
         </div>

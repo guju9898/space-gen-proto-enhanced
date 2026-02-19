@@ -84,6 +84,7 @@ export default function SubscriptionPage() {
     try {
       const response = await fetch("/api/stripe/portal", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

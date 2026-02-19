@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { cookies } from "next/headers"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { enforceCredits } from "@/lib/usage/enforceCredits"
 
@@ -11,7 +12,7 @@ export const runtime = "nodejs"
 export async function GET(request: Request) {
   try {
     // Initialize Supabase server client (reads auth from cookies)
-    const supabase = await createSupabaseServerClient()
+    const supabase = await createSupabaseServerClient(cookies())
 
     // Authenticate user from cookies
     const {
