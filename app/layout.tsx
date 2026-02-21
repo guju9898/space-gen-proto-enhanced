@@ -1,4 +1,5 @@
 import type React from "react"
+import { Suspense } from "react"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { DesignConfigProvider } from "@/hooks/useDesignConfig"
@@ -38,7 +39,9 @@ export default function RootLayout({
           <AuthProvider>
             <DesignConfigProvider>
               {children}
-              <LoginModalWrapper />
+              <Suspense fallback={null}>
+                <LoginModalWrapper />
+              </Suspense>
               <CheckoutResume />
             </DesignConfigProvider>
           </AuthProvider>
