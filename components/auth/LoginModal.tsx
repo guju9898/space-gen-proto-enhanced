@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,15 +18,33 @@ interface LoginModalProps {
 type ModalState = "idle" | "submitting" | "email_sent"
 
 export function LoginModal({ open, onOpenChange }: LoginModalProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const { redirectAfterLogin } = useAuth()
   const [email, setEmail] = useState("")
   const [state, setState] = useState<ModalState>("idle")
   const [error, setError] = useState<string | null>(null)
 
-  const callbackUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/auth/callback`
-      : "/auth/callback"
+  const urlError = searchParams?.get("error") === "auth_callback_failed"
+  const urlMessage = searchParams?.get("message") ?? null
+
+  useEffect(() => {
+    if (open && (urlError || urlMessage)) {
+      setError(
+        urlError
+          ? "Open the magic link in the same browser where you requested it. If you opened the link from an email app, copy the link and paste it into the same browser tab where you're logged in."
+          : null
+      )
+    }
+  }, [open, urlError, urlMessage])
+
+  const clearUrlAuthError = () => {
+    const params = new URLSearchParams(searchParams?.toString() ?? "")
+    params.delete("error")
+    params.delete("message")
+    const q = params.toString()
+    router.replace(q ? `/?${q}` : "/", { scroll: false })
+  }
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,17 +57,23 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
 
     setState("submitting")
 
-    // Set redirect cookie before calling signInWithOtp
     if (typeof document !== "undefined") {
-      document.cookie = `auth_redirect_next=${redirectAfterLogin || "/studio/interior"}; path=/; max-age=600; SameSite=Lax`
+      document.cookie = `auth_redirect_next=${encodeURIComponent(
+        redirectAfterLogin || "/studio/interior"
+      )}; path=/; max-age=600; SameSite=Lax`
     }
+
+    const origin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : ""
 
     try {
       const supabase = createClient()
       const { error: signInError } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: callbackUrl,
+          emailRedirectTo: `${origin}/auth/callback`,
         },
       })
 
@@ -69,17 +94,23 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
     setError(null)
     setState("submitting")
 
-    // Set redirect cookie before calling signInWithOAuth
     if (typeof document !== "undefined") {
-      document.cookie = `auth_redirect_next=${redirectAfterLogin || "/studio/interior"}; path=/; max-age=600; SameSite=Lax`
+      document.cookie = `auth_redirect_next=${encodeURIComponent(
+        redirectAfterLogin || "/studio/interior"
+      )}; path=/; max-age=600; SameSite=Lax`
     }
+
+    const origin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : ""
 
     try {
       const supabase = createClient()
       const { error: signInError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: callbackUrl,
+          redirectTo: `${origin}/auth/callback`,
         },
       })
 
@@ -94,8 +125,8 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
   }
 
   const handleClose = () => {
+    clearUrlAuthError()
     onOpenChange(false)
-    // Reset state after a brief delay to allow animation
     setTimeout(() => {
       setState("idle")
       setEmail("")
@@ -108,7 +139,6 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
       <DialogContent className="sm:max-w-md bg-[#0a0a0a] border border-[#1a1a1a] p-0 overflow-hidden">
         <DialogTitle className="sr-only">Log in</DialogTitle>
         <div className="p-8">
-          {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-semibold text-white">Log in</h2>
             <button
@@ -121,7 +151,6 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
           </div>
 
           {state === "email_sent" ? (
-            /* Email Sent State */
             <div className="space-y-4">
               <div className="flex items-center justify-center w-16 h-16 bg-[#1a1a1a] rounded-full mx-auto mb-4">
                 <Mail className="h-8 w-8 text-[#9747ff]" />
@@ -144,7 +173,6 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
               </Button>
             </div>
           ) : (
-            /* Default / Submitting State */
             <form onSubmit={handleEmailSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium text-muted-foreground">
@@ -162,6 +190,11 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
                 />
                 {error && (
                   <p className="text-sm text-red-500">{error}</p>
+                )}
+                {urlMessage && (
+                  <p className="text-xs text-muted-foreground mt-1 font-mono break-all" title="Supabase error (dev only)">
+                    {urlMessage}
+                  </p>
                 )}
               </div>
 
@@ -206,7 +239,6 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
                   type="button"
                   onClick={() => {
                     handleClose()
-                    // Navigate to onboarding - but don't do it here, let parent handle it
                     window.location.href = "/onboarding"
                   }}
                   className="text-[#9747ff] hover:text-[#8608fd] font-medium transition-colors"
@@ -221,4 +253,3 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
     </Dialog>
   )
 }
-
