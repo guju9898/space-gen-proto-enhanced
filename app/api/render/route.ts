@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import Replicate from "replicate"
-import { cookies } from "next/headers"
 import type { RenderRequest } from "@/types/studio"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 
@@ -34,7 +33,7 @@ export async function POST(request: Request) {
       )
     }
     // Initialize Supabase server client (reads auth from cookies)
-    const supabase = await createSupabaseServerClient(cookies())
+    const supabase = await createSupabaseServerClient()
 
     const body: unknown = await request.json()
 

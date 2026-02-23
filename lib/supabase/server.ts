@@ -1,52 +1,31 @@
 import { createServerClient } from "@supabase/ssr"
-import type { CookieMethodsServerDeprecated, CookieOptions } from "@supabase/ssr"
+import type { CookieOptions } from "@supabase/ssr"
 import { cookies } from "next/headers"
+
+type CookieToSet = { name: string; value: string; options: CookieOptions }
 
 /**
  * SERVER-SIDE SUPABASE CLIENT (FOR API ROUTES & AUTH CALLBACK)
  *
- * This client reads and writes authentication cookies via the provided
- * Next.js cookie store. Use in route handlers and the auth callback so
- * session cookies are handled correctly for magic link and OAuth.
- *
- * IMPORTANT: Caller must pass the result of `cookies()` (Promise of the cookie store).
- * Uses the anon key, NOT the service role key.
+ * Persists auth cookies for Next.js 16 App Router using getAll/setAll only.
  */
-export async function createSupabaseServerClient(
-  cookieStore: ReturnType<typeof cookies>
-) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+export async function createSupabaseServerClient() {
+  const cookieStore = await cookies()
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error(
-      "Missing Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are required"
-    )
-  }
-
-  const store = await cookieStore
-
-  const cookieMethods: CookieMethodsServerDeprecated = {
-    get(name: string) {
-      return store.get(name)?.value
-    },
-    set(name: string, value: string, options: CookieOptions) {
-      store.set({
-        name,
-        value,
-        ...options,
-      })
-    },
-    remove(name: string, options: CookieOptions) {
-      store.set({
-        name,
-        value: "",
-        ...options,
-      })
-    },
-  }
-
-  return createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: cookieMethods,
-  })
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookiesToSet: CookieToSet[]) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options)
+          })
+        },
+      },
+    }
+  )
 }

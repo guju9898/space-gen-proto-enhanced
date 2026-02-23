@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import Replicate from "replicate"
-import { cookies } from "next/headers"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { enforceCredits, consumeCredit, recordRenderEvent } from "@/lib/usage/enforceCredits"
 import { isString, isObject } from "@/lib/types/typeGuards"
@@ -38,7 +37,7 @@ export async function POST(req: Request) {
       )
     }
     // Initialize Supabase server client (reads auth from cookies)
-    const supabase = await createSupabaseServerClient(cookies())
+    const supabase = await createSupabaseServerClient()
 
     // Authenticate user from cookies
     const {

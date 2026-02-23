@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createClient } from "@/lib/supabase/client"
@@ -32,7 +32,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
     if (open && (urlError || urlMessage)) {
       setError(
         urlError
-          ? "Open the magic link in the same browser where you requested it. If you opened the link from an email app, copy the link and paste it into the same browser tab where you're logged in."
+          ? "The sign-in link didn’t work. Request a new one below and open it in this same browser (or copy the link from your email and paste it here). If you use both www and non-www (e.g. renderspace.ai and www.renderspace.ai), add both callback URLs in Supabase → Authentication → URL Configuration."
           : null
       )
     }
@@ -57,10 +57,15 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
 
     setState("submitting")
 
+    const nextPath =
+      redirectAfterLogin && redirectAfterLogin.startsWith("/")
+        ? redirectAfterLogin
+        : "/studio/interior"
     if (typeof document !== "undefined") {
-      document.cookie = `auth_redirect_next=${encodeURIComponent(
-        redirectAfterLogin || "/studio/interior"
-      )}; path=/; max-age=600; SameSite=Lax`
+      const secure = typeof window !== "undefined" && window.location.protocol === "https:"
+      document.cookie =
+        `auth_redirect_next=${encodeURIComponent(nextPath)}; Path=/; Max-Age=600; SameSite=Lax` +
+        (secure ? "; Secure" : "")
     }
 
     const origin =
@@ -73,7 +78,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
       const { error: signInError } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${origin}/auth/callback`,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       })
 
@@ -94,10 +99,15 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
     setError(null)
     setState("submitting")
 
+    const nextPath =
+      redirectAfterLogin && redirectAfterLogin.startsWith("/")
+        ? redirectAfterLogin
+        : "/studio/interior"
     if (typeof document !== "undefined") {
-      document.cookie = `auth_redirect_next=${encodeURIComponent(
-        redirectAfterLogin || "/studio/interior"
-      )}; path=/; max-age=600; SameSite=Lax`
+      const secure = typeof window !== "undefined" && window.location.protocol === "https:"
+      document.cookie =
+        `auth_redirect_next=${encodeURIComponent(nextPath)}; Path=/; Max-Age=600; SameSite=Lax` +
+        (secure ? "; Secure" : "")
     }
 
     const origin =
@@ -138,6 +148,9 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md bg-[#0a0a0a] border border-[#1a1a1a] p-0 overflow-hidden">
         <DialogTitle className="sr-only">Log in</DialogTitle>
+        <DialogDescription className="sr-only">
+          Sign in with your email or Google to continue.
+        </DialogDescription>
         <div className="p-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-semibold text-white">Log in</h2>
@@ -192,7 +205,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
                   <p className="text-sm text-red-500">{error}</p>
                 )}
                 {urlMessage && (
-                  <p className="text-xs text-muted-foreground mt-1 font-mono break-all" title="Supabase error (dev only)">
+                  <p className="text-xs text-muted-foreground mt-1 font-mono break-all" title="Supabase error">
                     {urlMessage}
                   </p>
                 )}
