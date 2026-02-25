@@ -12,6 +12,15 @@ function getReplicateClient(): Replicate | null {
   return new Replicate({ auth: token })
 }
 
+function saveBase64ImageToTempFile(base64Data: string): string {
+  const fs = require("fs")
+  const cleanBase64 = base64Data.replace(/^data:image\/\w+;base64,/, "")
+  const buffer = Buffer.from(cleanBase64, "base64")
+  const tempPath = `/tmp/input-${Date.now()}.jpg`
+  fs.writeFileSync(tempPath, buffer)
+  return tempPath
+}
+
 // Helper function to convert ReadableStream to base64 data URL
 async function streamToBase64(stream: ReadableStream): Promise<string> {
   const reader = stream.getReader()
@@ -89,8 +98,8 @@ export async function POST(req: Request) {
       )
     }
 
-    // Validate imageUrl - must be a valid HTTP/HTTPS URL
-    if (!isString(imageUrl) || !imageUrl.startsWith("http")) {
+    // Validate imageUrl - must be a valid HTTP/HTTPS URL or base64 data URL
+    if (!isString(imageUrl) || (!imageUrl.startsWith("http") && !imageUrl.startsWith("data:image/"))) {
       console.log("Interior generation blocked: no valid imageUrl provided")
       return NextResponse.json(
         { error: "imageUrl is required" },
@@ -113,6 +122,10 @@ export async function POST(req: Request) {
     const guidance_scale = typeof realism === "number" ? realism / 10 : 7
     const num_inference_steps = 30
 
+    const imageInput = imageUrl.startsWith("data:image/")
+      ? saveBase64ImageToTempFile(imageUrl)
+      : imageUrl
+
     console.log("📤 Calling Replicate adirik/interior-design with:", {
       promptLength: prompt.trim().length,
       imageUrl: imageUrl.substring(0, 50) + "...",
@@ -123,12 +136,12 @@ export async function POST(req: Request) {
 
     // Run Replicate adirik/interior-design model
     // Note: Replicate requires version-pinned model IDs to avoid 404 errors
-    // Pass imageUrl directly as HTTP/HTTPS URL - Replicate will fetch it
+    // Pass HTTP URL for Replicate to fetch, or temp file path when image is base64
     const result = await replicate.run(
       "adirik/interior-design:76604baddc85b1b4616e1c6475eca080da339c8875bd4996705440484a6eac38",
       {
         input: {
-          image: imageUrl,
+          image: imageInput,
           prompt: prompt.trim(),
           guidance_scale,
           num_inference_steps,

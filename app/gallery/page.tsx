@@ -8,34 +8,34 @@ export default function GalleryPage() {
       {/* Header */}
       <header className="container mx-auto py-4 px-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/amethyst-flow.png" alt="Space Gen Logo" width={32} height={32} className="w-8 h-8" />
-          <span className="font-bold text-lg text-white">Space Gen</span>
+          <Image src="/amethyst-flow.png" alt="Renderspace Logo" width={32} height={32} className="w-8 h-8" />
+          <span className="font-bold text-lg text-white">Renderspace</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
-          <Link href="#" className="text-sm text-muted-foreground hover:text-white">
-            About
+          <Link href="/" className="text-sm text-muted-foreground hover:text-white">
+            Home
           </Link>
           <Link href="/gallery" className="text-sm text-white hover:text-primary/90">
             Gallery
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+          <Link href="/pricing" className="text-sm text-muted-foreground hover:text-white">
             Pricing
           </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+          <Link href="/faq" className="text-sm text-muted-foreground hover:text-white">
             FAQ
           </Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <Link href="#" className="text-sm text-white hover:text-primary/90">
+          <Link href="/?login=1" className="text-sm text-white hover:text-primary/90">
             Log in
           </Link>
           <Link
-            href="#"
-            className="text-sm bg-gradient-to-r from-[#9747ff] to-[#8608fd] hover:opacity-90 text-white px-4 py-2 rounded-md"
+            href="/onboarding"
+            className="text-sm bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 text-white px-4 py-2 rounded-md"
           >
-            Redesign now
+            Redesign Now
           </Link>
         </div>
 
@@ -46,7 +46,7 @@ export default function GalleryPage() {
 
       {/* Gallery Hero */}
       <section className="container mx-auto px-4 py-12 md:py-16">
-        <h1 className="text-4xl md:text-5xl font-bold mb-12 text-white text-center">Explore User Latest Designs</h1>
+        <h1 className="text-4xl md:text-5xl font-bold mb-12 text-white text-center">Explore designs from the Renderspace community</h1>
 
         {/* Gallery Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -193,16 +193,16 @@ export default function GalleryPage() {
 
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-16">
-        <div className="bg-gradient-to-r from-[#9747ff]/20 to-[#8608fd]/20 rounded-xl p-8 flex flex-col md:flex-row items-center gap-8">
+        <div className="bg-gradient-to-r from-orange-500/20 to-violet-700/20 rounded-xl p-8 flex flex-col md:flex-row items-center gap-8">
           <div className="md:w-1/2">
             <h2 className="text-2xl md:text-3xl font-bold mb-2 text-primary">Ready to transform your space?</h2>
-            <h3 className="text-2xl md:text-3xl font-bold mb-4 text-white">Start your own design journey today!</h3>
+            <h3 className="text-2xl md:text-3xl font-bold mb-4 text-white">Start your own design journey today</h3>
             <p className="text-muted-foreground mb-6">
-              See how AI can help you visualize and create your dream space in minutes.
+              See how Renderspace helps you visualize and create client-ready concepts in minutes.
             </p>
             <Link
-              href="#"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-[#9747ff] to-[#8608fd] hover:opacity-90 text-white px-6 py-3 rounded-md font-medium"
+              href="/onboarding"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 text-white px-6 py-3 rounded-md font-medium"
             >
               Try It Now <ChevronRight className="w-4 h-4" />
             </Link>
@@ -223,29 +223,20 @@ export default function GalleryPage() {
       <footer className="bg-[#101010] border-t border-[#343434] py-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-            <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <Image src="/amethyst-flow.png" alt="Space Gen Logo" width={32} height={32} className="w-8 h-8" />
-              <span className="font-bold text-lg text-white">Space Gen</span>
-            </div>
+            <Link href="/" className="flex items-center gap-2 mb-4 md:mb-0">
+              <Image src="/amethyst-flow.png" alt="Renderspace Logo" width={32} height={32} className="w-8 h-8" />
+              <span className="font-bold text-lg text-white">Renderspace</span>
+            </Link>
 
             <nav className="flex flex-wrap justify-center gap-6 mb-4 md:mb-0">
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
-                Privacy Policy
-              </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
-                Terms of Service
-              </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
-                About
-              </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
-                Contact
-              </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="/pricing" className="text-sm text-muted-foreground hover:text-white">
                 Pricing
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-white">
+              <Link href="/faq" className="text-sm text-muted-foreground hover:text-white">
                 FAQ
+              </Link>
+              <Link href="/gallery" className="text-sm text-muted-foreground hover:text-white">
+                Gallery
               </Link>
             </nav>
 
@@ -301,7 +292,7 @@ export default function GalleryPage() {
           </div>
 
           <div className="text-center text-xs text-muted-foreground">
-            <p>© 2023 Space Gen. All rights reserved.</p>
+            <p>© 2024 Renderspace. All rights reserved.</p>
           </div>
         </div>
       </footer>

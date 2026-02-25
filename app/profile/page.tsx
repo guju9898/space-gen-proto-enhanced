@@ -155,8 +155,8 @@ export default function ProfilePage() {
         throw new Error(signOutError.message || "Failed to log out")
       }
 
-      // Redirect to home page after logout
       router.push("/")
+      router.refresh()
     } catch (err) {
       console.error("Error logging out:", err)
       setError(err instanceof Error ? err.message : "Failed to log out")

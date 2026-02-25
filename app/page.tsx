@@ -4,10 +4,14 @@ import { Suspense } from "react"
 import { ChevronDown, ChevronRight, Menu } from "lucide-react"
 import { LoginButton } from "@/components/auth/LoginButton"
 import { LoginRedirectHandler } from "@/components/auth/LoginRedirectHandler"
+import { RedirectIfAuthenticated } from "@/components/auth/RedirectIfAuthenticated"
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Suspense fallback={null}>
+        <RedirectIfAuthenticated />
+      </Suspense>
       <Suspense fallback={null}>
         <LoginRedirectHandler />
       </Suspense>
@@ -25,18 +29,9 @@ export default function Home() {
           <Link href="/gallery" className="text-sm text-muted-foreground hover:text-white">
             Gallery
           </Link>
-          <Link href="/my-renders" className="text-sm text-muted-foreground hover:text-white">
-            My Renders
-          </Link>
-          {/* TODO: create /pricing page */}
           <Link href="/pricing" className="text-sm text-muted-foreground hover:text-white">
             Pricing
           </Link>
-          {/* TODO: create /blog page */}
-          <Link href="/blog" className="text-sm text-muted-foreground hover:text-white">
-            Blog
-          </Link>
-          {/* TODO: create /faq page */}
           <Link href="/faq" className="text-sm text-muted-foreground hover:text-white">
             FAQ
           </Link>

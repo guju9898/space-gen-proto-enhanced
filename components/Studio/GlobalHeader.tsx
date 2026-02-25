@@ -4,7 +4,7 @@ import { useDesignConfig } from '@/hooks/useDesignConfig';
 import { StudioType } from '@/types/studio';
 import { Home, Building2, Trees, ChevronDown, Globe, LogIn } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 import { createClient } from '@/lib/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -31,12 +31,14 @@ const navLinks = [
 export function GlobalHeader() {
   const { config, setActiveStudio } = useDesignConfig();
   const pathname = usePathname();
+  const router = useRouter();
   const { user, openLoginModal } = useAuth();
 
   const handleLogOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    window.location.href = '/';
+    router.push("/")
+    router.refresh()
   };
 
   return (

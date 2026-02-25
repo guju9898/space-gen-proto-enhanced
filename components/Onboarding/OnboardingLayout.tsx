@@ -29,8 +29,8 @@ export default function OnboardingLayout({
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       {/* Header */}
-      <header className="bg-[#ec4899] py-3 px-4">
-        <div className="text-white font-bold text-lg">Ready For Dev</div>
+      <header className="bg-gradient-to-r from-orange-500 to-violet-700 py-3 px-4">
+        <div className="text-white font-bold text-lg">Renderspace</div>
       </header>
 
       {/* Content area */}

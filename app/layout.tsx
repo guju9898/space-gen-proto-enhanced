@@ -4,6 +4,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { DesignConfigProvider } from "@/hooks/useDesignConfig"
 import { AuthProvider } from "@/components/auth/AuthContext"
+import { AuthProvider as SessionAuthProvider } from "@/components/auth/AuthProvider"
 import { LoginModalWrapper } from "@/components/auth/LoginModalWrapper"
 import { CheckoutResume } from "@/components/auth/CheckoutResume"
 import { Inter } from "next/font/google"
@@ -36,15 +37,17 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <AuthProvider>
-            <DesignConfigProvider>
+          <SessionAuthProvider>
+            <AuthProvider>
+              <DesignConfigProvider>
               {children}
               <Suspense fallback={null}>
                 <LoginModalWrapper />
               </Suspense>
               <CheckoutResume />
-            </DesignConfigProvider>
-          </AuthProvider>
+              </DesignConfigProvider>
+            </AuthProvider>
+          </SessionAuthProvider>
         </ThemeProvider>
       </body>
     </html>
