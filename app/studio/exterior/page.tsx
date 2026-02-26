@@ -126,7 +126,11 @@ export default function ExteriorStudioPage() {
   }
 
   const handleImageUpload = (file: File, previewUrl: string) => {
-    setImageState({ file, previewUrl });
+    setImageState({
+      file,
+      previewUrl,
+      uploadedUrl: null
+    });
     handleConfigChange("image")(file);
   }
 
