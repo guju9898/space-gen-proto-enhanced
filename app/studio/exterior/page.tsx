@@ -38,6 +38,7 @@ import { exteriorDefaults } from "@/lib/studio/defaults"
 import { getCreditErrorMessage } from "@/lib/usage/errorMessages"
 import { useAuth } from "@/components/auth/AuthContext"
 import { usePathname } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
 
 const architecturalStyleOptions = [
   { value: "modern", label: "Modern", icon: Layout },
@@ -51,10 +52,13 @@ const surroundingEnvironmentOptions = [
   { value: "rural", label: "Rural", icon: Building2 }
 ]
 
-// Add ImageState interface
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024
+
 interface ImageState {
   file: File | null;
   previewUrl: string | null;
+  uploadedUrl: string | null;
 }
 
 export default function ExteriorStudioPage() {
@@ -69,8 +73,10 @@ export default function ExteriorStudioPage() {
   const [realisticValue, setRealisticValue] = useState(50)
   const [imageState, setImageState] = useState<ImageState>({
     file: null,
-    previewUrl: null
+    previewUrl: null,
+    uploadedUrl: null
   })
+  const [isUploading, setIsUploading] = useState(false)
   const [advancedControlsOpen, setAdvancedControlsOpen] = useState(false)
   const [creditsRemaining, setCreditsRemaining] = useState<number | null>(null)
 
@@ -146,21 +152,9 @@ export default function ExteriorStudioPage() {
       }
       const finalPrompt = buildGeminiPrompt(renderConfig)
       
-      // Convert File to base64 data URL if present
-      let referenceImageUrl: string | null = null
-      if (imageState.file) {
-        const base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader()
-          reader.onload = () => resolve(reader.result as string)
-          reader.onerror = reject
-          reader.readAsDataURL(imageState.file!)
-        })
-        referenceImageUrl = base64
-      } else if (isString(exteriorConfig.image) && exteriorConfig.image.startsWith("http")) {
-        referenceImageUrl = exteriorConfig.image
-      }
-
-      const hasReferenceImage = referenceImageUrl !== null
+      const referenceImageUrl =
+        imageState.uploadedUrl ??
+        (isString(exteriorConfig.image) && exteriorConfig.image.startsWith("http") ? exteriorConfig.image : null)
 
       const response = await fetch('/api/generate-openrouter', {
         method: 'POST',
@@ -609,36 +603,46 @@ export default function ExteriorStudioPage() {
 
         <FormSection title="Reference Image (Optional)" icon={ImageIcon}>
           <div className="space-y-4">
-            <p className="text-xs text-muted-foreground mb-2">Optional — improves accuracy when provided</p>
-            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center transition-colors hover:border-muted-foreground/50">
+            <p className="text-xs text-muted-foreground mb-2">
+              Upload JPG, PNG, or WEBP under 10MB. Higher resolution produces better results.
+            </p>
+            <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${isUploading ? "cursor-wait opacity-70 border-muted" : "hover:border-muted-foreground/50 border-border"}`}>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
+                disabled={isUploading}
                 onChange={(e) => {
                   const file = e.target.files?.[0]
                   if (file) {
                     const reader = new FileReader()
-                    reader.onload = (e) => {
-                      handleImageUpload(file, e.target?.result as string)
+                    reader.onload = (ev) => {
+                      handleImageUpload(file, ev.target?.result as string)
                     }
                     reader.readAsDataURL(file)
                   }
+                  e.target.value = ""
                 }}
                 className="hidden"
                 id="image-upload"
               />
               <label
                 htmlFor="image-upload"
-                className="cursor-pointer flex flex-col items-center space-y-2"
+                className={isUploading ? "cursor-wait flex flex-col items-center space-y-2" : "cursor-pointer flex flex-col items-center space-y-2"}
               >
                 <div className="p-3 rounded-full bg-muted">
                   <ImageIcon className="w-6 h-6 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Click to upload</p>
+                  <p className="text-sm font-medium">{isUploading ? "Uploading..." : "Click to upload"}</p>
                   <p className="text-xs text-muted-foreground">or drag and drop</p>
                 </div>
               </label>
+            </div>
+            <div className="text-xs text-muted-foreground space-y-1">
+              <p>Supported formats: JPG, PNG, WEBP</p>
+              <p>Max size: 10MB</p>
+              <p>Higher resolution images produce better results.</p>
+              <p>Avoid blurry, dark, or heavily compressed images.</p>
             </div>
           </div>
         </FormSection>
@@ -668,7 +672,7 @@ export default function ExteriorStudioPage() {
               </div>
             )}
             <div className="text-xs text-muted-foreground">
-              This render uses {imageState.file || (isString(exteriorConfig.image) && exteriorConfig.image.startsWith("http")) ? "1.5" : "1.0"} credits
+              This render uses {imageState.uploadedUrl || (isString(exteriorConfig.image) && exteriorConfig.image.startsWith("http")) ? "1.5" : "1.0"} credits
             </div>
             <div className="text-xs text-muted-foreground italic">
               Credits are only deducted after a successful render appears.

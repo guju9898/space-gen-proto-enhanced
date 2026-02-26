@@ -58,6 +58,7 @@ import { interiorDefaults } from "@/lib/studio/defaults"
 import { getCreditErrorMessage } from "@/lib/usage/errorMessages"
 import { useAuth } from "@/components/auth/AuthContext"
 import { usePathname } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
 
 interface ImageState {
   file: File | null;
@@ -75,8 +76,12 @@ export default function InteriorStudioPage() {
   const [isRendering, setIsRendering] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [imageState, setImageState] = useState<ImageState | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [creditsRemaining, setCreditsRemaining] = useState<number | null>(null)
+
+  const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const
+  const MAX_IMAGE_SIZE = 10 * 1024 * 1024
 
   // Handle client-side initialization
   useEffect(() => {
@@ -114,51 +119,48 @@ export default function InteriorStudioPage() {
 
   const handleImageUpload = async (file: File, previewUrl: string) => {
     try {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        throw new Error('Please upload an image file')
+      if (!ALLOWED_IMAGE_TYPES.includes(file.type as typeof ALLOWED_IMAGE_TYPES[number])) {
+        setError("Please upload JPG, PNG, or WEBP images.")
+        return
+      }
+      if (file.size > MAX_IMAGE_SIZE) {
+        setError("Image must be under 10MB.")
+        return
       }
 
-      // Validate file size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        throw new Error('Image size should be less than 10MB')
-      }
-
-      // Clean up previous preview URL if it exists
-      if (imageState && imageState.previewUrl && imageState.previewUrl.startsWith('blob:')) {
+      if (imageState?.previewUrl?.startsWith("blob:")) {
         URL.revokeObjectURL(imageState.previewUrl)
       }
 
-      // Upload to Supabase Storage via API route
       setError(null)
-      const formData = new FormData()
-      formData.append("file", file)
+      setIsUploading(true)
 
-      const uploadResponse = await fetch("/api/upload-image", {
-        method: "POST",
-        body: formData,
-      })
+      const fileExt = file.name.split(".").pop() || "jpg"
+      const fileName = `${Date.now()}.${fileExt}`
+      const supabase = createClient()
 
-      if (!uploadResponse.ok) {
-        const err = await uploadResponse.json()
-        throw new Error(err.error || "Failed to upload image")
-      }
+      const { data, error: uploadError } = await supabase.storage
+        .from("reference-images")
+        .upload(fileName, file)
 
-      const uploadData = await uploadResponse.json()
-      const uploadedUrl = uploadData.imageUrl
+      if (uploadError) throw uploadError
 
-      if (!uploadedUrl || !uploadedUrl.startsWith("http")) {
-        throw new Error("Invalid image URL returned from upload")
-      }
+      const { data: publicUrlData } = supabase.storage
+        .from("reference-images")
+        .getPublicUrl(fileName)
 
-      // Store file, preview, and uploaded URL
-      setImageState({ file, previewUrl, uploadedUrl })
-      handleConfigChange("image", uploadedUrl)
+      const imageUrl = publicUrlData.publicUrl
+      if (!imageUrl?.startsWith("http")) throw new Error("Invalid upload URL")
+
+      setImageState({ file, previewUrl, uploadedUrl: imageUrl })
+      handleConfigChange("image", imageUrl)
       setError(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to upload image')
+      setError(err instanceof Error ? err.message : "Upload failed. Please try again.")
       setImageState(null)
       handleConfigChange("image", null)
+    } finally {
+      setIsUploading(false)
     }
   }
 
@@ -513,12 +515,22 @@ export default function InteriorStudioPage() {
         </FormSection>
 
         <FormSection title="Reference Image" icon={ImageIcon}>
-          <ImageUpload 
+          <p className="text-xs text-muted-foreground mb-2">
+            Upload JPG, PNG, or WEBP images under 10MB. Higher resolution images produce better results.
+          </p>
+          <ImageUpload
             onUpload={handleImageUpload}
             currentPreview={imageState?.previewUrl}
-            accept="image/*"
-            maxSize={10 * 1024 * 1024}
+            accept="image/jpeg,image/png,image/webp"
+            maxSize={MAX_IMAGE_SIZE}
+            isLoading={isUploading}
           />
+          <div className="mt-3 text-xs text-muted-foreground space-y-1">
+            <p>Supported formats: JPG, PNG, WEBP</p>
+            <p>Max size: 10MB</p>
+            <p>Higher resolution images produce better results.</p>
+            <p>Avoid blurry, dark, or heavily compressed images.</p>
+          </div>
         </FormSection>
 
         <div className="space-y-6">

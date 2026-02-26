@@ -32,6 +32,7 @@ import { isString } from "@/lib/types/typeGuards"
 import { getCreditErrorMessage } from "@/lib/usage/errorMessages"
 import { useAuth } from "@/components/auth/AuthContext"
 import { usePathname } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
 
 const gardenTypeOptions = [
   { value: "Residential", label: "Residential" },
@@ -59,9 +60,13 @@ const lightingOptions = [
   { value: "Night", label: "Night" }
 ]
 
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024
+
 interface ImageState {
   file: File | null;
   previewUrl: string | null;
+  uploadedUrl: string | null;
 }
 
 export default function LandscapeStudioPage() {
@@ -76,8 +81,10 @@ export default function LandscapeStudioPage() {
   const [realisticValue, setRealisticValue] = useState(50)
   const [imageState, setImageState] = useState<ImageState>({
     file: null,
-    previewUrl: null
+    previewUrl: null,
+    uploadedUrl: null
   })
+  const [isUploading, setIsUploading] = useState(false)
   const [advancedControlsOpen, setAdvancedControlsOpen] = useState(false)
   const [creditsRemaining, setCreditsRemaining] = useState<number | null>(null)
 
@@ -118,9 +125,39 @@ export default function LandscapeStudioPage() {
     updateConfig({ [key]: value })
   }
 
-  const handleImageUpload = (file: File, previewUrl: string) => {
-    setImageState({ file, previewUrl });
-    handleConfigChange("image", file);
+  const handleImageUpload = async (file: File, previewUrl: string) => {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type as typeof ALLOWED_IMAGE_TYPES[number])) {
+      setError("Please upload JPG, PNG, or WEBP images.")
+      return
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      setError("Image must be under 10MB.")
+      return
+    }
+    setError(null)
+    setIsUploading(true)
+    try {
+      const fileExt = file.name.split(".").pop() || "jpg"
+      const fileName = `${Date.now()}.${fileExt}`
+      const supabase = createClient()
+      const { error: uploadError } = await supabase.storage
+        .from("reference-images")
+        .upload(fileName, file)
+      if (uploadError) throw uploadError
+      const { data: publicUrlData } = supabase.storage
+        .from("reference-images")
+        .getPublicUrl(fileName)
+      const imageUrl = publicUrlData.publicUrl
+      if (!imageUrl?.startsWith("http")) throw new Error("Invalid upload URL")
+      setImageState({ file, previewUrl, uploadedUrl: imageUrl })
+      handleConfigChange("image", imageUrl)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed. Please try again.")
+      setImageState({ file: null, previewUrl: null, uploadedUrl: null })
+      handleConfigChange("image", null)
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   const handleRender = async () => {
@@ -145,21 +182,9 @@ export default function LandscapeStudioPage() {
       }
       const finalPrompt = buildGeminiPrompt(renderConfig)
       
-      // Convert File to base64 data URL if present
-      let referenceImageUrl: string | null = null
-      if (imageState.file) {
-        const base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader()
-          reader.onload = () => resolve(reader.result as string)
-          reader.onerror = reject
-          reader.readAsDataURL(imageState.file!)
-        })
-        referenceImageUrl = base64
-      } else if (isString(landscapeConfig?.image) && landscapeConfig.image.startsWith("http")) {
-        referenceImageUrl = landscapeConfig.image
-      }
-
-      const hasReferenceImage = referenceImageUrl !== null
+      const referenceImageUrl =
+        imageState.uploadedUrl ??
+        (isString(landscapeConfig?.image) && landscapeConfig.image.startsWith("http") ? landscapeConfig.image : null)
 
       const response = await fetch('/api/generate-openrouter', {
         method: 'POST',
@@ -706,33 +731,37 @@ export default function LandscapeStudioPage() {
 
             <FormSection title="Reference Image (Optional)">
           <div className="space-y-4">
-            <p className="text-xs text-muted-foreground mb-2">Upload a site photo to improve scale, layout, and realism.</p>
-            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center transition-colors hover:border-muted-foreground/50">
+            <p className="text-xs text-muted-foreground mb-2">
+              Upload JPG, PNG, or WEBP under 10MB. Higher resolution produces better results.
+            </p>
+            <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${isUploading ? "cursor-wait opacity-70 border-muted" : "hover:border-muted-foreground/50 border-border"}`}>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
+                disabled={isUploading}
                 onChange={(e) => {
                   const file = e.target.files?.[0]
                   if (file) {
                     const reader = new FileReader()
-                    reader.onload = (e) => {
-                      handleImageUpload(file, e.target?.result as string)
+                    reader.onload = (ev) => {
+                      handleImageUpload(file, ev.target?.result as string)
                     }
                     reader.readAsDataURL(file)
                   }
+                  e.target.value = ""
                 }}
                 className="hidden"
                 id="image-upload"
               />
               <label
                 htmlFor="image-upload"
-                className="cursor-pointer flex flex-col items-center space-y-2"
+                className={isUploading ? "cursor-wait flex flex-col items-center space-y-2" : "cursor-pointer flex flex-col items-center space-y-2"}
               >
                 <div className="p-3 rounded-full bg-muted">
                   <ImageIcon className="w-6 h-6 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Click to upload</p>
+                  <p className="text-sm font-medium">{isUploading ? "Uploading..." : "Click to upload"}</p>
                   <p className="text-xs text-muted-foreground">or drag and drop</p>
                 </div>
                 {imageState.previewUrl && (
@@ -745,6 +774,12 @@ export default function LandscapeStudioPage() {
                   </div>
                 )}
               </label>
+            </div>
+            <div className="text-xs text-muted-foreground space-y-1">
+              <p>Supported formats: JPG, PNG, WEBP</p>
+              <p>Max size: 10MB</p>
+              <p>Higher resolution images produce better results.</p>
+              <p>Avoid blurry, dark, or heavily compressed images.</p>
             </div>
           </div>
             </FormSection>
@@ -774,7 +809,7 @@ export default function LandscapeStudioPage() {
               </div>
             )}
             <div className="text-xs text-muted-foreground">
-              This render uses {imageState.file || (isString(landscapeConfig?.image) && landscapeConfig.image.startsWith("http")) ? "1.5" : "1.0"} credits
+              This render uses {imageState.uploadedUrl || (isString(landscapeConfig?.image) && landscapeConfig.image.startsWith("http")) ? "1.5" : "1.0"} credits
             </div>
             <div className="text-xs text-muted-foreground italic">
               Credits are only deducted after a successful render appears.

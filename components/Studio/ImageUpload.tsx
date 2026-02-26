@@ -5,13 +5,14 @@ import { useDropzone } from "react-dropzone"
 import { Image as ImageIcon, Upload } from "lucide-react"
 
 interface ImageUploadProps {
-  onUpload: (file: File, previewUrl: string) => void;
+  onUpload: (file: File, previewUrl: string) => void | Promise<void>;
   currentPreview?: string | null;
   accept?: string;
   maxSize?: number;
+  isLoading?: boolean;
 }
 
-export function ImageUpload({ onUpload, currentPreview, accept = "image/*", maxSize }: ImageUploadProps) {
+export function ImageUpload({ onUpload, currentPreview, accept = "image/*", maxSize, isLoading }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(currentPreview || null);
 
   // Cleanup preview URL on unmount
@@ -47,19 +48,25 @@ export function ImageUpload({ onUpload, currentPreview, accept = "image/*", maxS
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: accept ? { [accept]: ['.png', '.jpg', '.jpeg', '.gif'] } : undefined,
+    accept: accept ? { 'image/jpeg': ['.jpg', '.jpeg'], 'image/png': ['.png'], 'image/webp': ['.webp'] } : undefined,
     maxFiles: 1,
-    maxSize: maxSize ?? undefined
+    maxSize: maxSize ?? undefined,
+    disabled: isLoading
   });
 
   return (
     <div
       {...getRootProps()}
-      className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors
-        ${isDragActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
+      className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors
+        ${isLoading ? 'cursor-wait opacity-70 border-muted' : 'cursor-pointer'}
+        ${!isLoading && isDragActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
     >
       <input {...getInputProps()} />
-      {preview ? (
+      {isLoading ? (
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">Uploading...</p>
+        </div>
+      ) : preview ? (
         <div className="space-y-2">
           <img
             src={preview}
