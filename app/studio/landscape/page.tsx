@@ -142,7 +142,11 @@ export default function LandscapeStudioPage() {
       const supabase = createClient()
       const { error: uploadError } = await supabase.storage
         .from("reference-images")
-        .upload(fileName, file)
+        .upload(fileName, file, {
+          contentType: file.type,
+          cacheControl: "3600",
+          upsert: false
+        })
       if (uploadError) throw uploadError
       const { data: publicUrlData } = supabase.storage
         .from("reference-images")

@@ -141,7 +141,11 @@ export default function InteriorStudioPage() {
 
       const { data, error: uploadError } = await supabase.storage
         .from("reference-images")
-        .upload(fileName, file)
+        .upload(fileName, file, {
+          contentType: file.type,
+          cacheControl: "3600",
+          upsert: false
+        })
 
       if (uploadError) throw uploadError
 
