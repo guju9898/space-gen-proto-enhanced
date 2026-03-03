@@ -11,7 +11,7 @@ import StepThree from "@/components/Onboarding/StepThree"
 import StepFour from "@/components/Onboarding/StepFour"
 import StepFive from "@/components/Onboarding/StepFive"
 
-export default function OnboardingPage() {
+function OnboardingContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -98,5 +98,13 @@ export default function OnboardingPage() {
     >
       {renderStep()}
     </OnboardingLayout>
+  )
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={null}>
+      <OnboardingContent />
+    </Suspense>
   )
 }
