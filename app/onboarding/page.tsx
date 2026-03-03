@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import OnboardingLayout from "@/components/Onboarding/OnboardingLayout"
 import StepOne from "@/components/Onboarding/StepOne"
