@@ -1,30 +1,47 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Mail } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
 
 interface StepOneProps {
   email: string
   setEmail: (email: string) => void
-  onSubmit: () => void
 }
 
-export default function StepOne({ email, setEmail, onSubmit }: StepOneProps) {
+export default function StepOne({ email, setEmail }: StepOneProps) {
+  const router = useRouter()
   const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    // Simple validation
     if (!email || !email.includes("@")) {
       setError("Please enter a valid email address")
       return
     }
-
     setError(null)
-    onSubmit()
+    setIsSubmitting(true)
+    try {
+      const supabase = createClient()
+      const { error: signInError } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/onboarding?step=3")}`,
+        },
+      })
+      if (signInError) {
+        setError(signInError.message || "Failed to send magic link")
+        setIsSubmitting(false)
+        return
+      }
+      router.push("/onboarding?step=2")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred")
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -56,9 +73,10 @@ export default function StepOne({ email, setEmail, onSubmit }: StepOneProps) {
 
         <button
           type="submit"
-          className="w-full py-3 px-4 bg-gradient-to-r from-[#ec4899] to-[#8b5cf6] rounded-md text-white font-medium hover:opacity-90 transition-opacity"
+          disabled={isSubmitting}
+          className="w-full py-3 px-4 bg-gradient-to-r from-[#ec4899] to-[#8b5cf6] rounded-md text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Continue
+          {isSubmitting ? "Sending..." : "Continue"}
         </button>
       </form>
     </div>

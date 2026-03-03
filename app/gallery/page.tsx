@@ -54,7 +54,7 @@ export default function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">Before</div>
             <Image
-              src="/gallery/living-room-before.jpg"
+              src="/gallery/replace-1.jpg"
               alt="Living room before redesign"
               width={600}
               height={400}
@@ -64,7 +64,7 @@ export default function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">After</div>
             <Image
-              src="/gallery/living-room-after.jpg"
+              src="/gallery/replace-2.jpg"
               alt="Living room after redesign"
               width={600}
               height={400}
@@ -76,7 +76,7 @@ export default function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">Before</div>
             <Image
-              src="/gallery/exterior-before.jpg"
+              src="/gallery/replace-3.jpg"
               alt="House exterior before redesign"
               width={600}
               height={400}
@@ -86,7 +86,7 @@ export default function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">After</div>
             <Image
-              src="/gallery/exterior-after.jpg"
+              src="/gallery/replace-4.jpg"
               alt="House exterior after redesign"
               width={600}
               height={400}
@@ -98,7 +98,7 @@ export default function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">Before</div>
             <Image
-              src="/gallery/patio-before.jpg"
+              src="/gallery/replace-5.jpg"
               alt="Patio before redesign"
               width={600}
               height={400}
@@ -108,7 +108,7 @@ export default function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">After</div>
             <Image
-              src="/gallery/patio-after.jpg"
+              src="/gallery/replace-6.jpg"
               alt="Patio after redesign"
               width={600}
               height={400}
@@ -120,7 +120,7 @@ export default function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">Before</div>
             <Image
-              src="/gallery/office-before.jpg"
+              src="/gallery/replace-7.jpg"
               alt="Office before redesign"
               width={600}
               height={400}
@@ -130,7 +130,7 @@ export default function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">After</div>
             <Image
-              src="/gallery/office-after.jpg"
+              src="/gallery/replace-8.jpg"
               alt="Office after redesign"
               width={600}
               height={400}
@@ -142,7 +142,7 @@ export default function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">Before</div>
             <Image
-              src="/gallery/kitchen-before.jpg"
+              src="/gallery/replace-9.jpg"
               alt="Kitchen before redesign"
               width={600}
               height={400}
@@ -152,7 +152,7 @@ export default function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">After</div>
             <Image
-              src="/gallery/kitchen-after.jpg"
+              src="/gallery/replace-10.jpg"
               alt="Kitchen after redesign"
               width={600}
               height={400}
@@ -164,7 +164,7 @@ export default function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">Before</div>
             <Image
-              src="/gallery/bedroom-before.jpg"
+              src="/gallery/replace-11.jpg"
               alt="Bedroom before redesign"
               width={600}
               height={400}
@@ -174,7 +174,7 @@ export default function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">After</div>
             <Image
-              src="/gallery/bedroom-after.jpg"
+              src="/gallery/replace-12.jpg"
               alt="Bedroom after redesign"
               width={600}
               height={400}
@@ -209,7 +209,7 @@ export default function GalleryPage() {
           </div>
           <div className="md:w-1/2">
             <Image
-              src="/gallery/cta-image.jpg"
+              src="/gallery/replace-13.jpg"
               alt="Modern living room design"
               width={500}
               height={300}

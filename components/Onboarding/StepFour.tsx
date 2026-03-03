@@ -41,7 +41,7 @@ export default function StepFour({ selectedPlan }: StepFourProps) {
       if (authError || !user) {
         // Store pending checkout plan for auto-resume after login
         sessionStorage.setItem("pending_checkout_plan", selectedPlan)
-        openLoginModal()
+        openLoginModal("/onboarding?step=4")
         setIsLoading(false)
         return
       }

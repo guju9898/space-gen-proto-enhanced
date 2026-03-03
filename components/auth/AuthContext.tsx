@@ -34,11 +34,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        supabase.from("profiles").upsert({ id: session.user.id }, { onConflict: "id", ignoreDuplicates: true })
+      }
       setUser(session?.user ?? null)
       setInitialized(true)
     })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
+      if (session?.user && (event === "INITIAL_SESSION" || event === "SIGNED_IN")) {
+        supabase.from("profiles").upsert({ id: session.user.id }, { onConflict: "id", ignoreDuplicates: true })
+      }
     })
     return () => subscription.unsubscribe()
   }, [])

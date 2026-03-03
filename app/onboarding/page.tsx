@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
 import OnboardingLayout from "@/components/Onboarding/OnboardingLayout"
 import StepOne from "@/components/Onboarding/StepOne"
 import StepTwo from "@/components/Onboarding/StepTwo"
@@ -9,8 +10,11 @@ import StepFour from "@/components/Onboarding/StepFour"
 import StepFive from "@/components/Onboarding/StepFive"
 
 export default function OnboardingPage() {
-  // Step state
-  const [currentStep, setCurrentStep] = useState(1)
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
+  const stepParam = searchParams?.get("step")
+  const currentStep = stepParam ? Math.max(1, Math.min(5, parseInt(stepParam, 10) || 1)) : 1
   const totalSteps = 5
 
   // Form data state
@@ -24,13 +28,13 @@ export default function OnboardingPage() {
   // Navigation handlers
   const handleNext = () => {
     if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1)
+      router.push(`/onboarding?step=${currentStep + 1}`)
     }
   }
 
   const handleBack = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
+      router.push(`/onboarding?step=${currentStep - 1}`)
     }
   }
 
@@ -56,9 +60,9 @@ export default function OnboardingPage() {
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <StepOne email={email} setEmail={setEmail} onSubmit={handleEmailSubmit} />
+        return <StepOne email={email} setEmail={setEmail} />
       case 2:
-        return <StepTwo email={email} verificationStatus={verificationStatus} onVerified={handleEmailVerified} />
+        return <StepTwo email={email} />
       case 3:
         return (
           <StepThree
