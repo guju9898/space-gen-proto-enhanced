@@ -5,6 +5,7 @@ import { ChevronDown, ChevronRight, Menu } from "lucide-react"
 import { LoginButton } from "@/components/auth/LoginButton"
 import { LoginRedirectHandler } from "@/components/auth/LoginRedirectHandler"
 import { RedirectIfAuthenticated } from "@/components/auth/RedirectIfAuthenticated"
+import ComparisonTable from "@/components/ComparisonTable"
 
 export default function Home() {
   return (
@@ -197,6 +198,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <ComparisonTable />
 
       {/* Design for AI Section */}
       <section className="container mx-auto px-4 py-16">
