@@ -199,6 +199,33 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Live Product Demo Video */}
+      <section className="container mx-auto px-4 py-16">
+        <p className="text-sm font-semibold text-primary uppercase tracking-wide text-center mb-2">
+          Live Product Demo / Actual Renderspace Interface (Sneak Peak)
+        </p>
+        <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white text-center">
+          See How Renderspace Works in 30 Seconds
+        </h2>
+        <p className="text-muted-foreground max-w-2xl mx-auto mb-10 text-center">
+          Generate client-ready design concepts from real photos in seconds.
+        </p>
+        <div className="max-w-[900px] mx-auto rounded-xl overflow-hidden border border-white/10 shadow-lg">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            controls
+            className="w-full h-auto"
+            src="/videos/renderspace-demo.mp4"
+            title="Renderspace product demo"
+          >
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </section>
+
       <ComparisonTable />
 
       {/* Design for AI Section */}
