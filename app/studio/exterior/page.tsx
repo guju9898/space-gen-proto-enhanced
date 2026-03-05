@@ -125,13 +125,54 @@ export default function ExteriorStudioPage() {
     updateConfig({ [key]: value })
   }
 
-  const handleImageUpload = (file: File, previewUrl: string) => {
-    setImageState({
-      file,
-      previewUrl,
-      uploadedUrl: null
-    });
-    handleConfigChange("image")(file);
+  const handleImageUpload = async (file: File, previewUrl: string) => {
+    try {
+      if (!ALLOWED_IMAGE_TYPES.includes(file.type as (typeof ALLOWED_IMAGE_TYPES)[number])) {
+        setError("Please upload JPG, PNG, or WEBP images.")
+        return
+      }
+      if (file.size > MAX_IMAGE_SIZE) {
+        setError("Image must be under 10MB.")
+        return
+      }
+
+      if (imageState?.previewUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(imageState.previewUrl)
+      }
+
+      setError(null)
+      setIsUploading(true)
+
+      const fileExt = file.name.split(".").pop() || "jpg"
+      const fileName = `${Date.now()}.${fileExt}`
+      const supabase = createClient()
+
+      const { error: uploadError } = await supabase.storage
+        .from("reference-images")
+        .upload(fileName, file, {
+          contentType: file.type,
+          cacheControl: "3600",
+          upsert: false
+        })
+
+      if (uploadError) throw uploadError
+
+      const { data: publicUrlData } = supabase.storage
+        .from("reference-images")
+        .getPublicUrl(fileName)
+
+      const imageUrl = publicUrlData.publicUrl
+      if (!imageUrl?.startsWith("http")) throw new Error("Invalid upload URL")
+
+      setImageState({ file, previewUrl, uploadedUrl: imageUrl })
+      handleConfigChange("image")(imageUrl)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed. Please try again.")
+      setImageState({ file: null, previewUrl: null, uploadedUrl: null })
+      handleConfigChange("image")(null)
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   const handleRender = async () => {

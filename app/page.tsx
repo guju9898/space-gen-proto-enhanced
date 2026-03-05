@@ -6,6 +6,7 @@ import { LoginButton } from "@/components/auth/LoginButton"
 import { LoginRedirectHandler } from "@/components/auth/LoginRedirectHandler"
 import { RedirectIfAuthenticated } from "@/components/auth/RedirectIfAuthenticated"
 import ComparisonTable from "@/components/ComparisonTable"
+import { RenderspaceBeforeAfterSlider } from "@/components/RenderspaceBeforeAfterSlider"
 
 export default function Home() {
   return (
@@ -110,26 +111,9 @@ export default function Home() {
           tailored to your project needs.
         </p>
 
-        {/* Featured Images */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <div className="rounded-xl overflow-hidden">
-            <Image
-              src="/landing/renders/renderspace-exterior-01.png"
-              alt="Renderspace exterior render"
-              width={600}
-              height={400}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="rounded-xl overflow-hidden">
-            <Image
-              src="/landing/renders/renderspace-exterior-02.png"
-              alt="Renderspace exterior render"
-              width={600}
-              height={400}
-              className="w-full h-full object-cover"
-            />
-          </div>
+        {/* Featured Before / After Slider */}
+        <div className="mb-8">
+          <RenderspaceBeforeAfterSlider />
         </div>
       </section>
 
