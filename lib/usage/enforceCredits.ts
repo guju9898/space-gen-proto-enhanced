@@ -51,6 +51,38 @@ export async function enforceCredits(userId: string): Promise<CreditEnforcementR
   const now = new Date()
   const periodStart = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-01T00:00:00.000Z`
 
+  // Demo access: allow render if user has valid demo_access row (before paid subscription check)
+  const nowIso = now.toISOString()
+  const { data: demoRows } = await supabase
+    .from("demo_access")
+    .select("credits_allocated, credits_used, starts_at")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .lte("starts_at", nowIso)
+    .gt("expires_at", nowIso)
+
+  const validDemo = demoRows?.find((row) => {
+    const used = typeof row.credits_used === "number" ? row.credits_used : parseFloat(String(row.credits_used ?? 0))
+    const allocated = typeof row.credits_allocated === "number" ? row.credits_allocated : parseFloat(String(row.credits_allocated ?? 0))
+    return used < allocated
+  })
+
+  if (validDemo) {
+    const allocated = typeof validDemo.credits_allocated === "number" ? validDemo.credits_allocated : parseFloat(String(validDemo.credits_allocated ?? 0))
+    const used = typeof validDemo.credits_used === "number" ? validDemo.credits_used : parseFloat(String(validDemo.credits_used ?? 0))
+    const creditsRemaining = Math.max(0, allocated - used)
+    const nearLimit = creditsRemaining <= allocated * 0.1
+    const demoPeriodStart = validDemo.starts_at ?? periodStart
+    return {
+      allow: true,
+      nearLimit,
+      creditsRemaining,
+      periodStart: typeof demoPeriodStart === "string" ? demoPeriodStart : new Date(demoPeriodStart).toISOString(),
+      planId: "demo",
+      monthlyLimit: allocated,
+    }
+  }
+
   try {
     // Get user's plan and subscription status from profiles table
     const { data: profile, error: profileError } = await supabase
@@ -188,6 +220,45 @@ export async function enforceCredits(userId: string): Promise<CreditEnforcementR
       reason: "no_plan",
     }
   }
+}
+
+/**
+ * Consume demo credits after successful generation.
+ * Uses atomic RPC so that credits_used + amount <= credits_allocated is enforced in a single update.
+ * Throws if no row was updated (demo credits exhausted or invalid window).
+ */
+export async function consumeDemoCredit(userId: string, amount: number): Promise<void> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    console.error("❌ Supabase configuration missing for demo credit consumption")
+    throw new Error("Demo credit consumption not configured")
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  })
+
+  const { data: rows, error } = await supabase.rpc("consume_demo_credits", {
+    p_user_id: userId,
+    p_amount: amount,
+  })
+
+  if (error) {
+    console.error("❌ Error consuming demo credit:", error)
+    throw new Error("Demo credit consumption failed")
+  }
+
+  if (!rows || (Array.isArray(rows) && rows.length === 0)) {
+    throw new Error("Demo credits exhausted")
+  }
+
+  const updated = Array.isArray(rows) ? rows[0] : rows
+  console.log(`✅ Demo credit consumed for user ${userId}, amount: ${amount}, total used: ${(updated as { credits_used: number }).credits_used}`)
 }
 
 /**

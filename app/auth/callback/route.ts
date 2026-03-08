@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
+import { upsertLoopsContact, sendLoopsEvent } from "@/lib/loops"
 
 /**
  * Safe redirect path: must be relative (start with "/") to prevent open redirect.
@@ -43,6 +44,7 @@ export async function GET(request: Request) {
 
     let error: { message?: string } | null = null
     let flowUsed: "token_hash" | "code" | null = null
+    let authUser: { id: string; email?: string; user_metadata?: Record<string, unknown> } | null = null
 
     if (token_hash) {
       flowUsed = "token_hash"
@@ -51,10 +53,12 @@ export async function GET(request: Request) {
         type: "email",
       })
       error = result.error
+      authUser = result.data?.user ?? null
     } else if (code) {
       flowUsed = "code"
       const result = await supabase.auth.exchangeCodeForSession(request.url)
       error = result.error
+      authUser = result.data?.session?.user ?? null
     } else {
       error = { message: "Missing code or token_hash in callback URL" }
     }
@@ -67,6 +71,25 @@ export async function GET(request: Request) {
         loginUrl.searchParams.set("message", String(error.message).slice(0, 200))
       }
       return NextResponse.redirect(loginUrl)
+    }
+
+    if (authUser?.email) {
+      try {
+        await upsertLoopsContact({
+          email: authUser.email,
+          firstName: (authUser.user_metadata?.first_name as string) ?? "",
+          userId: authUser.id,
+          plan: "free",
+          signedUpAt: new Date().toISOString(),
+        })
+        await sendLoopsEvent({
+          email: authUser.email,
+          eventName: "account_created",
+          properties: { plan: "free" },
+        })
+      } catch (err) {
+        console.error("Loops account_created failed", err)
+      }
     }
 
     // TEMP DEBUG: flow and cookie names (no secrets)

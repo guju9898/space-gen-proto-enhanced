@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
 import { createClient } from "@supabase/supabase-js"
+import { upsertLoopsContact, sendLoopsEvent } from "@/lib/loops"
 
 export const runtime = "nodejs"
 
@@ -92,6 +93,23 @@ export async function POST(request: Request) {
             console.error("❌ Error updating profile after checkout:", updateError)
           } else {
             console.log(`✅ Profile updated for user ${userId} with plan ${planId}`)
+            const customerEmail = session.customer_email ?? session.customer_details?.email ?? null
+            if (customerEmail) {
+              try {
+                await upsertLoopsContact({
+                  email: customerEmail,
+                  userId,
+                  plan: planId,
+                })
+                await sendLoopsEvent({
+                  email: customerEmail,
+                  eventName: "plan_started",
+                  properties: { plan: planId },
+                })
+              } catch (err) {
+                console.error("Loops plan_started failed", err)
+              }
+            }
           }
         }
         break
