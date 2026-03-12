@@ -103,11 +103,16 @@ export async function POST(request: Request) {
           break
         }
 
-        const periodStart = sub.current_period_start
-          ? new Date(sub.current_period_start * 1000).toISOString()
+        const stripeSub = sub as Stripe.Subscription & {
+          current_period_start?: number
+          current_period_end?: number
+        }
+
+        const periodStart = stripeSub.current_period_start
+          ? new Date(stripeSub.current_period_start * 1000).toISOString()
           : new Date().toISOString()
-        const periodEnd = sub.current_period_end
-          ? new Date(sub.current_period_end * 1000).toISOString()
+        const periodEnd = stripeSub.current_period_end
+          ? new Date(stripeSub.current_period_end * 1000).toISOString()
           : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
         // Upsert subscriptions table
