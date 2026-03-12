@@ -287,6 +287,11 @@ export async function POST(request: Request) {
           typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id
         if (!customerId) break
 
+        const stripeSub = subscription as Stripe.Subscription & {
+          current_period_start?: number
+          current_period_end?: number
+        }
+
         const { data: profile } = await supabase
           .from("profiles")
           .select("id")
@@ -297,11 +302,11 @@ export async function POST(request: Request) {
 
         const priceId = subscription.items?.data?.[0]?.price?.id
         const planCode = priceId ? priceIdToPlanCode(priceId) : null
-        const periodStart = subscription.current_period_start
-          ? new Date(subscription.current_period_start * 1000).toISOString()
+        const periodStart = stripeSub.current_period_start
+          ? new Date(stripeSub.current_period_start * 1000).toISOString()
           : null
-        const periodEnd = subscription.current_period_end
-          ? new Date(subscription.current_period_end * 1000).toISOString()
+        const periodEnd = stripeSub.current_period_end
+          ? new Date(stripeSub.current_period_end * 1000).toISOString()
           : null
         const status =
           subscription.status === "active"
