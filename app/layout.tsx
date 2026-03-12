@@ -7,6 +7,7 @@ import { AuthProvider } from "@/components/auth/AuthContext"
 import { AuthProvider as SessionAuthProvider } from "@/components/auth/AuthProvider"
 import { LoginModalWrapper } from "@/components/auth/LoginModalWrapper"
 import { CheckoutResume } from "@/components/auth/CheckoutResume"
+import { IntroModal } from "@/components/marketing/IntroModal"
 import { Inter } from "next/font/google"
 import type { Metadata } from "next"
 import Script from "next/script"
@@ -58,6 +59,9 @@ export default function RootLayout({
                   <LoginModalWrapper />
                 </Suspense>
                 <CheckoutResume />
+                <Suspense fallback={null}>
+                  <IntroModal />
+                </Suspense>
               </DesignConfigProvider>
             </AuthProvider>
           </SessionAuthProvider>

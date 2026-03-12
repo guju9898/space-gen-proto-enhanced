@@ -9,16 +9,28 @@ interface StepFourProps {
   selectedPlan: string
 }
 
-const planDetails: Record<string, { name: string; price: number; credits: number }> = {
+const planDetails: Record<
+  string,
+  { name: string; price: number; credits: number; cadence: string; note?: string }
+> = {
+  intro: {
+    name: "Intro Plan",
+    price: 19.99,
+    credits: 40,
+    cadence: "/ 7 days",
+    note: "Rolls into Professional unless canceled.",
+  },
   professional: {
     name: "Professional",
     price: 98,
     credits: 500,
+    cadence: "/ month",
   },
   business: {
     name: "Business",
     price: 349,
     credits: 6000,
+    cadence: "/ month",
   },
 }
 
@@ -27,7 +39,7 @@ export default function StepFour({ selectedPlan }: StepFourProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const plan = planDetails[selectedPlan] || planDetails.professional
+  const plan = planDetails[selectedPlan] ?? planDetails.professional
 
   const handleCheckout = async () => {
     setIsLoading(true)
@@ -46,6 +58,9 @@ export default function StepFour({ selectedPlan }: StepFourProps) {
         return
       }
 
+      if (selectedPlan === "intro") {
+        // TODO: analytics - intro_checkout_started
+      }
       // Create checkout session
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
@@ -91,16 +106,25 @@ export default function StepFour({ selectedPlan }: StepFourProps) {
       {/* Plan Summary */}
       <div className="max-w-md mx-auto mb-6">
         <div className="bg-gray-800/50 rounded-lg border border-gray-700 p-6">
-          <h3 className="font-bold text-lg mb-4">{plan.name} Plan</h3>
+          <h3 className="font-bold text-lg mb-4">{plan.name}</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-400">Monthly subscription</span>
-              <span className="text-white font-medium">${plan.price.toFixed(2)} / month</span>
+              <span className="text-gray-400">
+                {selectedPlan === "intro" ? "7-day access" : "Billing"}
+              </span>
+              <span className="text-white font-medium">
+                ${plan.price.toFixed(2)} {plan.cadence}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Credits included</span>
-              <span className="text-white font-medium">{plan.credits} per month</span>
+              <span className="text-white font-medium">
+                {plan.credits} {selectedPlan === "intro" ? "for 7 days" : "per month"}
+              </span>
             </div>
+            {plan.note && (
+              <p className="text-xs text-amber-400/90 pt-2">{plan.note}</p>
+            )}
           </div>
         </div>
       </div>

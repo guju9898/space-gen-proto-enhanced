@@ -136,10 +136,58 @@ export async function enforceCredits(userId: string): Promise<CreditEnforcementR
 
     let planId = profile.current_plan
 
+    // Intro plan: credits from user_usage (plan_code=intro, period_end > now)
+    if (planId === "intro") {
+      const { data: introUsageRows } = await supabase
+        .from("user_usage")
+        .select("period_start, credits_allocated, credits_used, period_end")
+        .eq("user_id", userId)
+        .eq("plan_code", "intro")
+        .gt("period_end", nowIso)
+        .limit(1)
+
+      const introRow = introUsageRows?.[0]
+      if (!introRow) {
+        return {
+          allow: false,
+          nearLimit: false,
+          creditsRemaining: 0,
+          periodStart,
+          planId: "intro",
+          monthlyLimit: null,
+          reason: "credits_exhausted",
+        }
+      }
+
+      const allocated =
+        typeof introRow.credits_allocated === "number"
+          ? introRow.credits_allocated
+          : parseFloat(String(introRow.credits_allocated ?? 0))
+      const used =
+        typeof introRow.credits_used === "number"
+          ? introRow.credits_used
+          : parseFloat(String(introRow.credits_used ?? 0))
+      const creditsRemaining = Math.max(0, allocated - used)
+      const nearLimit = creditsRemaining <= allocated * 0.1
+      const introPeriodStart =
+        typeof introRow.period_start === "string"
+          ? introRow.period_start
+          : new Date(introRow.period_start).toISOString()
+
+      return {
+        allow: creditsRemaining > 0,
+        nearLimit,
+        creditsRemaining,
+        periodStart: introPeriodStart,
+        planId: "intro",
+        monthlyLimit: allocated,
+        reason: creditsRemaining > 0 ? undefined : "credits_exhausted",
+      }
+    }
+
     // Defensive whitelist: only 'professional' and 'business' are valid plans
-    if (!planId || !['professional', 'business'].includes(planId)) {
-      // Treat unknown or malformed plans as professional
-      planId = 'professional'
+    if (!planId || !["professional", "business"].includes(planId)) {
+      planId = "professional"
     }
 
     // Business plan is never blocked
@@ -220,6 +268,63 @@ export async function enforceCredits(userId: string): Promise<CreditEnforcementR
       reason: "no_plan",
     }
   }
+}
+
+/**
+ * Consume intro plan credits (updates user_usage row where plan_code='intro' and period_end > now).
+ * Call only when creditCheck.planId === 'intro'.
+ */
+export async function consumeIntroCredit(userId: string, amount: number): Promise<void> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    console.error("❌ Supabase configuration missing for intro credit consumption")
+    throw new Error("Intro credit consumption not configured")
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
+
+  const nowIso = new Date().toISOString()
+  const { data: row } = await supabase
+    .from("user_usage")
+    .select("period_start, credits_allocated, credits_used")
+    .eq("user_id", userId)
+    .eq("plan_code", "intro")
+    .gt("period_end", nowIso)
+    .limit(1)
+    .single()
+
+  if (!row) {
+    throw new Error("Intro credits exhausted or period ended")
+  }
+
+  const used =
+    typeof row.credits_used === "number" ? row.credits_used : parseFloat(String(row.credits_used ?? 0))
+  const allocated =
+    typeof row.credits_allocated === "number"
+      ? row.credits_allocated
+      : parseFloat(String(row.credits_allocated ?? 0))
+  const newUsed = used + amount
+  if (newUsed > allocated) {
+    throw new Error("Intro credits exhausted")
+  }
+
+  const periodStart =
+    typeof row.period_start === "string" ? row.period_start : new Date(row.period_start).toISOString()
+  const { error } = await supabase
+    .from("user_usage")
+    .update({ credits_used: newUsed, updated_at: new Date().toISOString() })
+    .eq("user_id", userId)
+    .eq("period_start", periodStart)
+
+  if (error) {
+    console.error("❌ Error consuming intro credit:", error)
+    throw new Error("Intro credit consumption failed")
+  }
+  console.log(`✅ Intro credit consumed for user ${userId}, amount: ${amount}, total used: ${newUsed}`)
 }
 
 /**

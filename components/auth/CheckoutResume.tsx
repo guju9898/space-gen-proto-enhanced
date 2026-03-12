@@ -27,7 +27,7 @@ export function CheckoutResume() {
       }
 
       // Validate planId
-      if (!["professional", "business"].includes(pendingPlan)) {
+      if (!["intro", "professional", "business"].includes(pendingPlan)) {
         sessionStorage.removeItem("pending_checkout_plan")
         return
       }
@@ -48,8 +48,8 @@ export function CheckoutResume() {
           .eq("id", user.id)
           .single()
 
-        const hasPaidPlan = profile?.current_plan && 
-                          ["professional", "business"].includes(profile.current_plan) &&
+        const hasPaidPlan = profile?.current_plan &&
+                          ["intro", "professional", "business"].includes(profile.current_plan) &&
                           profile.subscription_status === "active"
 
         if (hasPaidPlan) {

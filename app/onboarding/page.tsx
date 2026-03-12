@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic"
 
-import { Suspense, useState } from "react"
+import { Suspense, useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import OnboardingLayout from "@/components/Onboarding/OnboardingLayout"
 import StepOne from "@/components/Onboarding/StepOne"
@@ -16,13 +16,17 @@ function OnboardingContent() {
   const router = useRouter()
 
   const stepParam = searchParams?.get("step")
+  const planParam = searchParams?.get("plan")
   const currentStep = stepParam ? Math.max(1, Math.min(5, parseInt(stepParam, 10) || 1)) : 1
   const totalSteps = 5
 
-  // Form data state
   const [email, setEmail] = useState("")
   const [verificationStatus, setVerificationStatus] = useState<"pending" | "verified" | "failed">("pending")
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(planParam === "intro" ? "intro" : null)
+
+  useEffect(() => {
+    if (currentStep === 3 && planParam === "intro") setSelectedPlan("intro")
+  }, [currentStep, planParam])
 
   // Step titles
   const stepTitles = ["Get Started", "Verify Email", "Choose Your Plan", "Payment Information", "Setup Complete"]

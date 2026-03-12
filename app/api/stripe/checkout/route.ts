@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
+import { createClient } from "@supabase/supabase-js"
 import Stripe from "stripe"
 import { isObject, isString } from "@/lib/types/typeGuards"
+import { getStripePriceId, type PlanCode } from "@/lib/stripe/plans"
 
 export const runtime = "nodejs"
 
@@ -9,6 +11,13 @@ function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY
   if (!key) return null
   return new Stripe(key, { apiVersion: "2025-10-29.clover" })
+}
+
+function getSupabaseService() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) return null
+  return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } })
 }
 
 export async function POST(request: Request) {
@@ -57,21 +66,40 @@ export async function POST(request: Request) {
     planId = isString(bodyData.planId) ? bodyData.planId : undefined
     const { src, rep } = bodyData
 
-    // Validate planId
-    if (!planId || !["professional", "business"].includes(planId)) {
+    // Validate planId (intro | professional | business)
+    const validPlans: PlanCode[] = ["intro", "professional", "business"]
+    if (!planId || !validPlans.includes(planId as PlanCode)) {
       return NextResponse.json(
-        { error: "Invalid planId. Must be 'professional' or 'business'" },
+        { error: "Invalid planId. Must be 'intro', 'professional', or 'business'" },
         { status: 400 }
       )
     }
 
-    // Map planId to Stripe price ID
-    const priceId =
-      planId === "professional"
-        ? process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO
-        : process.env.NEXT_PUBLIC_STRIPE_PRICE_BUSINESS
+    // Intro eligibility: only first-time; check intro_offer_claims
+    if (planId === "intro") {
+      const supabaseService = getSupabaseService()
+      if (!supabaseService) {
+        return NextResponse.json(
+          { error: "Server configuration error" },
+          { status: 503 }
+        )
+      }
+      const { data: existing } = await supabaseService
+        .from("intro_offer_claims")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle()
+      if (existing) {
+        return NextResponse.json(
+          { error: "Intro offer already claimed. Choose Professional or Business." },
+          { status: 403 }
+        )
+      }
+    }
 
-    if (!priceId || typeof priceId !== "string" || priceId.trim() === "") {
+    // Map planId to Stripe price ID (server-side env)
+    const priceId = getStripePriceId(planId)
+    if (!priceId || priceId.trim() === "") {
       console.error("❌ Stripe price ID missing or invalid for plan:", planId)
       return NextResponse.json(
         { error: "Stripe price ID not configured for this plan" },
@@ -118,7 +146,17 @@ export async function POST(request: Request) {
     console.log("  userId:", user.id)
     console.log("  userEmail:", user.email)
 
-    // Create checkout session
+    const metadata: Record<string, string> = {
+      userId: user.id,
+      planId,
+      ...(src ? { src: isObject(src) ? JSON.stringify(src) : String(src) } : {}),
+      ...(rep ? { rep: isObject(rep) ? JSON.stringify(rep) : String(rep) } : {}),
+    }
+    if (planId === "intro") {
+      metadata.rollover_plan = "professional"
+      metadata.intro_credits = "40"
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: [
@@ -129,12 +167,7 @@ export async function POST(request: Request) {
       ],
       client_reference_id: user.id,
       customer_email: user.email || undefined,
-      metadata: {
-        userId: user.id,
-        planId,
-        ...(src ? { src: isObject(src) ? JSON.stringify(src) : String(src) } : {}),
-        ...(rep ? { rep: isObject(rep) ? JSON.stringify(rep) : String(rep) } : {}),
-      },
+      metadata,
       success_url: successUrl,
       cancel_url: cancelUrl,
     })

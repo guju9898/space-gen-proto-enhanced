@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { generateImageFromOpenRouter } from "@/lib/api/generateImageFromOpenRouter"
-import { enforceCredits, consumeCredit, consumeDemoCredit, recordRenderEvent } from "@/lib/usage/enforceCredits"
+import { enforceCredits, consumeCredit, consumeDemoCredit, consumeIntroCredit, recordRenderEvent } from "@/lib/usage/enforceCredits"
 import { isString, isObject } from "@/lib/types/typeGuards"
 
 export const runtime = "nodejs"
@@ -114,6 +114,8 @@ export async function POST(request: Request) {
       // Only consume credits if this is the first time we've seen this render_id
       if (creditCheck.planId === "demo") {
         await consumeDemoCredit(user.id, creditCost)
+      } else if (creditCheck.planId === "intro") {
+        await consumeIntroCredit(user.id, creditCost)
       } else {
         await consumeCredit(user.id, creditCheck.periodStart, creditCost)
       }

@@ -7,6 +7,7 @@ import { LoginRedirectHandler } from "@/components/auth/LoginRedirectHandler"
 import { RedirectIfAuthenticated } from "@/components/auth/RedirectIfAuthenticated"
 import ComparisonTable from "@/components/ComparisonTable"
 import { RenderspaceBeforeAfterSlider } from "@/components/RenderspaceBeforeAfterSlider"
+import RoiCalculator from "@/components/RoiCalculator"
 
 export default function Home() {
   return (
@@ -56,16 +57,27 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">Visualize in Seconds. Win More Projects</h1>
+        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
+          Win More Projects in the First Meeting
+          <span className="block mt-1">Show Clients a Photorealistic Design in 30 Seconds</span>
+        </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-          Create client-ready interior, exterior, and landscape concepts in minutes — before plans, permits, or materials.
+          Upload a jobsite photo, generate a client-ready concept on the spot, and help homeowners visualize the upgrade instantly.
         </p>
-        <Link
-          href="/studio"
-          className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-6 py-3 rounded-md font-medium"
-        >
-          Redesign Your Space <ChevronRight className="w-4 h-4" />
-        </Link>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link
+            href="/onboarding"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-6 py-3 rounded-md font-medium"
+          >
+            Redesign Now <ChevronRight className="w-4 h-4" />
+          </Link>
+          <Link
+            href="/mockup-method"
+            className="inline-flex items-center border border-white/30 hover:bg-white/10 transition-all text-white px-6 py-3 rounded-md font-medium"
+          >
+            See How It Works
+          </Link>
+        </div>
         <p className="text-xs text-muted-foreground mt-3 text-center">No credit card required</p>
 
         {/* Featured Renders */}
@@ -304,6 +316,43 @@ export default function Home() {
         <p className="text-muted-foreground max-w-2xl mx-auto mb-12 text-center">
           Find the perfect plan for your design needs, from one-time projects to professional use
         </p>
+
+        {/* Tripwire Banner */}
+        <div className="max-w-3xl mx-auto rounded-xl border border-[#343434] bg-[#191f33]/60 p-5 mb-6 text-center relative">
+          <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-amber-600 text-white text-xs px-2.5 py-0.5 rounded-full font-medium">
+            First Job Test
+          </span>
+          <p className="text-sm text-muted-foreground">
+            New here? Try Renderspace on a real job for <span className="font-semibold text-white">$19.99</span>
+          </p>
+          <p className="text-sm text-muted-foreground mt-1">40 credits • 7 days • perfect for your next estimate</p>
+          <p className="text-xs text-muted-foreground mt-2">Automatically upgrades to Professional if you decide to continue.</p>
+          <Link
+            href="/onboarding?plan=starter"
+            className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-4 py-2 rounded-md text-sm font-medium"
+          >
+            Try 40 Credits for $19.99
+          </Link>
+        </div>
+
+        {/* Value Anchor Block */}
+        <div className="max-w-3xl mx-auto rounded-xl border border-[#343434] bg-[#191f33] p-6 mb-10 text-center">
+          <h3 className="text-xl md:text-2xl font-semibold text-white">
+            One render can help close a <span className="font-semibold text-white">$20,000</span> project
+          </h3>
+          <p className="text-muted-foreground mt-2">
+            Renderspace costs less than <span className="font-semibold text-white">0.5%</span> of a single job.
+          </p>
+        </div>
+
+        {/* ROI Calculator */}
+        <h3 className="text-2xl md:text-3xl font-bold mb-2 text-white text-center">
+          What could one better closing rate mean for your business?
+        </h3>
+        <p className="text-muted-foreground max-w-2xl mx-auto mb-8 text-center">
+          Even small improvements in client visualization can dramatically increase project approvals.
+        </p>
+        <RoiCalculator />
 
         <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
           {/* Professional Plan */}
