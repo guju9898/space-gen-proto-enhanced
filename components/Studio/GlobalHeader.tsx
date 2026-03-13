@@ -24,7 +24,7 @@ const studioTypes: { type: StudioType; name: string; path: string; icon: React.R
 
 const navLinks = [
   { name: 'Studio', path: '/studio' },
-  { name: 'My Projects', path: '/projects' },
+  { name: 'My Projects', path: '/studio/projects' },
   { name: 'Subscription', path: '/subscription' }
 ];
 

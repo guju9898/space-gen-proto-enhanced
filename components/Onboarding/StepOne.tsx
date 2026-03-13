@@ -29,7 +29,7 @@ export default function StepOne({ email, setEmail }: StepOneProps) {
       const { error: signInError } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/onboarding?step=3")}`,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       })
       if (signInError) {

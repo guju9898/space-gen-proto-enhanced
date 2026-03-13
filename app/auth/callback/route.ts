@@ -20,7 +20,7 @@ function safeRedirectPath(raw: string | null | undefined): string | null {
 
 /**
  * Redirect destination after successful auth.
- * Priority: auth_redirect_next cookie → next query param → /studio/interior
+ * Priority: auth_redirect_next cookie → next query param → /studio/exterior
  */
 async function getRedirectPath(request: Request): Promise<string> {
   const requestUrl = new URL(request.url)
@@ -31,7 +31,7 @@ async function getRedirectPath(request: Request): Promise<string> {
   const queryNext = requestUrl.searchParams.get("next")
   const fromQuery = safeRedirectPath(queryNext)
   if (fromQuery) return fromQuery
-  return "/studio/interior"
+  return "/studio/exterior"
 }
 
 export async function GET(request: Request) {
@@ -39,6 +39,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url)
     const code = url.searchParams.get("code")
     const token_hash = url.searchParams.get("token_hash")
+    const type = url.searchParams.get("type") as "email" | "magiclink" | null
 
     const supabase = await createSupabaseServerClient()
 
@@ -50,7 +51,7 @@ export async function GET(request: Request) {
       flowUsed = "token_hash"
       const result = await supabase.auth.verifyOtp({
         token_hash,
-        type: "email",
+        type: type === "magiclink" ? "magiclink" : "email",
       })
       error = result.error
       authUser = result.data?.user ?? null
