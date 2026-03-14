@@ -1,7 +1,6 @@
 "use client"
 
 import type { Project } from "@/lib/projects/types"
-import { ProjectCard } from "./ProjectCard"
 
 export interface ProjectsGridProps {
   projects: Project[]
@@ -19,13 +18,39 @@ export function ProjectsGrid({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {projects.map((project) => (
-        <ProjectCard
+        <div
           key={project.id}
-          project={project}
-          onRename={onRename}
-          onDelete={onDelete}
-          onDownloadLatest={onDownloadLatest}
-        />
+          className="rounded-lg border border-border bg-card p-4"
+        >
+          <div className="aspect-[4/3] bg-muted rounded mb-3" />
+          <h3 className="font-medium text-foreground truncate">{project.name}</h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            {project.renderCount} render{project.renderCount !== 1 ? "s" : ""}
+          </p>
+          <div className="flex gap-2 mt-3">
+            <button
+              type="button"
+              className="text-xs text-primary hover:underline"
+              onClick={() => onRename(project)}
+            >
+              Rename
+            </button>
+            <button
+              type="button"
+              className="text-xs text-destructive hover:underline"
+              onClick={() => onDelete(project)}
+            >
+              Delete
+            </button>
+            <button
+              type="button"
+              className="text-xs text-muted-foreground hover:underline"
+              onClick={() => onDownloadLatest(project)}
+            >
+              Download
+            </button>
+          </div>
+        </div>
       ))}
     </div>
   )
