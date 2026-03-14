@@ -14,8 +14,10 @@ export interface Project {
   renderCount: number
   updatedAt: string
   createdAt: string
-  /** Future: shareable slug for renderspace.ai/view/[shareSlug] */
+  /** Shareable slug for /view/[slug] */
   shareSlug?: string | null
+  /** Whether the project is publicly shared */
+  isShared?: boolean
 }
 
 export interface ProjectRender {
@@ -27,8 +29,15 @@ export interface ProjectRender {
   thumbnailUrl: string | null
   sourceImageUrl: string | null
   promptSummary: string | null
+  creditsUsed?: number | null
   createdAt: string
 }
+
+/**
+ * Database column names (Supabase):
+ * projects: id, user_id, name, project_type, cover_image, share_slug, is_shared, created_at, updated_at
+ * project_renders: id, project_id, user_id, studio_type, image_url, thumbnail_url, source_image_url, prompt_summary, credits_used, created_at
+ */
 
 export type SortOption = "updated_desc" | "created_desc" | "created_asc"
 

@@ -10,8 +10,10 @@ import { ProjectsEmptyState } from "@/components/Studio/projects/ProjectsEmptySt
 import { ProjectsSkeleton } from "@/components/Studio/projects/ProjectsSkeleton"
 import { RenameProjectDialog } from "@/components/Studio/projects/RenameProjectDialog"
 import { DeleteProjectDialog } from "@/components/Studio/projects/DeleteProjectDialog"
+import { ShareProjectDialog } from "@/components/Studio/projects/ShareProjectDialog"
 import { getProjects } from "@/lib/projects/get-projects"
 import { downloadImage } from "@/lib/projects/utils"
+import { renameProject, deleteProject, toggleProjectShare } from "@/app/studio/projects/actions"
 import type { Project, SortOption } from "@/lib/projects/types"
 
 export default function StudioProjectsPage() {
@@ -21,8 +23,9 @@ export default function StudioProjectsPage() {
   const [search, setSearch] = useState("")
   const [projectTypeFilter, setProjectTypeFilter] = useState("all")
   const [sort, setSort] = useState<SortOption>("updated_desc")
-  const [renameProject, setRenameProject] = useState<Project | null>(null)
-  const [deleteProject, setDeleteProject] = useState<Project | null>(null)
+  const [renameProjectState, setRenameProjectState] = useState<Project | null>(null)
+  const [deleteProjectState, setDeleteProjectState] = useState<Project | null>(null)
+  const [shareProject, setShareProject] = useState<Project | null>(null)
 
   const loadProjects = useCallback(
     async (uid: string) => {
@@ -63,17 +66,34 @@ export default function StudioProjectsPage() {
   }, [userId, search, projectTypeFilter, sort])
 
   async function handleRename(projectId: string, newName: string) {
+    const result = await renameProject(projectId, newName)
+    if (result.error) throw new Error(result.error)
     setProjects((prev) =>
       prev.map((p) =>
         p.id === projectId ? { ...p, name: newName, updatedAt: new Date().toISOString() } : p
       )
     )
-    setRenameProject(null)
+    setRenameProjectState(null)
   }
 
   async function handleDelete(projectId: string) {
+    const result = await deleteProject(projectId)
+    if (result.error) throw new Error(result.error)
     setProjects((prev) => prev.filter((p) => p.id !== projectId))
-    setDeleteProject(null)
+    setDeleteProjectState(null)
+  }
+
+  async function handleToggleShare(projectId: string) {
+    const result = await toggleProjectShare(projectId)
+    if (result.error) return result
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === projectId
+          ? { ...p, shareSlug: result.shareSlug ?? p.shareSlug, isShared: result.isShared ?? p.isShared }
+          : p
+      )
+    )
+    return result
   }
 
   function handleDownloadLatest(project: Project) {
@@ -104,23 +124,30 @@ export default function StudioProjectsPage() {
         ) : (
           <ProjectsGrid
             projects={projects}
-            onRename={setRenameProject}
-            onDelete={setDeleteProject}
+            onRename={setRenameProjectState}
+            onDelete={setDeleteProjectState}
             onDownloadLatest={handleDownloadLatest}
+            onShare={setShareProject}
           />
         )}
       </main>
       <RenameProjectDialog
-        project={renameProject}
-        open={!!renameProject}
-        onOpenChange={(open) => !open && setRenameProject(null)}
+        project={renameProjectState}
+        open={!!renameProjectState}
+        onOpenChange={(open) => !open && setRenameProjectState(null)}
         onRename={handleRename}
       />
       <DeleteProjectDialog
-        project={deleteProject}
-        open={!!deleteProject}
-        onOpenChange={(open) => !open && setDeleteProject(null)}
+        project={deleteProjectState}
+        open={!!deleteProjectState}
+        onOpenChange={(open) => !open && setDeleteProjectState(null)}
         onConfirm={handleDelete}
+      />
+      <ShareProjectDialog
+        project={shareProject}
+        open={!!shareProject}
+        onOpenChange={(open) => !open && setShareProject(null)}
+        onToggleShare={handleToggleShare}
       />
     </div>
   )

@@ -7,6 +7,7 @@ export interface ProjectsGridProps {
   onRename: (project: Project) => void
   onDelete: (project: Project) => void
   onDownloadLatest: (project: Project) => void
+  onShare?: (project: Project) => void
 }
 
 export function ProjectsGrid({
@@ -14,6 +15,7 @@ export function ProjectsGrid({
   onRename,
   onDelete,
   onDownloadLatest,
+  onShare,
 }: ProjectsGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -27,7 +29,16 @@ export function ProjectsGrid({
           <p className="text-xs text-muted-foreground mt-1">
             {project.renderCount} render{project.renderCount !== 1 ? "s" : ""}
           </p>
-          <div className="flex gap-2 mt-3">
+          <div className="flex flex-wrap gap-2 mt-3">
+            {onShare && (
+              <button
+                type="button"
+                className="text-xs text-muted-foreground hover:underline"
+                onClick={() => onShare(project)}
+              >
+                Share
+              </button>
+            )}
             <button
               type="button"
               className="text-xs text-primary hover:underline"

@@ -21,6 +21,8 @@ export function getMockProjects(userId: string): Project[] {
       renderCount: 4,
       updatedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
       createdAt: new Date(Date.now() - 86400000 * 14).toISOString(),
+      shareSlug: null,
+      isShared: false,
     },
     {
       id: "proj-2",
@@ -31,6 +33,8 @@ export function getMockProjects(userId: string): Project[] {
       renderCount: 2,
       updatedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
       createdAt: new Date(Date.now() - 86400000 * 21).toISOString(),
+      shareSlug: null,
+      isShared: false,
     },
     {
       id: "proj-3",
@@ -41,6 +45,8 @@ export function getMockProjects(userId: string): Project[] {
       renderCount: 6,
       updatedAt: now,
       createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+      shareSlug: null,
+      isShared: false,
     },
     {
       id: "proj-4",
@@ -51,6 +57,8 @@ export function getMockProjects(userId: string): Project[] {
       renderCount: 1,
       updatedAt: new Date(Date.now() - 86400000 * 7).toISOString(),
       createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
+      shareSlug: null,
+      isShared: false,
     },
   ]
 }
