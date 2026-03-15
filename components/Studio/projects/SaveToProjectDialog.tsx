@@ -45,7 +45,7 @@ export function SaveToProjectDialog({
         imageUrl,
         sourceImageUrl
       )
-      if (result.error) {
+      if ("error" in result) {
         setError(result.error)
         return
       }

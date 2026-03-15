@@ -51,14 +51,12 @@ export function CreateMockupDialog({
         propertyAddress: propertyAddress.trim() || null,
         message: message.trim() || null,
       })
-      if (result.error) {
+      if ("error" in result) {
         setError(result.error)
         return
       }
-      if (result.slug) {
-        setSlug(result.slug)
-        onSuccess?.()
-      }
+      setSlug(result.slug)
+      onSuccess?.()
     } finally {
       setLoading(false)
     }
