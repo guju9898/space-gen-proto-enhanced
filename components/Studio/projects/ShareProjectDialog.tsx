@@ -16,14 +16,16 @@ export interface ShareProjectDialogProps {
   project: Project | null
   open: boolean
   onOpenChange: (open: boolean) => void
-  onToggleShare: (projectId: string) => Promise<{ shareSlug?: string | null; isShared?: boolean; error?: string }>
+  onEnableShare: (projectId: string) => Promise<{ slug?: string; error?: string }>
+  onDisableShare: (projectId: string) => Promise<{ error?: string }>
 }
 
 export function ShareProjectDialog({
   project,
   open,
   onOpenChange,
-  onToggleShare,
+  onEnableShare,
+  onDisableShare,
 }: ShareProjectDialogProps) {
   const [isShared, setIsShared] = useState(false)
   const [shareSlug, setShareSlug] = useState<string | null>(null)
@@ -39,18 +41,36 @@ export function ShareProjectDialog({
     }
   }, [project])
 
-  async function handleToggle() {
+  async function handleTurnOn() {
     if (!project) return
     setLoading(true)
     setError(null)
     try {
-      const result = await onToggleShare(project.id)
+      const result = await onEnableShare(project.id)
       if (result.error) {
         setError(result.error)
         return
       }
-      if (result.isShared !== undefined) setIsShared(result.isShared)
-      if (result.shareSlug !== undefined) setShareSlug(result.shareSlug)
+      if (result.slug) {
+        setShareSlug(result.slug)
+        setIsShared(true)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleTurnOff() {
+    if (!project) return
+    setLoading(true)
+    setError(null)
+    try {
+      const result = await onDisableShare(project.id)
+      if (result.error) {
+        setError(result.error)
+        return
+      }
+      setIsShared(false)
     } finally {
       setLoading(false)
     }
@@ -89,15 +109,15 @@ export function ShareProjectDialog({
             Allow anyone with the link to view this project&apos;s renders.
           </p>
           <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/30 p-3">
-            <span className="text-sm font-medium">Public link</span>
+            <span className="text-sm font-medium">Share link</span>
             <Button
               type="button"
               variant={isShared ? "secondary" : "default"}
               size="sm"
               disabled={loading}
-              onClick={handleToggle}
+              onClick={isShared ? handleTurnOff : handleTurnOn}
             >
-              {loading ? "…" : isShared ? "Stop sharing" : "Turn on"}
+              {loading ? "…" : isShared ? "Turn off" : "Turn on"}
             </Button>
           </div>
           {isShared && shareSlug && (

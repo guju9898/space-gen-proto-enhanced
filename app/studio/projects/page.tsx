@@ -13,7 +13,7 @@ import { DeleteProjectDialog } from "@/components/Studio/projects/DeleteProjectD
 import { ShareProjectDialog } from "@/components/Studio/projects/ShareProjectDialog"
 import { getProjects } from "@/lib/projects/get-projects"
 import { downloadImage } from "@/lib/projects/utils"
-import { renameProject, deleteProject, toggleProjectShare } from "@/app/studio/projects/actions"
+import { renameProject, deleteProject, enableProjectShare, disableProjectShare } from "@/app/studio/projects/actions"
 import type { Project, SortOption } from "@/lib/projects/types"
 
 export default function StudioProjectsPage() {
@@ -83,17 +83,26 @@ export default function StudioProjectsPage() {
     setDeleteProjectState(null)
   }
 
-  async function handleToggleShare(projectId: string) {
-    const result = await toggleProjectShare(projectId)
-    if (result.error) return result
+  async function handleEnableShare(projectId: string) {
+    const result = await enableProjectShare(projectId)
+    if ("error" in result) return result
     setProjects((prev) =>
       prev.map((p) =>
-        p.id === projectId
-          ? { ...p, shareSlug: result.shareSlug ?? p.shareSlug, isShared: result.isShared ?? p.isShared }
-          : p
+        p.id === projectId ? { ...p, shareSlug: result.slug, isShared: true } : p
       )
     )
-    return result
+    return { slug: result.slug }
+  }
+
+  async function handleDisableShare(projectId: string) {
+    const result = await disableProjectShare(projectId)
+    if ("error" in result) return result
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === projectId ? { ...p, isShared: false } : p
+      )
+    )
+    return {}
   }
 
   function handleDownloadLatest(project: Project) {
@@ -147,7 +156,8 @@ export default function StudioProjectsPage() {
         project={shareProject}
         open={!!shareProject}
         onOpenChange={(open) => !open && setShareProject(null)}
-        onToggleShare={handleToggleShare}
+        onEnableShare={handleEnableShare}
+        onDisableShare={handleDisableShare}
       />
     </div>
   )

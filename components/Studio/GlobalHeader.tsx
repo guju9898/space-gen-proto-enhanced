@@ -28,11 +28,16 @@ const navLinks = [
   { name: 'Subscription', path: '/subscription' }
 ];
 
-export function GlobalHeader() {
+interface GlobalHeaderProps {
+  demoMode?: boolean;
+}
+
+export function GlobalHeader({ demoMode }: GlobalHeaderProps = {}) {
   const { config, setActiveStudio } = useDesignConfig();
   const pathname = usePathname();
   const router = useRouter();
   const { user, openLoginModal } = useAuth();
+  const links = demoMode ? navLinks.filter((l) => l.path === '/studio') : navLinks;
 
   const handleLogOut = async () => {
     const supabase = createClient();
@@ -51,7 +56,7 @@ export function GlobalHeader() {
               {studioTypes.map(({ type, name, path, icon }) => (
                 <Link
                   key={type}
-                  href={path}
+                  href={demoMode ? `${path}?demo=true` : path}
                   className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${
                     pathname?.startsWith(path)
                       ? 'bg-background text-foreground shadow-sm'
@@ -68,7 +73,7 @@ export function GlobalHeader() {
 
           {/* Center: Navigation Links */}
           <div className="flex items-center gap-8">
-            {navLinks.map(({ name, path }) => (
+            {links.map(({ name, path }) => (
               <Link
                 key={path}
                 href={path}

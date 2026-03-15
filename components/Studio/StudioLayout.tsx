@@ -4,14 +4,16 @@ import { Suspense } from 'react';
 import { useDesignConfig } from '@/hooks/useDesignConfig';
 import { GlobalHeader } from './GlobalHeader';
 import { CheckoutSuccessDialog } from './CheckoutSuccessDialog';
+import { DemoBanner } from '@/components/demo/DemoBanner';
 
 interface StudioLayoutProps {
   formContent: React.ReactNode;
   previewContent: React.ReactNode;
   requestContent: React.ReactNode;
+  demoMode?: boolean;
 }
 
-export function StudioLayout({ formContent, previewContent, requestContent }: StudioLayoutProps) {
+export function StudioLayout({ formContent, previewContent, requestContent, demoMode }: StudioLayoutProps) {
   const { interior } = useDesignConfig();
 
   if (!interior) {
@@ -24,7 +26,8 @@ export function StudioLayout({ formContent, previewContent, requestContent }: St
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
-      <GlobalHeader />
+      <GlobalHeader demoMode={demoMode} />
+      {demoMode && <DemoBanner />}
       <Suspense fallback={null}>
         <CheckoutSuccessDialog />
       </Suspense>

@@ -3,15 +3,97 @@ import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { generateImageFromOpenRouter } from "@/lib/api/generateImageFromOpenRouter"
 import { enforceCredits, consumeCredit, consumeDemoCredit, consumeIntroCredit, recordRenderEvent } from "@/lib/usage/enforceCredits"
 import { isString, isObject } from "@/lib/types/typeGuards"
+import {
+  getDemoSupabase,
+  getClientIp,
+  getCookieId,
+  isValidDemoEmail,
+  checkDemoLimit,
+  incrementDemoUsage,
+  DEMO_LIMIT,
+} from "@/lib/demo/usage"
 
 export const runtime = "nodejs"
 
 export async function POST(request: Request) {
   try {
-    // Initialize Supabase server client (reads auth from cookies)
-    const supabase = await createSupabaseServerClient()
+    const body = (await request.json()) as unknown
+    if (!isObject(body)) {
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 }
+      )
+    }
 
-    // Authenticate user from cookies
+    const bodyTyped = body as {
+      prompt?: unknown
+      image?: unknown
+      renderType?: unknown
+      renderId?: unknown
+      demo?: unknown
+      demoEmail?: unknown
+    }
+
+    // Demo mode: no auth, enforce demo_usage limit
+    if (bodyTyped.demo === true && isString(bodyTyped.demoEmail)) {
+      const email = bodyTyped.demoEmail.trim().toLowerCase()
+      if (!isValidDemoEmail(bodyTyped.demoEmail)) {
+        return NextResponse.json(
+          { error: "Invalid email address" },
+          { status: 400 }
+        )
+      }
+      const supabaseDemo = getDemoSupabase()
+      if (!supabaseDemo) {
+        return NextResponse.json(
+          { error: "Demo mode is not configured" },
+          { status: 503 }
+        )
+      }
+      const ip = getClientIp(request)
+      const cookieId = getCookieId(request)
+      const { allowed } = await checkDemoLimit(supabaseDemo, email, ip, cookieId)
+      if (!allowed) {
+        return NextResponse.json(
+          { error: "Demo limit reached" },
+          { status: 429 }
+        )
+      }
+      if (!isString(bodyTyped.prompt) || !isString(bodyTyped.renderType)) {
+        return NextResponse.json(
+          { error: "Missing required fields: prompt and renderType" },
+          { status: 400 }
+        )
+      }
+      if (bodyTyped.renderType !== "exterior" && bodyTyped.renderType !== "landscape") {
+        return NextResponse.json(
+          { error: "Invalid renderType. Must be 'exterior' or 'landscape'" },
+          { status: 400 }
+        )
+      }
+      const imageUrl = await generateImageFromOpenRouter({
+        prompt: bodyTyped.prompt,
+        image: isString(bodyTyped.image) ? bodyTyped.image : null,
+        renderType: bodyTyped.renderType,
+      })
+      if (!imageUrl?.trim()) {
+        return NextResponse.json(
+          { error: "Failed to generate image" },
+          { status: 500 }
+        )
+      }
+      const newRendersUsed = await incrementDemoUsage(supabaseDemo, email, ip, cookieId)
+      const rendersRemaining = Math.max(0, DEMO_LIMIT - newRendersUsed)
+      return NextResponse.json({
+        imageUrl,
+        timestamp: new Date().toISOString(),
+        rendersRemaining,
+        rendersUsed: newRendersUsed,
+      })
+    }
+
+    // Authenticated flow
+    const supabase = await createSupabaseServerClient()
     const {
       data: { user },
       error: authError,
@@ -24,11 +106,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // Enforce credits BEFORE generation
     const creditCheck = await enforceCredits(user.id)
-
     if (!creditCheck.allow) {
-      // Return specific error reason for UI to display contextual message
       const errorMessage = creditCheck.reason || "capacity_reached"
       return NextResponse.json(
         { error: errorMessage },
@@ -36,21 +115,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const body = await request.json() as unknown
-
-    if (!isObject(body)) {
-      return NextResponse.json(
-        { error: "Invalid request body" },
-        { status: 400 }
-      )
-    }
-
-    const { prompt, image, renderType, renderId } = body as {
-      prompt?: unknown
-      image?: unknown
-      renderType?: unknown
-      renderId?: unknown
-    }
+    const { prompt, image, renderType, renderId } = bodyTyped
 
     // Validate renderId for idempotency
     if (!isString(renderId)) {

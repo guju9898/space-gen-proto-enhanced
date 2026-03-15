@@ -3,6 +3,15 @@ import Replicate from "replicate"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { enforceCredits, consumeCredit, consumeDemoCredit, consumeIntroCredit, recordRenderEvent } from "@/lib/usage/enforceCredits"
 import { isString, isObject } from "@/lib/types/typeGuards"
+import {
+  getDemoSupabase,
+  getClientIp,
+  getCookieId,
+  isValidDemoEmail,
+  checkDemoLimit,
+  incrementDemoUsage,
+  DEMO_LIMIT,
+} from "@/lib/demo/usage"
 
 export const runtime = "nodejs"
 
@@ -36,10 +45,111 @@ export async function POST(req: Request) {
         { status: 503 }
       )
     }
-    // Initialize Supabase server client (reads auth from cookies)
-    const supabase = await createSupabaseServerClient()
 
-    // Authenticate user from cookies
+    const body = (await req.json()) as unknown
+    if (!isObject(body)) {
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 }
+      )
+    }
+
+    const bodyTyped = body as {
+      prompt?: unknown
+      imageUrl?: unknown
+      realism?: unknown
+      renderId?: unknown
+      demo?: unknown
+      demoEmail?: unknown
+    }
+
+    // Demo mode: no auth, enforce demo_usage limit by email/IP/cookie
+    if (bodyTyped.demo === true && isString(bodyTyped.demoEmail)) {
+      const email = bodyTyped.demoEmail.trim().toLowerCase()
+      if (!isValidDemoEmail(bodyTyped.demoEmail)) {
+        return NextResponse.json(
+          { error: "Invalid email address" },
+          { status: 400 }
+        )
+      }
+      const supabaseDemo = getDemoSupabase()
+      if (!supabaseDemo) {
+        return NextResponse.json(
+          { error: "Demo mode is not configured" },
+          { status: 503 }
+        )
+      }
+      const ip = getClientIp(req)
+      const cookieId = getCookieId(req)
+      const { allowed } = await checkDemoLimit(supabaseDemo, email, ip, cookieId)
+      if (!allowed) {
+        return NextResponse.json(
+          { error: "Demo limit reached" },
+          { status: 429 }
+        )
+      }
+      if (!isString(bodyTyped.prompt) || bodyTyped.prompt.trim().length === 0) {
+        return NextResponse.json(
+          { error: "prompt is required" },
+          { status: 400 }
+        )
+      }
+      if (!isString(bodyTyped.imageUrl) || !bodyTyped.imageUrl.startsWith("http")) {
+        return NextResponse.json(
+          { error: "imageUrl is required" },
+          { status: 400 }
+        )
+      }
+      const guidance_scale = typeof bodyTyped.realism === "number" ? bodyTyped.realism / 10 : 7
+      const imageResponse = await fetch(bodyTyped.imageUrl)
+      if (!imageResponse.ok) {
+        throw new Error("Failed to fetch reference image")
+      }
+      const imageBuffer = await imageResponse.arrayBuffer()
+      const result = await replicate.run(
+        "adirik/interior-design:76604baddc85b1b4616e1c6475eca080da339c8875bd4996705440484a6eac38",
+        {
+          input: {
+            image: Buffer.from(imageBuffer),
+            prompt: bodyTyped.prompt.trim(),
+            guidance_scale,
+            num_inference_steps: 30,
+          },
+        }
+      )
+      let generatedImageUrl: string
+      if (result instanceof ReadableStream) {
+        generatedImageUrl = await streamToBase64(result)
+      } else if (Array.isArray(result) && typeof result[0] === "string") {
+        generatedImageUrl = result[0]
+      } else if (
+        typeof result === "object" &&
+        result !== null &&
+        "output" in result &&
+        (result as { output: unknown }).output instanceof ReadableStream
+      ) {
+        generatedImageUrl = await streamToBase64((result as { output: ReadableStream }).output)
+      } else {
+        console.error("Unexpected Replicate output:", result)
+        throw new Error("Unexpected Replicate output format")
+      }
+      if (!generatedImageUrl?.trim()) {
+        return NextResponse.json(
+          { error: "Generated image URL is invalid" },
+          { status: 500 }
+        )
+      }
+      const newRendersUsed = await incrementDemoUsage(supabaseDemo, email, ip, cookieId)
+      const rendersRemaining = Math.max(0, DEMO_LIMIT - newRendersUsed)
+      return NextResponse.json({
+        imageUrl: generatedImageUrl,
+        rendersRemaining,
+        rendersUsed: newRendersUsed,
+      })
+    }
+
+    // Authenticated flow
+    const supabase = await createSupabaseServerClient()
     const {
       data: { user },
       error: authError,
@@ -52,11 +162,8 @@ export async function POST(req: Request) {
       )
     }
 
-    // Enforce credits BEFORE generation
     const creditCheck = await enforceCredits(user.id)
-
     if (!creditCheck.allow) {
-      // Return specific error reason for UI to display contextual message
       const errorMessage = creditCheck.reason || "capacity_reached"
       return NextResponse.json(
         { error: errorMessage },
@@ -64,17 +171,7 @@ export async function POST(req: Request) {
       )
     }
 
-    // Parse request body after auth check
-    const body = await req.json() as unknown
-
-    if (!isObject(body)) {
-      return NextResponse.json(
-        { error: "Invalid request body" },
-        { status: 400 }
-      )
-    }
-
-    const { prompt, imageUrl, realism, renderId } = body as {
+    const { prompt, imageUrl, realism, renderId } = bodyTyped as {
       prompt?: unknown
       imageUrl?: unknown
       realism?: unknown

@@ -78,7 +78,6 @@ export default function Home() {
             See How It Works
           </Link>
         </div>
-        <p className="text-xs text-muted-foreground mt-3 text-center">No credit card required</p>
 
         {/* Featured Renders */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-16 max-w-4xl mx-auto">

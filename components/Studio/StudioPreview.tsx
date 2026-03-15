@@ -11,6 +11,7 @@ interface StudioPreviewProps {
   isRendering?: boolean
   isLoading?: boolean
   onThumbnailClick: (renderUrl: string) => void
+  demoMode?: boolean
 }
 
 function RenderStatus({ isRendering }: { isRendering: boolean }) {
@@ -62,6 +63,7 @@ export function StudioPreview({
   isRendering,
   isLoading,
   onThumbnailClick,
+  demoMode,
 }: StudioPreviewProps) {
   const [mounted, setMounted] = useState(false);
   const rendering = isRendering ?? isLoading ?? false;
@@ -128,7 +130,7 @@ export function StudioPreview({
         </div>
       </div>
 
-      {latestRenders.length > 0 && (
+      {latestRenders.length > 0 && !demoMode && (
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Previous Renders</h3>
           <div className="grid grid-cols-2 gap-4">

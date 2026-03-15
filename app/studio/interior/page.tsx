@@ -57,8 +57,18 @@ import { cn } from "@/lib/utils"
 import { interiorDefaults } from "@/lib/studio/defaults"
 import { getCreditErrorMessage } from "@/lib/usage/errorMessages"
 import { useAuth } from "@/components/auth/AuthContext"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
+import { DemoEmailGate } from "@/components/demo/DemoEmailGate"
+import { DemoLimitModal } from "@/components/demo/DemoLimitModal"
+import { COOKIE_NAME, DEMO_EMAIL_COOKIE } from "@/lib/demo/usage"
+import { RenderActionsBar } from "@/components/Studio/RenderActionsBar"
+import { SaveToProjectDialog } from "@/components/Studio/projects/SaveToProjectDialog"
+import { ShareProjectDialog } from "@/components/Studio/projects/ShareProjectDialog"
+import { CreateMockupDialog } from "@/components/Studio/projects/CreateMockupDialog"
+import { downloadImage } from "@/lib/projects/utils"
+import { enableProjectShare, disableProjectShare } from "@/app/studio/projects/actions"
+import type { Project } from "@/lib/projects/types"
 
 interface ImageState {
   file: File | null;
@@ -67,6 +77,8 @@ interface ImageState {
 }
 
 export default function InteriorStudioPage() {
+  const searchParams = useSearchParams()
+  const demoMode = searchParams.get("demo") === "true"
   const { config, updateConfig } = useInteriorConfig()
   const { status: authStatus, openLoginModal } = useAuth()
   const pathname = usePathname()
@@ -79,6 +91,15 @@ export default function InteriorStudioPage() {
   const [isUploading, setIsUploading] = useState(false)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [creditsRemaining, setCreditsRemaining] = useState<number | null>(null)
+  const [demoEmail, setDemoEmail] = useState<string | null>(null)
+  const [showEmailGate, setShowEmailGate] = useState(false)
+  const [rendersRemaining, setRendersRemaining] = useState<number>(5)
+  const [showLimitModal, setShowLimitModal] = useState(false)
+  const [lastSavedProject, setLastSavedProject] = useState<Project | null>(null)
+  const [lastSavedRenderId, setLastSavedRenderId] = useState<string | null>(null)
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false)
+  const [shareProject, setShareProject] = useState<Project | null>(null)
+  const [mockupDialogOpen, setMockupDialogOpen] = useState(false)
 
   const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const
   const MAX_IMAGE_SIZE = 10 * 1024 * 1024
@@ -86,10 +107,34 @@ export default function InteriorStudioPage() {
   // Handle client-side initialization
   useEffect(() => {
     setMounted(true)
-    // Initialize state with default values to prevent hydration mismatch
     updateConfig(interiorDefaults)
+    if (typeof document !== "undefined") {
+      const match = document.cookie.match(new RegExp(`${DEMO_EMAIL_COOKIE.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}=([^;]+)`))
+      if (match) {
+        try {
+          const email = decodeURIComponent(match[1].trim())
+          if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) setDemoEmail(email)
+        } catch (_) {}
+      }
+      const saved = sessionStorage.getItem("renderspace_demo_renders")
+      if (saved) {
+        try {
+          const { current, latest } = JSON.parse(saved) as { current?: string; latest?: string[] }
+          if (current) setCurrentRender(current)
+          if (Array.isArray(latest) && latest.length) setLatestRenders(latest)
+        } catch (_) {}
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    if (!demoMode || typeof sessionStorage === "undefined") return
+    sessionStorage.setItem(
+      "renderspace_demo_renders",
+      JSON.stringify({ current: currentRender, latest: latestRenders })
+    )
+  }, [demoMode, currentRender, latestRenders])
 
   // Cleanup preview URLs on unmount or when previewUrl changes
   useEffect(() => {
@@ -100,6 +145,14 @@ export default function InteriorStudioPage() {
     }
   }, [imageState?.previewUrl])
 
+  const setDemoCookie = () => {
+    if (typeof document === "undefined") return
+    const existing = document.cookie.match(new RegExp(`${COOKIE_NAME}=([^;]+)`))
+    if (existing) return
+    const id = crypto.randomUUID()
+    document.cookie = `${COOKIE_NAME}=${encodeURIComponent(id)}; path=/; max-age=2592000`
+  }
+
   // Early return during SSR
   if (!mounted) {
     return (
@@ -107,6 +160,7 @@ export default function InteriorStudioPage() {
         formContent={<FormPanel><div className="h-[800px]" /></FormPanel>}
         previewContent={<div className="h-[600px]" />}
         requestContent={<div className="h-[100px]" />}
+        demoMode={demoMode}
       />
     )
   }
@@ -169,53 +223,66 @@ export default function InteriorStudioPage() {
   }
 
   const handleGenerate = async (config: Record<string, any>) => {
-    if (authStatus === "initializing") {
-      return
-    }
-    if (authStatus === "unauthenticated") {
-      openLoginModal(pathname ?? "/studio/interior")
-      return
-    }
-
-    // Frontend guard: Interior Studio requires a reference image URL
-    const imageUrl = imageState?.uploadedUrl || (isString(config.image) && 
-      config.image.startsWith("http") ? config.image : null)
-    
+    const imageUrl = imageState?.uploadedUrl || (isString(config.image) && config.image.startsWith("http") ? config.image : null)
     if (!imageUrl || !imageUrl.startsWith("http")) {
       setError("Upload a room photo to generate.")
       return
     }
 
+    if (demoMode) {
+      if (!demoEmail) {
+        setShowEmailGate(true)
+        return
+      }
+      if (rendersRemaining <= 0) {
+        setShowLimitModal(true)
+        return
+      }
+    } else {
+      if (authStatus === "initializing") return
+      if (authStatus === "unauthenticated") {
+        openLoginModal(pathname ?? "/studio/interior")
+        return
+      }
+    }
+
     setError(null)
-    setIsRendering(true);
+    setIsRendering(true)
 
     try {
-      // Generate unique render_id for idempotency
       const renderId = crypto.randomUUID()
+      const finalPrompt = buildPrompt(config)
 
-      // Build prompt using existing function
-      const finalPrompt = buildPrompt(config);
+      const body: Record<string, unknown> = {
+        prompt: finalPrompt,
+        imageUrl,
+        realism: config.realism ?? 50,
+        renderId,
+      }
+      if (demoMode && demoEmail) {
+        body.demo = true
+        body.demoEmail = demoEmail
+      }
 
       const response = await fetch("/api/generate-replicate", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: finalPrompt,
-          imageUrl: imageUrl,
-          realism: config.realism ?? 50,
-          renderId: renderId,
-        }),
+        body: JSON.stringify(body),
       })
 
       if (!response.ok) {
-        const err = await response.json()
+        const err = await response.json().catch(() => ({}))
+        if (response.status === 429 && demoMode) {
+          setShowLimitModal(true)
+          setRendersRemaining(0)
+          return
+        }
         if (response.status === 401) {
           openLoginModal(pathname ?? "/studio/interior")
           throw new Error("Please log in to generate images.")
         }
-        // Map API error codes to user-friendly messages
-        const errorMessage = response.status === 402 
+        const errorMessage = response.status === 402
           ? getCreditErrorMessage(err.error)
           : (err.error || "Interior generation failed")
         throw new Error(errorMessage)
@@ -223,26 +290,27 @@ export default function InteriorStudioPage() {
 
       const data = await response.json()
       const generatedImageUrl = data.imageUrl
-      
-      // Update credits remaining from API response
-      if (data.usage?.creditsRemaining !== undefined) {
+
+      if (demoMode && data.rendersRemaining !== undefined) {
+        setRendersRemaining(data.rendersRemaining)
+      }
+      if (!demoMode && data.usage?.creditsRemaining !== undefined) {
         setCreditsRemaining(data.usage.creditsRemaining)
       }
-      
+
       if (generatedImageUrl) {
-        console.log("✅ Image generated:", generatedImageUrl);
-        setCurrentRender(generatedImageUrl);
-        setLatestRenders(prev => [generatedImageUrl, ...prev].slice(0, 4));
+        setCurrentRender(generatedImageUrl)
+        setLatestRenders(prev => [generatedImageUrl, ...prev].slice(0, 4))
       } else {
-        console.error('Failed to generate image: No URL returned from API');
+        console.error("Failed to generate image: No URL returned from API")
       }
     } catch (error) {
-      console.error("❌ Generation error:", error);
+      console.error("❌ Generation error:", error)
       setError(error instanceof Error ? error.message : "Interior generation failed")
     }
 
-    setIsRendering(false);
-  };
+    setIsRendering(false)
+  }
 
   const handleThumbnailClick = (renderUrl: string) => {
     setCurrentRender(renderUrl)
@@ -554,22 +622,27 @@ export default function InteriorStudioPage() {
             </div>
           )}
           
-          {/* Credits Display */}
-          <div className="pt-4 space-y-2">
-            {creditsRemaining !== null && (
-              <div className="text-sm text-muted-foreground">
-                Credits remaining: <span className="font-medium text-foreground">{creditsRemaining}</span>
+          {demoMode ? (
+            <div className="pt-4 text-sm text-muted-foreground">
+              You have <span className="font-medium text-foreground">{rendersRemaining}</span> demo render{rendersRemaining !== 1 ? "s" : ""} remaining.
+            </div>
+          ) : (
+            <div className="pt-4 space-y-2">
+              {creditsRemaining !== null && (
+                <div className="text-sm text-muted-foreground">
+                  Credits remaining: <span className="font-medium text-foreground">{creditsRemaining}</span>
+                </div>
+              )}
+              <div className="text-xs text-muted-foreground">
+                This render uses 1.0 credits
               </div>
-            )}
-            <div className="text-xs text-muted-foreground">
-              This render uses 1.0 credits
+              <div className="text-xs text-muted-foreground italic">
+                Credits are only deducted after a successful render appears.
+              </div>
             </div>
-            <div className="text-xs text-muted-foreground italic">
-              Credits are only deducted after a successful render appears.
-            </div>
-          </div>
+          )}
 
-          <FirstPaidSessionHint className="mt-4" />
+          {!demoMode && <FirstPaidSessionHint className="mt-4" />}
           <div className="pt-4 border-t border-border">
             <Button 
               className={cn(
@@ -582,16 +655,18 @@ export default function InteriorStudioPage() {
               )}
               onClick={() => handleGenerate(config)}
               disabled={
-                authStatus === "initializing" ||
+                (demoMode ? rendersRemaining <= 0 : authStatus === "initializing") ||
                 isRendering ||
                 !(imageState?.uploadedUrl || (isString(config.image) && config.image.startsWith("http")))
               }
             >
-              {authStatus === "initializing"
+              {authStatus === "initializing" && !demoMode
                 ? "Checking..."
                 : isRendering
                   ? "Generating..."
-                  : "Generate"}
+                  : demoMode && rendersRemaining <= 0
+                    ? "Demo limit reached"
+                    : "Generate"}
             </Button>
           </div>
         </div>
@@ -600,13 +675,27 @@ export default function InteriorStudioPage() {
   )
 
   const previewContent = (
-    <div className="bg-card rounded-lg border border-border p-6">
+    <div className="bg-card rounded-lg border border-border p-6 space-y-4">
       <StudioPreview
         currentRender={currentRender}
         latestRenders={latestRenders}
         isRendering={isRendering}
         onThumbnailClick={handleThumbnailClick}
+        demoMode={demoMode}
       />
+      {!demoMode && (
+        <RenderActionsBar
+          currentRenderUrl={currentRender}
+          projectType="interior"
+          hasSavedProject={!!lastSavedProject}
+          onDownload={() => {
+            if (currentRender) downloadImage(currentRender, "interior-render.png")
+          }}
+          onSaveToProject={() => setSaveDialogOpen(true)}
+          onShareProject={() => lastSavedProject && setShareProject(lastSavedProject)}
+          onCreateMockup={() => setMockupDialogOpen(true)}
+        />
+      )}
     </div>
   )
 
@@ -618,10 +707,87 @@ export default function InteriorStudioPage() {
   )
 
   return (
-    <StudioLayout
-      formContent={formContent}
-      previewContent={previewContent}
-      requestContent={requestContent}
-    />
+    <>
+      <StudioLayout
+        formContent={formContent}
+        previewContent={previewContent}
+        requestContent={requestContent}
+        demoMode={demoMode}
+      />
+      {!demoMode && (
+        <>
+          <SaveToProjectDialog
+            open={saveDialogOpen}
+            onOpenChange={setSaveDialogOpen}
+            projectType="interior"
+            imageUrl={currentRender ?? ""}
+            sourceImageUrl={imageState?.uploadedUrl ?? (config && isString(config.image) && config.image ? String(config.image) : null)}
+            onSuccess={(projectId, renderId, projectName) => {
+              const now = new Date().toISOString()
+              setLastSavedProject({
+                id: projectId,
+                userId: "",
+                name: projectName,
+                projectType: "interior",
+                coverImageUrl: currentRender,
+                renderCount: 1,
+                updatedAt: now,
+                createdAt: now,
+                shareSlug: null,
+                isShared: false,
+              })
+              setLastSavedRenderId(renderId)
+            }}
+          />
+          <ShareProjectDialog
+            project={shareProject}
+            open={!!shareProject}
+            onOpenChange={(open) => !open && setShareProject(null)}
+            onEnableShare={async (projectId) => {
+              const result = await enableProjectShare(projectId)
+              if ("error" in result) return result
+              if (lastSavedProject && lastSavedProject.id === projectId) {
+                setLastSavedProject((p) => (p ? { ...p, shareSlug: result.slug, isShared: true } : p))
+              }
+              setShareProject((p) => (p && p.id === projectId ? { ...p, shareSlug: result.slug, isShared: true } : p))
+              return { slug: result.slug }
+            }}
+            onDisableShare={async (projectId) => {
+              const result = await disableProjectShare(projectId)
+              if ("error" in result) return result
+              if (lastSavedProject && lastSavedProject.id === projectId) {
+                setLastSavedProject((p) => (p ? { ...p, isShared: false } : p))
+              }
+              setShareProject((p) => (p && p.id === projectId ? { ...p, isShared: false } : p))
+              return {}
+            }}
+          />
+          <CreateMockupDialog
+            open={mockupDialogOpen}
+            onOpenChange={setMockupDialogOpen}
+            renderId={lastSavedRenderId}
+          />
+        </>
+      )}
+      {demoMode && (
+        <>
+          <DemoEmailGate
+            open={showEmailGate}
+            onContinue={(email) => {
+              setDemoEmail(email)
+              setShowEmailGate(false)
+              setDemoCookie()
+              fetch(`/api/demo-render?email=${encodeURIComponent(email)}`, { credentials: "include" })
+                .then((r) => r.json())
+                .then((d) => {
+                  if (typeof d.rendersRemaining === "number") setRendersRemaining(d.rendersRemaining)
+                })
+                .catch(() => {})
+            }}
+          />
+          <DemoLimitModal open={showLimitModal} onClose={() => setShowLimitModal(false)} />
+        </>
+      )}
+    </>
   )
 } 
