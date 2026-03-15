@@ -81,7 +81,7 @@ interface ImageState {
 
 export default function LandscapeStudioPage() {
   const searchParams = useSearchParams()
-  const demoMode = searchParams.get("demo") === "true"
+  const demoMode = searchParams?.get("demo") === "true"
   const { landscape, updateConfig, setActiveStudio } = useDesignConfig()
   const { status: authStatus, openLoginModal } = useAuth()
   const pathname = usePathname()

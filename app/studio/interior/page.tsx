@@ -78,7 +78,7 @@ interface ImageState {
 
 export default function InteriorStudioPage() {
   const searchParams = useSearchParams()
-  const demoMode = searchParams.get("demo") === "true"
+  const demoMode = searchParams?.get("demo") === "true"
   const { config, updateConfig } = useInteriorConfig()
   const { status: authStatus, openLoginModal } = useAuth()
   const pathname = usePathname()

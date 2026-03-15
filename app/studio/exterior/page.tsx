@@ -73,7 +73,7 @@ interface ImageState {
 
 export default function ExteriorStudioPage() {
   const searchParams = useSearchParams()
-  const demoMode = searchParams.get("demo") === "true"
+  const demoMode = searchParams?.get("demo") === "true"
   const { exterior, updateConfig, setActiveStudio } = useDesignConfig()
   const { status: authStatus, openLoginModal } = useAuth()
   const pathname = usePathname()
