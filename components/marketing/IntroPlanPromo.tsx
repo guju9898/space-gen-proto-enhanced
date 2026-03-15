@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button"
 const STORAGE_KEY = "renderspace_promo_hidden"
 const DELAY_MS = 5000
 
+const MARKETING_PATHS = ["/", "/gallery", "/pricing", "/faq", "/contractor-demo", "/mockup-method"]
+
 export function IntroPlanPromo() {
   const pathname = usePathname()
   const [visible, setVisible] = useState(false)
@@ -25,12 +27,12 @@ export function IntroPlanPromo() {
       return
     }
 
+    const isMarketingPage = pathname != null && MARKETING_PATHS.includes(pathname)
     const isContractorDemo = pathname === "/contractor-demo"
     const isDemoMode =
-      typeof window !== "undefined" &&
       pathname?.startsWith("/studio") &&
-      new URLSearchParams(window.location.search).get("demo") === "true"
-    if (isContractorDemo || isDemoMode) {
+      new URLSearchParams(typeof window !== "undefined" ? window.location.search : "").get("demo") === "true"
+    if (isMarketingPage || isContractorDemo || isDemoMode) {
       setVisible(true)
       return
     }
