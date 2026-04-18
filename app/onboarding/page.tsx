@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic"
 
-import { Suspense, useState, useEffect } from "react"
+import { Suspense, useState, useLayoutEffect, useCallback } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import OnboardingLayout from "@/components/Onboarding/OnboardingLayout"
 import StepOne from "@/components/Onboarding/StepOne"
@@ -10,6 +10,24 @@ import StepTwo from "@/components/Onboarding/StepTwo"
 import StepThree from "@/components/Onboarding/StepThree"
 import StepFour from "@/components/Onboarding/StepFour"
 import StepFive from "@/components/Onboarding/StepFive"
+
+/** Canonical plan ids used by StepThree / Stripe — ignore unknown query values. */
+type OnboardingPlanId = "intro" | "professional" | "business"
+
+function normalizePlanFromQuery(raw: string | null | undefined): OnboardingPlanId | null {
+  if (raw == null) return null
+  const p = raw.trim().toLowerCase()
+  if (p === "intro" || p === "professional" || p === "business") return p
+  return null
+}
+
+function buildOnboardingHref(step: number, plan: string | null | undefined) {
+  const u = new URLSearchParams()
+  u.set("step", String(step))
+  const canonical = normalizePlanFromQuery(plan ?? null)
+  if (canonical) u.set("plan", canonical)
+  return `/onboarding?${u.toString()}`
+}
 
 function OnboardingContent() {
   const searchParams = useSearchParams()
@@ -22,25 +40,33 @@ function OnboardingContent() {
 
   const [email, setEmail] = useState("")
   const [verificationStatus, setVerificationStatus] = useState<"pending" | "verified" | "failed">("pending")
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(planParam === "intro" ? "intro" : null)
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (currentStep === 3 && planParam === "intro") setSelectedPlan("intro")
-  }, [currentStep, planParam])
+  // Hydrate from URL before paint so step 3 shows the correct selection immediately (direct load + client nav + refresh).
+  useLayoutEffect(() => {
+    const fromUrl = normalizePlanFromQuery(planParam)
+    if (fromUrl !== null) {
+      setSelectedPlan(fromUrl)
+    }
+  }, [planParam])
 
   // Step titles
   const stepTitles = ["Get Started", "Verify Email", "Choose Your Plan", "Payment Information", "Setup Complete"]
 
-  // Navigation handlers
+  const planForUrl = useCallback(() => {
+    return normalizePlanFromQuery(selectedPlan) ?? normalizePlanFromQuery(planParam)
+  }, [selectedPlan, planParam])
+
+  // Navigation handlers — keep `plan` in the URL when we have one so refresh / remount does not drop deep-linked selection.
   const handleNext = () => {
     if (currentStep < totalSteps) {
-      router.push(`/onboarding?step=${currentStep + 1}`)
+      router.push(buildOnboardingHref(currentStep + 1, planForUrl()))
     }
   }
 
   const handleBack = () => {
     if (currentStep > 1) {
-      router.push(`/onboarding?step=${currentStep - 1}`)
+      router.push(buildOnboardingHref(currentStep - 1, planForUrl()))
     }
   }
 

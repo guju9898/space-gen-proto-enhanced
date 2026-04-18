@@ -63,6 +63,13 @@ async function uploadToImgBB(file: File): Promise<string | null> {
   }
 }
 
+function sanitizePromptValue(raw: string): string {
+  if (!raw) return ""
+  // Remove newlines/control chars, trim, and clamp length
+  const cleaned = raw.replace(/[\r\n\t]+/g, " ").replace(/\s+/g, " ").trim()
+  return cleaned.length > 120 ? cleaned.slice(0, 117).trimEnd() + "..." : cleaned
+}
+
 export function buildPrompt(config: Record<string, any>): string {
   // Map config keys to their corresponding prompt prefixes
   const promptPrefixes: Record<string, string> = {
@@ -117,10 +124,16 @@ export function buildPrompt(config: Record<string, any>): string {
     })
     .map(([key, value]) => {
       const prefix = promptPrefixes[key];
-      const promptPart = `${prefix} ${value}`.trim();
+      const safeValue = sanitizePromptValue(value);
+      if (!safeValue) {
+        console.log(`⏭️ Skipping empty sanitized value for ${key}`);
+        return "";
+      }
+      const promptPart = `${prefix} ${safeValue}`.trim();
       console.log(`✅ Adding to prompt: ${key} -> ${promptPart}`);
       return promptPart;
     })
+    .filter(Boolean)
     .join(', ');
 
   const basePrompt = "professional architectural photography, 8k uhd, highly detailed";

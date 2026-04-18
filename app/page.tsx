@@ -1,13 +1,14 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Suspense } from "react"
-import { ChevronDown, ChevronRight, Menu } from "lucide-react"
+import { ChevronRight, Menu } from "lucide-react"
 import { LoginButton } from "@/components/auth/LoginButton"
 import { LoginRedirectHandler } from "@/components/auth/LoginRedirectHandler"
 import { RedirectIfAuthenticated } from "@/components/auth/RedirectIfAuthenticated"
 import ComparisonTable from "@/components/ComparisonTable"
 import { RenderspaceBeforeAfterSlider } from "@/components/RenderspaceBeforeAfterSlider"
 import RoiCalculator from "@/components/RoiCalculator"
+import { HomepageFAQ } from "@/components/HomepageFAQ"
 
 export default function Home() {
   return (
@@ -120,10 +121,7 @@ export default function Home() {
 
       {/* Space Gen Section */}
       <section className="container mx-auto px-4 py-16 text-center">
-        <h2 className="text-2xl md:text-3xl font-bold mb-2 text-primary">Renderspace:</h2>
-        <h3 className="text-2xl md:text-3xl font-bold mb-4 text-white">Transform, Redesign and Refine</h3>
-        <h4 className="text-xl md:text-2xl font-bold mb-8 text-white">Your Personal and Commercial Spaces</h4>
-        <p className="text-muted-foreground max-w-2xl mx-auto mb-12">
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
           Our AI-powered platform helps you create professional design visualizations quickly. Generate concept renders
           tailored to your project needs.
         </p>
@@ -480,30 +478,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section id="faq" className="container mx-auto px-4 py-16">
-        <h2 className="text-2xl md:text-3xl font-bold mb-12 text-white text-center">FAQ</h2>
-
-        <div className="max-w-3xl mx-auto space-y-4">
-          {[
-            "Questions about using Renderspace?",
-            "What is Renderspace best used for?",
-            "Can I customize the generated designs?",
-            "What file formats do you support?",
-            "How many designs can I generate?",
-            "Can I use the designs commercially?",
-            "What payment methods do you accept?",
-            "Can I cancel my subscription?",
-          ].map((question, i) => (
-            <div key={i} className="border border-[#343434] rounded-lg overflow-hidden">
-              <button className="w-full flex justify-between items-center p-4 text-left text-white">
-                <span>{question}</span>
-                <ChevronDown className="w-5 h-5 text-muted-foreground" />
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
+      <HomepageFAQ />
 
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-16">
@@ -615,7 +590,7 @@ export default function Home() {
           </div>
 
           <div className="text-center text-xs text-muted-foreground">
-            <p>© 2023 Renderspace. All rights reserved.</p>
+            <p>© 2026 Renderspace. All rights reserved.</p>
           </div>
         </div>
       </footer>

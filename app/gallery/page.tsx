@@ -25,6 +25,12 @@ export default function GalleryPage() {
           <Link href="/faq" className="text-sm text-muted-foreground hover:text-white">
             FAQ
           </Link>
+          <Link href="/contractor-demo" className="text-sm text-muted-foreground hover:text-white">
+            Demo
+          </Link>
+          <Link href="/mockup-method" className="text-sm text-muted-foreground hover:text-white">
+            Mockup Method
+          </Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
@@ -46,13 +52,13 @@ export default function GalleryPage() {
 
       {/* Gallery Hero */}
       <section className="container mx-auto px-4 py-12 md:py-16">
-        <h1 className="text-4xl md:text-5xl font-bold mb-12 text-white text-center">Explore designs from the Renderspace community</h1>
+        <h1 className="text-4xl md:text-5xl font-bold mb-2 text-white text-center">Explore designs from the Renderspace community</h1>
+        <p className="text-muted-foreground text-center mb-12">All images below are real Renderspace outputs—no stock photos.</p>
 
         {/* Gallery Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Row 1 */}
           <div className="relative rounded-xl overflow-hidden">
-            <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">Before</div>
             <Image
               src="/gallery/replace-1.jpg"
               alt="Living room before redesign"
@@ -62,7 +68,6 @@ export default function GalleryPage() {
             />
           </div>
           <div className="relative rounded-xl overflow-hidden">
-            <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">After</div>
             <Image
               src="/gallery/replace-2.jpg"
               alt="Living room after redesign"
@@ -74,7 +79,6 @@ export default function GalleryPage() {
 
           {/* Row 2 */}
           <div className="relative rounded-xl overflow-hidden">
-            <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">Before</div>
             <Image
               src="/gallery/replace-3.jpg"
               alt="House exterior before redesign"
@@ -84,7 +88,6 @@ export default function GalleryPage() {
             />
           </div>
           <div className="relative rounded-xl overflow-hidden">
-            <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">After</div>
             <Image
               src="/gallery/replace-4.jpg"
               alt="House exterior after redesign"
@@ -96,7 +99,6 @@ export default function GalleryPage() {
 
           {/* Row 3 */}
           <div className="relative rounded-xl overflow-hidden">
-            <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">Before</div>
             <Image
               src="/gallery/replace-5.jpg"
               alt="Patio before redesign"
@@ -106,7 +108,6 @@ export default function GalleryPage() {
             />
           </div>
           <div className="relative rounded-xl overflow-hidden">
-            <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">After</div>
             <Image
               src="/gallery/replace-6.jpg"
               alt="Patio after redesign"
@@ -118,7 +119,6 @@ export default function GalleryPage() {
 
           {/* Row 4 */}
           <div className="relative rounded-xl overflow-hidden">
-            <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">Before</div>
             <Image
               src="/gallery/replace-7.jpg"
               alt="Office before redesign"
@@ -128,7 +128,6 @@ export default function GalleryPage() {
             />
           </div>
           <div className="relative rounded-xl overflow-hidden">
-            <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">After</div>
             <Image
               src="/gallery/replace-8.jpg"
               alt="Office after redesign"
@@ -140,7 +139,6 @@ export default function GalleryPage() {
 
           {/* Row 5 */}
           <div className="relative rounded-xl overflow-hidden">
-            <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">Before</div>
             <Image
               src="/gallery/replace-9.jpg"
               alt="Kitchen before redesign"
@@ -150,7 +148,6 @@ export default function GalleryPage() {
             />
           </div>
           <div className="relative rounded-xl overflow-hidden">
-            <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">After</div>
             <Image
               src="/gallery/replace-10.jpg"
               alt="Kitchen after redesign"
@@ -162,7 +159,6 @@ export default function GalleryPage() {
 
           {/* Row 6 */}
           <div className="relative rounded-xl overflow-hidden">
-            <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">Before</div>
             <Image
               src="/gallery/replace-11.jpg"
               alt="Bedroom before redesign"
@@ -172,7 +168,6 @@ export default function GalleryPage() {
             />
           </div>
           <div className="relative rounded-xl overflow-hidden">
-            <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">After</div>
             <Image
               src="/gallery/replace-12.jpg"
               alt="Bedroom after redesign"

@@ -25,6 +25,12 @@ export default function PricingPage() {
           <Link href="/faq" className="text-sm text-muted-foreground hover:text-white">
             FAQ
           </Link>
+          <Link href="/contractor-demo" className="text-sm text-muted-foreground hover:text-white">
+            Demo
+          </Link>
+          <Link href="/mockup-method" className="text-sm text-muted-foreground hover:text-white">
+            Mockup Method
+          </Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-4">

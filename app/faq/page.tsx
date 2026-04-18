@@ -42,6 +42,8 @@ export default function FAQPage() {
           <Link href="/gallery" className="text-sm text-muted-foreground hover:text-white">Gallery</Link>
           <Link href="/pricing" className="text-sm text-muted-foreground hover:text-white">Pricing</Link>
           <Link href="/faq" className="text-sm text-white hover:text-primary/90">FAQ</Link>
+          <Link href="/contractor-demo" className="text-sm text-muted-foreground hover:text-white">Demo</Link>
+          <Link href="/mockup-method" className="text-sm text-muted-foreground hover:text-white">Mockup Method</Link>
         </nav>
         <div className="hidden md:flex items-center gap-4">
           <Link href="/?login=1" className="text-sm text-white hover:text-primary/90">Log in</Link>

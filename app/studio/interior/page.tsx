@@ -334,7 +334,11 @@ export default function InteriorStudioPage() {
           </div>
         )}
         
-        <FormSection title="Room Settings" icon={Layout}>
+        <FormSection
+          title="Room Settings"
+          icon={Layout}
+          tips="Core space and style choices. These define the type of room and overall design language the AI will follow."
+        >
           <div className="space-y-6">
             <div>
               <ImageOptionGrid
@@ -374,7 +378,11 @@ export default function InteriorStudioPage() {
           </div>
         </FormSection>
 
-        <FormSection title="Visual Composition" icon={Camera}>
+        <FormSection
+          title="Visual Composition"
+          icon={Camera}
+          tips="How the camera frames the space. Adjust these to control perspective and how the room is visually organized."
+        >
           <div className="space-y-6">
             <div>
               <VariableSelect
@@ -512,7 +520,11 @@ export default function InteriorStudioPage() {
           )}
         </div>
 
-        <FormSection title="Materials & Textures" icon={Star}>
+        <FormSection
+          title="Materials & Textures"
+          icon={Star}
+          tips="Surface feel of the space. Use this to guide flooring, finishes, and texture emphasis without changing the layout."
+        >
           <div className="space-y-6">
             <div>
               <VariableSelect
@@ -526,7 +538,11 @@ export default function InteriorStudioPage() {
           </div>
         </FormSection>
 
-        <FormSection title="Lighting & Atmosphere" icon={Lightbulb}>
+        <FormSection
+          title="Lighting & Atmosphere"
+          icon={Lightbulb}
+          tips="Overall mood and light quality. Use this to control how bright, soft, or dramatic the interior feels."
+        >
           <div className="space-y-6">
             <div>
               <VariableSelect
@@ -561,7 +577,11 @@ export default function InteriorStudioPage() {
           </div>
         </FormSection>
 
-        <FormSection title="Architectural Details" icon={Building}>
+        <FormSection
+          title="Architectural Details"
+          icon={Building}
+          tips="Refinements to the bones of the space—geometry, architect influence, and key structural touches."
+        >
           <div className="space-y-6">
             <div>
               <VariableSelect
@@ -578,8 +598,7 @@ export default function InteriorStudioPage() {
                 label="Geometry"
                 value={config?.geometry ?? interiorDefaults.geometry}
                 options={geometries.map(opt => opt.value)}
-                placeholder="Select geometry"
-                allowCustom={false}
+                placeholder="Select or type geometry"
                 onChange={(value) => handleConfigChange("geometry", value)}
               />
             </div>

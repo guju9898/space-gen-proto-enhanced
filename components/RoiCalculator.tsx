@@ -12,13 +12,22 @@ const PLAN_PRICES = {
 
 type PlanKey = keyof typeof PLAN_PRICES
 
+export interface RoiCalculatorProps {
+  /** Override primary CTA destination (e.g. contractor-demo → studio demo). */
+  ctaHref?: string
+  ctaLabel?: string
+}
+
 const PLAN_LABELS: Record<PlanKey, string> = {
   starter: "Starter (Tripwire): $19.99",
   professional: "Professional: $99",
   business: "Business: $349",
 }
 
-export default function RoiCalculator() {
+export default function RoiCalculator({
+  ctaHref = "/onboarding",
+  ctaLabel = "Redesign Now",
+}: RoiCalculatorProps) {
   const [averageProjectValue, setAverageProjectValue] = useState(20000)
   const [projectsPerMonth, setProjectsPerMonth] = useState(6)
   const [closingRateIncrease, setClosingRateIncrease] = useState(10)
@@ -119,10 +128,10 @@ export default function RoiCalculator() {
             If Renderspace helps you close just one extra project every few months, it easily pays for itself.
           </p>
           <Link
-            href="/onboarding"
+            href={ctaHref}
             className="mt-6 inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-6 py-3 rounded-md font-medium w-fit"
           >
-            Redesign Now <ChevronRight className="w-4 h-4" />
+            {ctaLabel} <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
       </div>

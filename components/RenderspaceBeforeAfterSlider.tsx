@@ -1,18 +1,17 @@
 "use client"
 
 import Image from "next/image"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
-type CategoryKey = "landscape" | "exterior" | "interior"
+type DefaultCategoryKey = "landscape" | "exterior" | "interior"
 
-const CATEGORY_CONFIG: Record<
-  CategoryKey,
-  {
-    label: string
-    beforeSrc: string
-    afterSrc: string
-  }
-> = {
+export type BeforeAfterCategoryItem = {
+  label: string
+  beforeSrc: string
+  afterSrc: string
+}
+
+const DEFAULT_CATEGORY_CONFIG: Record<DefaultCategoryKey, BeforeAfterCategoryItem> = {
   landscape: {
     label: "Landscape",
     beforeSrc: "/images/before-landscape.webp",
@@ -30,8 +29,32 @@ const CATEGORY_CONFIG: Record<
   },
 }
 
-export function RenderspaceBeforeAfterSlider() {
-  const [activeCategory, setActiveCategory] = useState<CategoryKey>("landscape")
+const DEFAULT_CATEGORY_ORDER: DefaultCategoryKey[] = ["landscape", "exterior", "interior"]
+
+export interface RenderspaceBeforeAfterSliderProps {
+  /** When set (e.g. contractor demo), tabs and image pairs come from this map instead of the homepage defaults. */
+  categories?: Record<string, BeforeAfterCategoryItem>
+  /** Tab order; should list every key in `categories` when using custom categories. */
+  categoryOrder?: string[]
+}
+
+export function RenderspaceBeforeAfterSlider({
+  categories: categoriesProp,
+  categoryOrder: categoryOrderProp,
+}: RenderspaceBeforeAfterSliderProps = {}) {
+  const categoryConfig: Record<string, BeforeAfterCategoryItem> = (categoriesProp ??
+    DEFAULT_CATEGORY_CONFIG) as Record<string, BeforeAfterCategoryItem>
+  const categoryOrder = useMemo(() => {
+    if (categoriesProp) {
+      if (categoryOrderProp?.length) return categoryOrderProp
+      return Object.keys(categoriesProp)
+    }
+    return DEFAULT_CATEGORY_ORDER as string[]
+  }, [categoriesProp, categoryOrderProp])
+
+  const initialKey = categoryOrder[0] ?? "landscape"
+
+  const [activeCategory, setActiveCategory] = useState<string>(initialKey)
   const [sliderPosition, setSliderPosition] = useState(0.5)
   const [isDragging, setIsDragging] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
@@ -41,7 +64,7 @@ export function RenderspaceBeforeAfterSlider() {
 
   const sliderRef = useRef<HTMLDivElement | null>(null)
 
-  const currentCategory = CATEGORY_CONFIG[activeCategory]
+  const currentCategory = categoryConfig[activeCategory] ?? categoryConfig[initialKey]
 
   const updateSliderFromClientX = (clientX: number) => {
     const slider = sliderRef.current
@@ -143,7 +166,7 @@ export function RenderspaceBeforeAfterSlider() {
     }
   }, [hasNudged, hasInteracted])
 
-  const handleCategoryChange = (category: CategoryKey) => {
+  const handleCategoryChange = (category: string) => {
     if (category === activeCategory) return
     setIsFading(true)
     setTimeout(() => {
@@ -177,17 +200,11 @@ export function RenderspaceBeforeAfterSlider() {
         >
           <Image
             src={currentCategory.afterSrc}
-            alt={
-              activeCategory === "landscape"
-                ? "Landscape after redesign generated with Renderspace"
-                : activeCategory === "exterior"
-                ? "Exterior after redesign generated with Renderspace"
-                : "Interior after redesign generated with Renderspace"
-            }
+            alt={`${currentCategory.label} after redesign generated with Renderspace`}
             fill
             sizes="(min-width: 1280px) 900px, (min-width: 768px) 80vw, 100vw"
             className="object-cover"
-            priority={activeCategory === "landscape"}
+            priority={activeCategory === categoryOrder[0]}
             unoptimized
           />
 
@@ -200,17 +217,11 @@ export function RenderspaceBeforeAfterSlider() {
           >
             <Image
               src={currentCategory.beforeSrc}
-              alt={
-                activeCategory === "landscape"
-                  ? "Landscape before redesign"
-                  : activeCategory === "exterior"
-                  ? "Exterior before redesign"
-                  : "Interior before redesign"
-              }
+              alt={`${currentCategory.label} before redesign`}
               fill
               sizes="(min-width: 1280px) 900px, (min-width: 768px) 80vw, 100vw"
               className="object-cover"
-              priority={activeCategory === "landscape"}
+              priority={activeCategory === categoryOrder[0]}
               unoptimized
             />
           </div>
@@ -249,9 +260,10 @@ export function RenderspaceBeforeAfterSlider() {
         </div>
       </div>
 
-      <div className="inline-flex items-center gap-2 rounded-full bg-[#05060b]/80 p-1 border border-white/10">
-        {(Object.keys(CATEGORY_CONFIG) as CategoryKey[]).map((key) => {
-          const category = CATEGORY_CONFIG[key]
+      <div className="inline-flex flex-wrap items-center justify-center gap-2 rounded-full bg-[#05060b]/80 p-1 border border-white/10">
+        {categoryOrder.map((key) => {
+          const category = categoryConfig[key]
+          if (!category) return null
           const isActive = key === activeCategory
 
           return (

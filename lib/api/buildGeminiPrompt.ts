@@ -6,6 +6,12 @@ function hasValue(value: any): boolean {
   return true
 }
 
+function sanitizeDescriptor(raw: any): string {
+  if (typeof raw !== "string") return ""
+  const cleaned = raw.replace(/[\r\n\t]+/g, " ").replace(/\s+/g, " ").trim()
+  return cleaned.length > 120 ? cleaned.slice(0, 117).trimEnd() + "..." : cleaned
+}
+
 // Helper function to convert numeric realism to descriptive text
 function formatRealism(realism: number | undefined | null): string {
   if (!hasValue(realism)) return ""
@@ -41,27 +47,42 @@ function buildExteriorAdvancedRefinement(advanced: any): string {
   
   // Architect Influence
   if (hasValue(advanced.architectInfluence) && advanced.architectInfluence !== "none") {
-    refinementParts.push(`Architectural influence may subtly echo ${advanced.architectInfluence} without changing the selected style.`)
+    const v = sanitizeDescriptor(advanced.architectInfluence)
+    if (v) {
+      refinementParts.push(`Architectural influence may subtly echo ${v} without changing the selected style.`)
+    }
   }
   
   // Lens
   if (hasValue(advanced.lens) && advanced.lens !== "standard") {
-    refinementParts.push(`Lens behavior should resemble a ${advanced.lens} lens with natural depth and perspective.`)
+    const v = sanitizeDescriptor(advanced.lens)
+    if (v) {
+      refinementParts.push(`Lens behavior should resemble a ${v} lens with natural depth and perspective.`)
+    }
   }
   
   // Geometry
   if (hasValue(advanced.geometry) && advanced.geometry !== "balanced") {
-    refinementParts.push(`Overall form language should feel ${advanced.geometry} while remaining structurally realistic.`)
+    const v = sanitizeDescriptor(advanced.geometry)
+    if (v) {
+      refinementParts.push(`Overall form language should feel ${v} while remaining structurally realistic.`)
+    }
   }
   
   // Symmetry
   if (hasValue(advanced.symmetry) && advanced.symmetry !== "subtle") {
-    refinementParts.push(`Composition may lean toward ${advanced.symmetry} symmetry where appropriate.`)
+    const v = sanitizeDescriptor(advanced.symmetry)
+    if (v) {
+      refinementParts.push(`Composition may lean toward ${v} symmetry where appropriate.`)
+    }
   }
   
   // Mood / Atmosphere
   if (hasValue(advanced.mood) && advanced.mood !== "neutral") {
-    refinementParts.push(`Atmospheric conditions should feel ${advanced.mood} without overpowering the architecture.`)
+    const v = sanitizeDescriptor(advanced.mood)
+    if (v) {
+      refinementParts.push(`Atmospheric conditions should feel ${v} without overpowering the architecture.`)
+    }
   }
   
   if (refinementParts.length === 0) return ""
@@ -77,22 +98,34 @@ function buildLandscapeAdvancedRefinement(advanced: any): string {
   
   // Lens
   if (hasValue(advanced.lens) && advanced.lens !== "standard") {
-    refinementParts.push(`Lens behavior should resemble a ${advanced.lens} lens without visual distortion.`)
+    const v = sanitizeDescriptor(advanced.lens)
+    if (v) {
+      refinementParts.push(`Lens behavior should resemble a ${v} lens without visual distortion.`)
+    }
   }
   
   // Geometry
   if (hasValue(advanced.geometry) && advanced.geometry !== "balanced") {
-    refinementParts.push(`Spatial geometry should feel ${advanced.geometry} while maintaining natural outdoor flow.`)
+    const v = sanitizeDescriptor(advanced.geometry)
+    if (v) {
+      refinementParts.push(`Spatial geometry should feel ${v} while maintaining natural outdoor flow.`)
+    }
   }
   
   // Symmetry
   if (hasValue(advanced.symmetry) && advanced.symmetry !== "subtle") {
-    refinementParts.push(`Planting and layout may lean toward ${advanced.symmetry} symmetry where appropriate.`)
+    const v = sanitizeDescriptor(advanced.symmetry)
+    if (v) {
+      refinementParts.push(`Planting and layout may lean toward ${v} symmetry where appropriate.`)
+    }
   }
   
   // Mood / Atmosphere
   if (hasValue(advanced.mood) && advanced.mood !== "neutral") {
-    refinementParts.push(`The overall atmosphere should feel ${advanced.mood} while preserving realism.`)
+    const v = sanitizeDescriptor(advanced.mood)
+    if (v) {
+      refinementParts.push(`The overall atmosphere should feel ${v} while preserving realism.`)
+    }
   }
   
   if (refinementParts.length === 0) return ""

@@ -341,7 +341,11 @@ export default function ExteriorStudioPage() {
   const formContent = (
     <FormPanel>
       <div className="space-y-10">
-        <FormSection title="Building Settings" icon={Building2}>
+        <FormSection
+          title="Building Settings"
+          icon={Building2}
+          tips="High-level building choices—type, style, and context. These set the main massing and character of the exterior."
+        >
           <div className="space-y-6">
             <div>
               <ImageOptionGrid
@@ -389,7 +393,11 @@ export default function ExteriorStudioPage() {
           </div>
         </FormSection>
 
-        <FormSection title="Visual Design" icon={Palette}>
+        <FormSection
+          title="Visual Design"
+          icon={Palette}
+          tips="Color and aesthetic direction. Use this to set the exterior palette and overall visual feel."
+        >
           <div className="space-y-6">
             <div>
               <VariableSelect
@@ -403,7 +411,11 @@ export default function ExteriorStudioPage() {
           </div>
         </FormSection>
 
-        <FormSection title="Lighting & Time" icon={Sun}>
+        <FormSection
+          title="Lighting & Time"
+          icon={Sun}
+          tips="Time of day and lighting conditions. These influence shadows, contrast, and how the facade reads."
+        >
           <div className="space-y-6">
             <div>
               <VariableSelect
@@ -459,7 +471,10 @@ export default function ExteriorStudioPage() {
           
           {advancedControlsOpen && (
             <div className="space-y-10 mt-4 opacity-90 animate-in fade-in-0 duration-150">
-              <FormSection title="Materials & Details">
+              <FormSection
+                title="Materials & Details"
+                tips="Primary cladding, roofing, and surface details. Adjust these to communicate construction quality and texture."
+              >
                 <div className="space-y-6">
                   <div>
                     <VariableSelect
@@ -482,7 +497,10 @@ export default function ExteriorStudioPage() {
                 </div>
               </FormSection>
 
-              <FormSection title="Furnishings & Details">
+              <FormSection
+                title="Furnishings & Details"
+                tips="Porches, outdoor furniture, and accents that make the exterior feel lived-in and complete."
+              >
                 <div className="space-y-6">
                   <div>
                     <VariableSelect
@@ -505,7 +523,10 @@ export default function ExteriorStudioPage() {
                 </div>
               </FormSection>
 
-              <FormSection title="Views & Context">
+              <FormSection
+                title="Views & Context"
+                tips="Which side of the building is shown and how it sits on the site. Helpful for matching real-world viewpoints."
+              >
                 <div className="space-y-6">
                   <div>
                     <VariableSelect
@@ -519,7 +540,10 @@ export default function ExteriorStudioPage() {
                 </div>
               </FormSection>
 
-              <FormSection title="Focal Design">
+              <FormSection
+                title="Focal Design"
+                tips="What the eye should land on first—entry, roofline, landscaping, or key detail."
+              >
                 <div className="space-y-6">
                   <div>
                     <VariableSelect
@@ -533,7 +557,10 @@ export default function ExteriorStudioPage() {
                 </div>
               </FormSection>
 
-              <FormSection title="Symmetry">
+              <FormSection
+                title="Symmetry"
+                tips="How balanced or dynamic the front elevation feels. Higher symmetry feels more formal; asymmetry feels more contemporary or expressive."
+              >
                 <div className="space-y-6">
                   <div>
                     <VariableSelect
@@ -557,7 +584,10 @@ export default function ExteriorStudioPage() {
                 </div>
               </FormSection>
 
-              <FormSection title="Landscape Integration">
+              <FormSection
+                title="Landscape Integration"
+                tips="Trees, planting, and hardscape that frame the building. Use this to suggest curb appeal without overpowering the architecture."
+              >
                 <div className="space-y-6">
                   <div>
                     <VariableSelect
@@ -590,8 +620,7 @@ export default function ExteriorStudioPage() {
                 <VariableSelect
                   value={exteriorConfig.advanced?.architectInfluence ?? "none"}
                   options={["none", "foster", "gehry", "calatrava", "hadid", "koolhaas"]}
-                  placeholder="Select architect influence"
-                  allowCustom={false}
+                  placeholder="Select or type architect influence"
                   onChange={(value) => updateConfig({ 
                     advanced: { 
                       ...(exteriorConfig.advanced || {}), 
@@ -647,8 +676,7 @@ export default function ExteriorStudioPage() {
                 <VariableSelect
                   value={exteriorConfig.advanced?.geometry ?? "balanced"}
                   options={["balanced", "rectangular", "curved", "angular", "organic"]}
-                  placeholder="Select geometry"
-                  allowCustom={false}
+                  placeholder="Select or type geometry"
                   onChange={(value) => updateConfig({ 
                     advanced: { 
                       ...(exteriorConfig.advanced || {}), 
@@ -674,8 +702,7 @@ export default function ExteriorStudioPage() {
                 <VariableSelect
                   value={exteriorConfig.advanced?.symmetry ?? "subtle"}
                   options={["subtle", "balanced", "asymmetrical", "symmetrical"]}
-                  placeholder="Select symmetry"
-                  allowCustom={false}
+                  placeholder="Select or type symmetry"
                   onChange={(value) => updateConfig({ 
                     advanced: { 
                       ...(exteriorConfig.advanced || {}), 
@@ -701,8 +728,7 @@ export default function ExteriorStudioPage() {
                 <VariableSelect
                   value={exteriorConfig.advanced?.mood ?? "neutral"}
                   options={["neutral", "calm", "dramatic", "serene", "energetic"]}
-                  placeholder="Select mood"
-                  allowCustom={false}
+                  placeholder="Select or type mood"
                   onChange={(value) => updateConfig({ 
                     advanced: { 
                       ...(exteriorConfig.advanced || {}), 
@@ -720,7 +746,11 @@ export default function ExteriorStudioPage() {
             )}
         </div>
 
-        <FormSection title="Reference Image (Optional)" icon={ImageIcon}>
+        <FormSection
+          title="Reference Image (Optional)"
+          icon={ImageIcon}
+          tips="Upload a real photo to anchor proportions and context. The AI will adapt your settings around this image."
+        >
           <div className="space-y-4">
             <p className="text-xs text-muted-foreground mb-2">
               Upload JPG, PNG, or WEBP under 10MB. Higher resolution produces better results.

@@ -327,7 +327,10 @@ export default function LandscapeStudioPage() {
         <FormPanel>
           <div className="space-y-10">
             {/* Essential Controls - Always Visible */}
-            <FormSection title="Project Basics">
+            <FormSection
+              title="Project Basics"
+              tips="Core landscape definition—garden type and theme. These choices set the overall use case and style."
+            >
               <div className="space-y-6">
                 <div>
                   <GridPickerDialog
@@ -354,7 +357,10 @@ export default function LandscapeStudioPage() {
               </div>
             </FormSection>
 
-            <FormSection title="Lighting">
+            <FormSection
+              title="Lighting"
+              tips="Time of day and light quality in the scene. Use this to control mood and visibility of planting and hardscape."
+            >
               <div className="space-y-6">
                 <div>
                   <VariableSelect
@@ -378,7 +384,10 @@ export default function LandscapeStudioPage() {
               </div>
             </FormSection>
 
-            <FormSection title="Hardscape & Water">
+            <FormSection
+              title="Hardscape & Water"
+              tips="Paths, paving, decks, and water features. These elements structure circulation and focal moments."
+            >
               <div className="space-y-6">
                 <div>
                   <VariableSelect
@@ -420,7 +429,10 @@ export default function LandscapeStudioPage() {
               
               {advancedControlsOpen && (
                 <div className="space-y-10 mt-4 opacity-90 animate-in fade-in-0 duration-150">
-                  <FormSection title="Planting">
+                  <FormSection
+                    title="Planting"
+                    tips="Types of plants and how dense they should feel. Great for dialing in lush vs minimal gardens."
+                  >
                     <div className="space-y-6">
                       <div>
                         <VariableSelect
@@ -444,7 +456,10 @@ export default function LandscapeStudioPage() {
                     </div>
                   </FormSection>
 
-                  <FormSection title="Topography">
+                  <FormSection
+                    title="Topography"
+                    tips="Overall shape of the land—flat, sloped, or terraced. Helps the AI understand grading and level changes."
+                  >
                     <div className="space-y-6">
                       <div>
                         <VariableSelect
@@ -458,7 +473,10 @@ export default function LandscapeStudioPage() {
                     </div>
                   </FormSection>
 
-                  <FormSection title="Furniture & Structures">
+                  <FormSection
+                    title="Furniture & Structures"
+                    tips="Built elements like pergolas and seating that make the space usable for people."
+                  >
                     <div className="space-y-6">
                       <div>
                         <VariableSelect
@@ -490,7 +508,10 @@ export default function LandscapeStudioPage() {
                     </div>
                   </FormSection>
 
-                  <FormSection title="Lighting Details">
+                  <FormSection
+                    title="Lighting Details"
+                    tips="How intense the landscape lighting should feel, independent of time of day."
+                  >
                     <div className="space-y-6">
                       <div>
                         <VariableSelect
@@ -505,7 +526,10 @@ export default function LandscapeStudioPage() {
                     </div>
                   </FormSection>
 
-                  <FormSection title="Furniture & Structures">
+                  <FormSection
+                    title="Furniture & Structures"
+                    tips="Additional control over outdoor seating and structures when you need more specificity."
+                  >
                     <div className="space-y-6">
                       <div>
                         <VariableSelect
@@ -537,7 +561,10 @@ export default function LandscapeStudioPage() {
                     </div>
                   </FormSection>
 
-                  <FormSection title="Activity & Interaction">
+                  <FormSection
+                    title="Activity & Interaction"
+                    tips="Play, movement, and interactive elements that define how people use the landscape."
+                  >
                     <div className="space-y-6">
                       <div>
                         <VariableSelect
@@ -560,7 +587,10 @@ export default function LandscapeStudioPage() {
                     </div>
                   </FormSection>
 
-                  <FormSection title="Materials">
+                  <FormSection
+                    title="Materials"
+                    tips="Walls and vertical materials that frame the garden and define boundaries."
+                  >
                     <div className="space-y-6">
                       <div>
                         <VariableSelect
@@ -574,7 +604,10 @@ export default function LandscapeStudioPage() {
                     </div>
                   </FormSection>
 
-                  <FormSection title="Environment / Climate">
+                  <FormSection
+                    title="Environment / Climate"
+                    tips="Climate and weather conditions so the planting and light feel believable for the region."
+                  >
                     <div className="space-y-6">
                       <div>
                         <VariableSelect
@@ -597,7 +630,10 @@ export default function LandscapeStudioPage() {
                     </div>
                   </FormSection>
 
-                  <FormSection title="Visual Framing">
+                  <FormSection
+                    title="Visual Framing"
+                    tips="Overall shape of the space and camera angle. Use this to control how the garden is framed in the shot."
+                  >
                     <div className="space-y-6">
                       <div>
                         <VariableSelect
@@ -640,7 +676,10 @@ export default function LandscapeStudioPage() {
                     </div>
                   </FormSection>
 
-                  <FormSection title="Nature">
+                  <FormSection
+                    title="Nature"
+                    tips="Optional wildlife details like birds or butterflies to add life without cluttering the design."
+                  >
                     <div className="space-y-6">
                       <div>
                         <VariableSelect
@@ -673,8 +712,7 @@ export default function LandscapeStudioPage() {
                         <VariableSelect
                           value={landscapeConfig?.advanced?.architectInfluence ?? "none"}
                           options={["none", "foster", "gehry", "calatrava", "hadid", "koolhaas"]}
-                          placeholder="Select architect influence"
-                          allowCustom={false}
+                          placeholder="Select or type architect influence"
                           onChange={(value) => updateConfig({ 
                             advanced: { 
                               ...(landscapeConfig?.advanced || {}), 
@@ -730,8 +768,7 @@ export default function LandscapeStudioPage() {
                         <VariableSelect
                           value={landscapeConfig?.advanced?.geometry ?? "balanced"}
                           options={["balanced", "rectangular", "curved", "angular", "organic"]}
-                          placeholder="Select geometry"
-                          allowCustom={false}
+                          placeholder="Select or type geometry"
                           onChange={(value) => updateConfig({ 
                             advanced: { 
                               ...(landscapeConfig?.advanced || {}), 
@@ -757,8 +794,7 @@ export default function LandscapeStudioPage() {
                         <VariableSelect
                           value={landscapeConfig?.advanced?.symmetry ?? "subtle"}
                           options={["subtle", "balanced", "asymmetrical", "symmetrical"]}
-                          placeholder="Select symmetry"
-                          allowCustom={false}
+                          placeholder="Select or type symmetry"
                           onChange={(value) => updateConfig({ 
                             advanced: { 
                               ...(landscapeConfig?.advanced || {}), 
@@ -784,8 +820,7 @@ export default function LandscapeStudioPage() {
                         <VariableSelect
                           value={landscapeConfig?.advanced?.mood ?? "neutral"}
                           options={["neutral", "calm", "dramatic", "serene", "energetic"]}
-                          placeholder="Select mood"
-                          allowCustom={false}
+                          placeholder="Select or type mood"
                           onChange={(value) => updateConfig({ 
                             advanced: { 
                               ...(landscapeConfig?.advanced || {}), 
@@ -803,7 +838,10 @@ export default function LandscapeStudioPage() {
               )}
             </div>
 
-            <FormSection title="Reference Image (Optional)">
+            <FormSection
+              title="Reference Image (Optional)"
+              tips="Upload a real photo of the site to ground scale, planting layout, and materials."
+            >
           <div className="space-y-4">
             <p className="text-xs text-muted-foreground mb-2">
               Upload JPG, PNG, or WEBP under 10MB. Higher resolution produces better results.

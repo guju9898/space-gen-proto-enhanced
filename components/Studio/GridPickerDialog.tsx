@@ -67,14 +67,6 @@ export function GridPickerDialog({
         <DialogContent className="max-w-2xl p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold">{label || "Select an option"}</h3>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => setOpen(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
           <div className="grid grid-cols-3 gap-4 max-h-[500px] overflow-y-auto pr-2">
             {options.map((option) => {
