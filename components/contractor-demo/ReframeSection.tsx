@@ -1,11 +1,11 @@
 export function ReframeSection() {
   return (
     <section className="container mx-auto px-4 py-16 md:py-24">
-      <div className="max-w-4xl mx-auto text-center">
+      <div className="max-w-6xl mx-auto text-center">
         <p className="text-primary text-sm font-semibold uppercase tracking-wide mb-3">New Sales Reality</p>
         <h2 className="text-2xl md:text-4xl font-bold text-white mb-10 md:mb-12">Stop Explaining. Start Showing.</h2>
 
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           {/* Zone A — tool description */}
           <div className="text-center">
             <div className="space-y-1.5 mb-10">

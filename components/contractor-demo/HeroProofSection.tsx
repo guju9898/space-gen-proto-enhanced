@@ -38,12 +38,12 @@ export function HeroProofSection({ cityLabel, onClickPremium, onClickDemo }: Her
 
   return (
     <section className="container mx-auto px-4 py-10 md:py-16">
-      <div className="text-center max-w-4xl mx-auto mb-8">
+      <div className="text-center max-w-6xl mx-auto mb-8">
         <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight">
           You&apos;re Not Losing Jobs Because You&apos;re Bad.
           <span className="block mt-2">You&apos;re Losing Them Because They Can&apos;t See It.</span>
         </h1>
-        <p className="text-muted-foreground text-lg mt-5 max-w-3xl mx-auto">
+        <p className="text-muted-foreground text-lg mt-5 max-w-4xl mx-auto">
           Renderspace turns a blank yard into a photorealistic vision in 30 seconds — shown on-site, during the estimate,
           before you leave the driveway. The contractor who shows the vision first wins the job.
         </p>
@@ -69,14 +69,14 @@ export function HeroProofSection({ cityLabel, onClickPremium, onClickDemo }: Her
         </p>
       </div>
 
-      <div className="max-w-3xl mx-auto mb-6 text-center">
+      <div className="max-w-4xl mx-auto mb-6 text-center">
         <h2 className="text-xl md:text-2xl font-semibold text-white">
           This Is What Every Contractor Shows. And This Is What Closes On The Spot.
         </h2>
       </div>
 
       {/* Mobile: before → slider → after | Desktop: three-column side-by-side */}
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-center lg:gap-6 max-w-[1200px] mx-auto w-full">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-center lg:gap-6 max-w-6xl mx-auto w-full">
         <div className="order-1 lg:order-1">
           <CopyBlock title="Before" body={beforeBody} align="before" />
         </div>
@@ -88,7 +88,7 @@ export function HeroProofSection({ cityLabel, onClickPremium, onClickDemo }: Her
         </div>
       </div>
 
-      <p className="mt-6 text-center text-sm text-muted-foreground max-w-2xl mx-auto">
+      <p className="mt-6 text-center text-sm text-muted-foreground max-w-4xl mx-auto">
         These renders were generated in under 30 seconds. From a photo taken on a phone. At an estimate.
       </p>
     </section>

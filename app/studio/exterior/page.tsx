@@ -785,6 +785,15 @@ export default function ExteriorStudioPage() {
                   <p className="text-sm font-medium">{isUploading ? "Uploading..." : "Click to upload"}</p>
                   <p className="text-xs text-muted-foreground">or drag and drop</p>
                 </div>
+                {imageState.previewUrl && (
+                  <div className="mt-4">
+                    <img
+                      src={imageState.previewUrl}
+                      alt="Preview"
+                      className="max-h-48 rounded-lg object-cover"
+                    />
+                  </div>
+                )}
               </label>
             </div>
             <div className="text-xs text-muted-foreground space-y-1">

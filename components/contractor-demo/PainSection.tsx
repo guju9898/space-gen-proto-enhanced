@@ -8,7 +8,7 @@ const narrative = "text-base md:text-lg text-muted-foreground leading-relaxed mb
 export function PainSection({ cityLabel: _cityLabel }: PainSectionProps) {
   return (
     <section className="container mx-auto px-4 py-14">
-      <div className="max-w-4xl mx-auto rounded-xl border border-[#343434] border-l-4 border-l-orange-500 bg-[#191f33]/60 p-10 md:p-12">
+      <div className="max-w-6xl mx-auto rounded-xl border border-[#343434] border-l-4 border-l-orange-500 bg-[#191f33]/60 p-10 md:p-12">
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-10 md:mb-12 leading-tight">
           Here&apos;s What Actually Happening When They Say &quot;Let Me Think About It.&quot;
         </h2>

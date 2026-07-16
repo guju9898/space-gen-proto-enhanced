@@ -7,6 +7,8 @@ import { HeroProofSection } from "./HeroProofSection"
 import { PainSection } from "./PainSection"
 import { ReframeSection } from "./ReframeSection"
 import { ProofStackSection } from "./ProofStackSection"
+import { SocialProofSubstituteSection } from "./SocialProofSubstituteSection"
+import { DemoCTASection } from "./DemoCTASection"
 import { ContractorDemoVideoSection } from "./ContractorDemoVideoSection"
 import { PremiumCTASection } from "./PremiumCTASection"
 import { MailerPreviewSection } from "./MailerPreviewSection"
@@ -60,7 +62,7 @@ export function ContractorDemoPage({ citySlug }: ContractorDemoPageProps) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-white/10">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Image src="/amethyst-flow.png" alt="Renderspace" width={32} height={32} className="w-8 h-8" />
             <span className="font-bold text-lg text-white">Renderspace</span>
@@ -89,6 +91,8 @@ export function ContractorDemoPage({ citySlug }: ContractorDemoPageProps) {
         <ReframeSection />
         <ContractorDemoVideoSection />
         <ProofStackSection />
+        <SocialProofSubstituteSection />
+        <DemoCTASection onClickDemo={handleDemoClick} />
         <PremiumCTASection cityLabel={cityLabel} onClickPremium={handlePremiumClick} />
         <ContractorDemoRoiSection />
         <MailerPreviewSection onViewed={handleMailerViewed} />
@@ -104,7 +108,7 @@ export function ContractorDemoPage({ citySlug }: ContractorDemoPageProps) {
       </main>
 
       <footer className="border-t border-white/10 py-8">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-muted-foreground">
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 text-center text-sm text-muted-foreground">
           <Link href="/" className="hover:text-white transition-colors">
             Renderspace
           </Link>

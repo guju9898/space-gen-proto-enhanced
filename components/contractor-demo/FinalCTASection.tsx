@@ -17,7 +17,7 @@ export function FinalCTASection({
 }: FinalCTASectionProps) {
   return (
     <section className="container mx-auto px-4 py-16">
-      <div className="max-w-4xl mx-auto rounded-xl border border-[#343434] bg-gradient-to-r from-[#9747ff]/20 to-[#8608fd]/20 p-8 text-center">
+      <div className="max-w-6xl mx-auto rounded-xl border border-[#343434] bg-gradient-to-r from-[#9747ff]/20 to-[#8608fd]/20 p-8 text-center">
         <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
           {cityLabel ? `${cityLabel} Contractors: ` : ""}Choose Your Fastest Path To More Closed Jobs
         </h2>

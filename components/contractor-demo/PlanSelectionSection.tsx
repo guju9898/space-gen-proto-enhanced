@@ -8,7 +8,7 @@ interface PlanSelectionSectionProps {
 export function PlanSelectionSection({ onClickBusiness, onClickProfessional }: PlanSelectionSectionProps) {
   return (
     <section className="container mx-auto px-4 py-14">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-3">Prefer To Run It Yourself?</h2>
         <p className="text-muted-foreground text-center mb-8">
           Start self-serve and keep full control. Upgrade to done-for-you when you want speed and leverage.
