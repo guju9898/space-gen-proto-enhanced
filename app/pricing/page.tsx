@@ -31,6 +31,9 @@ export default function PricingPage() {
           <Link href="/mockup-method" className="text-sm text-muted-foreground hover:text-white">
             Mockup Method
           </Link>
+          <Link href="/human-polish" className="text-sm text-muted-foreground hover:text-white">
+            Human Polish™
+          </Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-4">

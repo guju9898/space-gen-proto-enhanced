@@ -74,6 +74,9 @@ export function ContractorDemoPage({ citySlug }: ContractorDemoPageProps) {
             <Link href="/pricing" className="text-sm text-muted-foreground hover:text-white transition-colors">
               Pricing
             </Link>
+            <Link href="/human-polish" className="text-sm text-muted-foreground hover:text-white transition-colors">
+              Human Polish™
+            </Link>
             <Link
               href="/book-demo"
               onClick={handlePremiumClick}
