@@ -2,6 +2,7 @@ import Link from "next/link"
 import {
   AI_RENDER_PACKS,
   FIRST_PURCHASE_25_PRICE,
+  SUBSCRIBER_PRICE_25,
   SUBSCRIBER_DISCOUNT_PERCENT,
   PACK_EXPIRATION_DAYS,
   formatUsd,
@@ -72,7 +73,7 @@ export function RenderPackPricingSection({ onSelectPack }: RenderPackPricingSect
           <p>
             <span className="text-white font-medium">Discounts do not stack.</span> Checkout applies the single best
             eligible offer (for example, a 25-pack buyer eligible for both first-purchase and subscriber pricing receives
-            the lower subscriber price of {formatUsd(339.15)}, not both reductions).
+            the lower subscriber price of {formatUsd(SUBSCRIBER_PRICE_25)}, not both reductions).
           </p>
           <p>
             <span className="text-white font-medium">{PACK_EXPIRATION_DAYS}-day pack period:</span> AI Render Packs must

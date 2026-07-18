@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { formatUsd } from "./marketingConfig"
+import { ESSENTIALS_2D_PRICE, ESSENTIALS_3D_PRICE, formatUsd } from "./marketingConfig"
 
 interface BuildReadyPricingSectionProps {
   onSelectBuildReady: (packageId: "essentials-2d" | "essentials-3d" | "custom") => void
@@ -17,7 +17,7 @@ export function BuildReadyPricingSection({ onSelectBuildReady }: BuildReadyPrici
         <div className="grid md:grid-cols-3 gap-6">
           <article className="rounded-xl border border-[#343434] bg-[#191f33]/50 p-8">
             <h3 className="text-xl font-bold text-white">Essentials 2D</h3>
-            <p className="text-3xl font-bold text-white mt-3">{formatUsd(599)}</p>
+            <p className="text-3xl font-bold text-white mt-3">{formatUsd(ESSENTIALS_2D_PRICE)}</p>
             <p className="text-sm text-muted-foreground mt-1">Delivery target: 3–5 business days</p>
             <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
               <li>• Site map</li>
@@ -44,7 +44,7 @@ export function BuildReadyPricingSection({ onSelectBuildReady }: BuildReadyPrici
               Includes 3D views
             </span>
             <h3 className="text-xl font-bold text-white">Essentials 3D</h3>
-            <p className="text-3xl font-bold text-white mt-3">{formatUsd(899)}</p>
+            <p className="text-3xl font-bold text-white mt-3">{formatUsd(ESSENTIALS_3D_PRICE)}</p>
             <p className="text-sm text-muted-foreground mt-1">Delivery target: 5–10 business days</p>
             <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
               <li>• Everything in Essentials 2D</li>

@@ -1,5 +1,11 @@
 import Link from "next/link"
-import { FIRST_PURCHASE_25_PRICE, formatUsd } from "./marketingConfig"
+import {
+  FIRST_PURCHASE_25_PRICE,
+  STANDARD_PRICE_25,
+  SUBSCRIBER_PRICE_25,
+  SUBSCRIBER_DISCOUNT_PERCENT,
+  formatUsd,
+} from "./marketingConfig"
 
 interface FirstPurchasePromoSectionProps {
   onSelectPack: (packageId: "25") => void
@@ -18,12 +24,12 @@ export function FirstPurchasePromoSection({ onSelectPack }: FirstPurchasePromoSe
             <p className="text-muted-foreground mb-3">
               New customers can start with the 25-concept pack at{" "}
               <span className="text-white font-semibold">{formatUsd(FIRST_PURCHASE_25_PRICE)}</span> instead of the
-              standard {formatUsd(399)}. This promotion applies only to the first 25-render purchase.
+              standard {formatUsd(STANDARD_PRICE_25)}. This promotion applies only to the first 25-render purchase.
             </p>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>• Eligibility is verified server-side (normalized phone history).</li>
               <li>• Discounts do not stack — checkout applies the single best eligible offer.</li>
-              <li>• Active subscribers may receive 15% off instead when that price is lower ({formatUsd(339.15)}).</li>
+              <li>• Active subscribers may receive {SUBSCRIBER_DISCOUNT_PERCENT}% off instead when that price is lower ({formatUsd(SUBSCRIBER_PRICE_25)}).</li>
               <li>• This is a first-purchase offer, not a permanent list price.</li>
             </ul>
           </div>

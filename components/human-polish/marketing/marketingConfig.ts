@@ -1,66 +1,65 @@
 /**
- * Marketing-local pricing and CTA config.
- * Self-isolated so Foundation can later replace with shared lib/human-polish/config.
+ * Marketing-local presentation config for /human-polish.
+ *
+ * Machine-readable values (prices, package slugs, first-batch sizes, discount
+ * percent, expiration, delivery targets) are sourced from the canonical shared
+ * config in `lib/human-polish`. Only marketing-specific copy (CTA hrefs,
+ * disclaimer text, assisted-sales contacts, formatting) lives here.
  */
 
-export const AI_RENDER_PACKS = [
-  {
-    packageId: "25" as const,
-    label: "25 concepts",
-    standardPrice: 399,
-    subscriberPrice: 339.15,
-    firstBatch: 5,
-    delivery: "24–48 hours",
-    href: "/human-polish/intake?family=ai-render-pack&package=25",
-  },
-  {
-    packageId: "50" as const,
-    label: "50 concepts",
-    standardPrice: 699,
-    subscriberPrice: 594.15,
-    firstBatch: 10,
-    delivery: "48–72 hours",
-    href: "/human-polish/intake?family=ai-render-pack&package=50",
-  },
-  {
-    packageId: "100" as const,
-    label: "100 concepts",
-    standardPrice: 1199,
-    subscriberPrice: 1019.15,
-    firstBatch: 15,
-    delivery: "3–5 business days",
-    href: "/human-polish/intake?family=ai-render-pack&package=100",
-  },
-] as const
+import {
+  AI_RENDER_PACK_PACKAGES,
+  HUMAN_POLISH_PACKAGE_LABELS,
+} from "@/lib/human-polish/types"
+import {
+  AI_RENDER_PACK_STANDARD_PRICES_CENTS,
+  AI_RENDER_PACK_SUBSCRIBER_PRICES_CENTS,
+  AI_RENDER_PACK_FIRST_BATCH_SIZES,
+  AI_RENDER_PACK_DELIVERY_TARGETS,
+  AI_RENDER_PACK_FIRST_PURCHASE_25_CENTS,
+  AI_RENDER_PACK_SUBSCRIBER_DISCOUNT_PERCENT,
+  AI_RENDER_PACK_EXPIRATION_DAYS,
+  BUILD_READY_STANDARD_PRICES_CENTS,
+  BUILD_READY_DELIVERY_TARGETS,
+} from "@/lib/human-polish/config"
 
-export const FIRST_PURCHASE_25_PRICE = 349
+const toDollars = (cents: number) => cents / 100
 
-export const BUILD_READY_PACKAGES = [
-  {
-    packageId: "essentials-2d" as const,
-    label: "Essentials 2D",
-    price: 599,
-    delivery: "3–5 business days",
-    href: "/human-polish/intake?family=build-ready&package=essentials-2d",
-  },
-  {
-    packageId: "essentials-3d" as const,
-    label: "Essentials 3D",
-    price: 899,
-    delivery: "5–10 business days",
-    href: "/human-polish/intake?family=build-ready&package=essentials-3d",
-  },
-  {
-    packageId: "custom" as const,
-    label: "Custom",
-    price: null,
-    delivery: "Quoted after scope review",
-    href: "/human-polish/intake?family=build-ready&package=custom",
-  },
-] as const
+function intakeHref(family: "ai-render-pack" | "build-ready", pkg: string) {
+  return `/human-polish/intake?family=${family}&package=${pkg}`
+}
 
-export const PACK_EXPIRATION_DAYS = 90
-export const SUBSCRIBER_DISCOUNT_PERCENT = 15
+export const AI_RENDER_PACKS = AI_RENDER_PACK_PACKAGES.map((pkg) => ({
+  packageId: pkg,
+  label: HUMAN_POLISH_PACKAGE_LABELS[pkg],
+  standardPrice: toDollars(AI_RENDER_PACK_STANDARD_PRICES_CENTS[pkg]),
+  subscriberPrice: toDollars(AI_RENDER_PACK_SUBSCRIBER_PRICES_CENTS[pkg]),
+  firstBatch: AI_RENDER_PACK_FIRST_BATCH_SIZES[pkg],
+  delivery: AI_RENDER_PACK_DELIVERY_TARGETS[pkg],
+  href: intakeHref("ai-render-pack", pkg),
+}))
+
+/** Convenience scalars for the 25-pack (used in promo/pricing copy). */
+export const STANDARD_PRICE_25 = toDollars(AI_RENDER_PACK_STANDARD_PRICES_CENTS["25"])
+export const SUBSCRIBER_PRICE_25 = toDollars(AI_RENDER_PACK_SUBSCRIBER_PRICES_CENTS["25"])
+
+export const FIRST_PURCHASE_25_PRICE = toDollars(AI_RENDER_PACK_FIRST_PURCHASE_25_CENTS)
+
+const BUILD_READY_DISPLAY_ORDER = ["essentials-2d", "essentials-3d", "custom"] as const
+
+export const BUILD_READY_PACKAGES = BUILD_READY_DISPLAY_ORDER.map((pkg) => ({
+  packageId: pkg,
+  label: HUMAN_POLISH_PACKAGE_LABELS[pkg],
+  price: pkg === "custom" ? null : toDollars(BUILD_READY_STANDARD_PRICES_CENTS[pkg]),
+  delivery: pkg === "custom" ? "Quoted after scope review" : BUILD_READY_DELIVERY_TARGETS[pkg],
+  href: intakeHref("build-ready", pkg),
+}))
+
+export const ESSENTIALS_2D_PRICE = toDollars(BUILD_READY_STANDARD_PRICES_CENTS["essentials-2d"])
+export const ESSENTIALS_3D_PRICE = toDollars(BUILD_READY_STANDARD_PRICES_CENTS["essentials-3d"])
+
+export const PACK_EXPIRATION_DAYS = AI_RENDER_PACK_EXPIRATION_DAYS
+export const SUBSCRIBER_DISCOUNT_PERCENT = AI_RENDER_PACK_SUBSCRIBER_DISCOUNT_PERCENT
 
 /** Assisted-sales contacts. Real WhatsApp deep-link pending ops phone number. */
 export const ASSISTED_SALES = {
