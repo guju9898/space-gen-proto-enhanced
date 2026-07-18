@@ -31,6 +31,12 @@ export default function MockupMethodPage() {
               Home
             </Link>
             <Link
+              href="/human-polish"
+              className="text-sm text-muted-foreground hover:text-white transition-colors"
+            >
+              Human Polish™
+            </Link>
+            <Link
               href="/contractor-demo"
               className="text-sm bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-4 py-2 rounded-md"
             >
