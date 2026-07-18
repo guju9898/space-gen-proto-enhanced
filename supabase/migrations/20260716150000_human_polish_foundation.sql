@@ -3,6 +3,21 @@
 -- Idempotent where practical.
 
 -- ---------------------------------------------------------------------------
+-- Shared updated_at trigger function
+-- Defined in the initial schema, but recreated here so this migration is
+-- self-contained on projects where the initial schema was not applied.
+-- CREATE OR REPLACE is a no-op if it already exists with the same body.
+-- ---------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION public.handle_updated_at()
+RETURNS trigger AS $$
+BEGIN
+  NEW.updated_at = timezone('utc'::text, now());
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ---------------------------------------------------------------------------
 -- human_polish_requests
 -- ---------------------------------------------------------------------------
 
