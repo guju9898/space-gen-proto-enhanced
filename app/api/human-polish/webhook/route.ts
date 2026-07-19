@@ -31,6 +31,19 @@ import {
   isHumanPolishMetadata,
 } from "@/lib/human-polish/stripe"
 import { getHumanPolishSupabaseService } from "@/lib/human-polish/supabase"
+import { getDeliveryTarget, getFirstBatchSize } from "@/lib/human-polish/config"
+import {
+  sendInternalTeamAlertEmail,
+  sendPaymentReceivedEmail,
+} from "@/lib/human-polish/email"
+import {
+  HUMAN_POLISH_PACKAGE_LABELS,
+  isAiRenderPackPackage,
+  isHumanPolishPackage,
+  isHumanPolishServiceFamily,
+  type HumanPolishPackage,
+  type HumanPolishServiceFamily,
+} from "@/lib/human-polish/types"
 
 export const runtime = "nodejs"
 
@@ -51,7 +64,9 @@ async function markRequestPaid(supabase: SupabaseClient, update: PaidUpdate): Pr
 
   const { data: existing, error: readErr } = await supabase
     .from("human_polish_requests")
-    .select("id, status, payment_status")
+    .select(
+      "id, status, payment_status, contact_email, contact_name, family, requested_package, quoted_amount, currency"
+    )
     .eq("id", requestId)
     .maybeSingle()
 
@@ -64,7 +79,7 @@ async function markRequestPaid(supabase: SupabaseClient, update: PaidUpdate): Pr
     return
   }
   if (existing.payment_status === "paid") {
-    // Idempotent: already processed.
+    // Idempotent: already processed — do not re-send confirmation emails.
     return
   }
 
@@ -76,27 +91,70 @@ async function markRequestPaid(supabase: SupabaseClient, update: PaidUpdate): Pr
   if (paymentIntentId) patch.stripe_payment_intent_id = paymentIntentId
   if (customerId) patch.stripe_customer_id = customerId
 
-  const { error: updateErr } = await supabase
+  const { error: updateErr, count } = await supabase
     .from("human_polish_requests")
-    .update(patch)
+    .update(patch, { count: "exact" })
     .eq("id", requestId)
-    // Guard against a racing concurrent delivery flipping it first.
+    // Guard against a racing concurrent delivery flipping it first. This makes
+    // the paid transition — and the confirmation emails below — fire exactly once.
     .neq("payment_status", "paid")
 
   if (updateErr) {
     console.error("[human-polish] webhook: failed to mark request paid")
     return
   }
+  // Another concurrent delivery already flipped the row: skip duplicate emails.
+  if (count === 0) return
 
   // ---------------------------------------------------------------------------
-  // EMAIL INTEGRATION SEAM (owned by the Email Agent — do NOT implement here).
-  // When payment is confirmed, the "Payment received" milestone email (spec §6.2,
-  // event #2) plus the internal alert to frank@renderspace.ai should be sent.
-  // Wire that here once the Loops helper exists, e.g.:
-  //   await sendHumanPolishMilestone("payment_received", { requestId })
-  // Keep it non-blocking and best-effort so email failures never fail the webhook.
-  // TODO(email): trigger Human Polish "payment received" notification.
+  // Launch-critical notifications (spec §6.2 #2 + internal alert). Best-effort:
+  // email failures must never fail the webhook, and emails are safe no-ops until
+  // LOOPS_API_KEY + template ids are provisioned. Only reached on the single
+  // unpaid→paid transition above, so no duplicate sends on webhook re-delivery.
   // ---------------------------------------------------------------------------
+  const family: HumanPolishServiceFamily | null = isHumanPolishServiceFamily(existing.family)
+    ? existing.family
+    : null
+  const pkg: HumanPolishPackage | null = isHumanPolishPackage(existing.requested_package)
+    ? existing.requested_package
+    : null
+  const contactEmail =
+    typeof existing.contact_email === "string" ? existing.contact_email : null
+
+  if (family && pkg) {
+    const packageLabel = HUMAN_POLISH_PACKAGE_LABELS[pkg]
+    const amountCents =
+      typeof existing.quoted_amount === "number" ? existing.quoted_amount : undefined
+    const currency = typeof existing.currency === "string" ? existing.currency : undefined
+    const deliveryTarget = getDeliveryTarget(family, pkg) ?? undefined
+    const firstBatchSize = isAiRenderPackPackage(pkg) ? getFirstBatchSize(pkg) : undefined
+
+    const jobs: Promise<unknown>[] = []
+    if (contactEmail) {
+      jobs.push(
+        sendPaymentReceivedEmail({
+          to: contactEmail,
+          contactName:
+            typeof existing.contact_name === "string" ? existing.contact_name : undefined,
+          requestId,
+          family,
+          packageLabel,
+          amountCents,
+          currency,
+          deliveryTarget,
+          firstBatchSize,
+        })
+      )
+    }
+    jobs.push(
+      sendInternalTeamAlertEmail({
+        subject: `Human Polish paid order (${packageLabel})`,
+        requestId,
+        summary: `family=${family} package=${pkg} paid`,
+      })
+    )
+    await Promise.allSettled(jobs)
+  }
 }
 
 function asString(value: string | null | undefined): string | null {

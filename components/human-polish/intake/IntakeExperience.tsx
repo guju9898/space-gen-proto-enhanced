@@ -115,6 +115,7 @@ export function IntakeExperience() {
   const [maxVisitedIndex, setMaxVisitedIndex] = useState(0)
   const [completion, setCompletion] = useState<Completion>({ kind: "none" })
   const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const startedRef = useRef(false)
   const draftTrackedRef = useRef(false)
@@ -187,24 +188,38 @@ export function IntakeExperience() {
     if (!session) return
 
     setSubmitting(true)
+    setSubmitError(null)
     const payload = buildCheckoutPayload()
 
-    // -------------------------------------------------------------------------
-    // INTEGRATION SEAM — payment / scope-review handoff.
-    // The Stripe checkout route (POST /api/human-polish/checkout) and the
-    // Build-Ready scope-review submission are owned by other workstreams and are
-    // NOT implemented here. When the checkout route exists it is expected to
-    // accept the payload below and return { url } for a redirect. Until then we
-    // record the intent client-side and show a placeholder confirmation. It is
-    // acceptable for the endpoint to 404 during parallel development.
-    // -------------------------------------------------------------------------
+    // 1) Persist the full intake onto the server request (server normalizes the
+    //    phone, records acknowledgments, and advances the request out of draft).
+    try {
+      const submitRes = await fetch("/api/human-polish/draft/submit", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+      if (!submitRes.ok) {
+        const body = (await submitRes.json().catch(() => ({}))) as { error?: string }
+        setSubmitError(body?.error ?? "We couldn't save your request. Please try again.")
+        setSubmitting(false)
+        return
+      }
+    } catch {
+      setSubmitError("Network error while saving your request. Please try again.")
+      setSubmitting(false)
+      return
+    }
+
+    // 2) AI Render Packs proceed to secure one-time checkout; Build-Ready is
+    //    submitted for human scope review (no immediate payment — spec §3.2).
     if (isAiPack && pkg !== "custom") {
       trackHumanPolishEvent("initiated_checkout", { family, package: pkg })
       try {
         const res = await fetch("/api/human-polish/checkout", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({ requestId: session.requestId, draftToken: session.draftToken }),
         })
         if (res.ok) {
           const data = (await res.json()) as { url?: string }
@@ -212,9 +227,14 @@ export function IntakeExperience() {
             window.location.href = data.url
             return
           }
+        } else {
+          const body = (await res.json().catch(() => ({}))) as { error?: string }
+          setSubmitError(
+            body?.error ?? "Checkout could not be started. Your request has been saved."
+          )
         }
       } catch {
-        // Route not available yet during parallel development — fall through.
+        setSubmitError("Network error starting checkout. Your request has been saved.")
       }
       setCompletion({ kind: "checkout_pending", requestId: session.requestId })
     } else {
@@ -434,6 +454,14 @@ export function IntakeExperience() {
           />
         ) : null}
       </div>
+
+      {submitError ? (
+        <Alert variant="destructive" className="mt-6 border-red-500/40 bg-red-500/5">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Something went wrong</AlertTitle>
+          <AlertDescription>{submitError}</AlertDescription>
+        </Alert>
+      ) : null}
 
       <div className="mt-6 flex items-center justify-between gap-3">
         <Button
