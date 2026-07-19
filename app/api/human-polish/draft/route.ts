@@ -38,7 +38,7 @@ type CreateDraftBody = {
 
 export async function POST(request: Request) {
   const ip = getClientIp(request)
-  const rl = checkRateLimit(
+  const rl = await checkRateLimit(
     `hp-draft-create:${ip}`,
     HP_RATE_LIMITS.draftCreate.limit,
     HP_RATE_LIMITS.draftCreate.windowMs
