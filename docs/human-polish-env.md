@@ -75,6 +75,64 @@ Notes:
 3. **Test mode first:** complete a full test order (spec §14) before enabling live
    prices.
 
+## Transactional email (Loops) — added by the Human Polish email agent
+
+`lib/human-polish/email.ts` sends the §6.2 milestone emails through the Loops
+transactional API, mirroring the fetch/auth conventions of the existing
+`lib/loops.ts` integration. It adds no npm packages.
+
+### Shared Loops variables (existing)
+
+| Variable | Purpose |
+|---|---|
+| `LOOPS_API_KEY` | Loops API key. When **absent**, all Human Polish email functions are safe no-ops (no network call, no throw) — this is expected in build/CI and any environment without the key. Server-only; never logged. |
+| `LOOPS_API_BASE_URL` | Optional Loops API base URL override. Defaults to `https://app.loops.so/api/v1`. |
+
+### Human Polish internal alert recipient
+
+| Variable | Purpose |
+|---|---|
+| `LOOPS_HP_INTERNAL_ALERT_EMAIL` | Optional override for the internal team alert recipient. Defaults to `frank@renderspace.ai` (spec §6.2). |
+
+### Human Polish transactional template IDs
+
+Each §6.2 milestone maps to one Loops transactional template. **The template IDs
+must be provisioned by a human in the Loops dashboard.** Until the matching env
+var is set, the send is a guarded no-op (a `TODO_` placeholder id is used and no
+email is sent). All are server-only and never logged.
+
+| Variable | §6.2 event | Sending function |
+|---|---|---|
+| `LOOPS_HP_DRAFT_RECEIVED_TEMPLATE_ID` | #1 Draft/intake received | `sendDraftReceivedEmail` |
+| `LOOPS_HP_PAYMENT_RECEIVED_TEMPLATE_ID` | #2 Payment received | `sendPaymentReceivedEmail` |
+| `LOOPS_HP_FILES_NEED_INFO_TEMPLATE_ID` | #3 Files need replacement/more info | `sendFilesNeedInfoEmail` |
+| `LOOPS_HP_FILES_ACCEPTED_TEMPLATE_ID` | #4 Files accepted / clock started | `sendFilesAcceptedEmail` |
+| `LOOPS_HP_RUSH_APPROVED_TEMPLATE_ID` | #5 Rush request approved | `sendRushApprovedEmail` |
+| `LOOPS_HP_RUSH_UNAVAILABLE_TEMPLATE_ID` | #6 Rush not available (standard option) | `sendRushUnavailableEmail` |
+| `LOOPS_HP_FIRST_BATCH_READY_TEMPLATE_ID` | #7 First batch ready | `sendFirstBatchReadyEmail` |
+| `LOOPS_HP_FINAL_DELIVERY_READY_TEMPLATE_ID` | #8 Final delivery ready | `sendFinalDeliveryReadyEmail` |
+| `LOOPS_HP_BUILD_READY_SCOPE_APPROVED_TEMPLATE_ID` | #9 Build-Ready scope approved | `sendBuildReadyScopeApprovedEmail` |
+| `LOOPS_HP_BUILD_READY_QUOTE_TEMPLATE_ID` | #10 Build-Ready custom quote / more info | `sendBuildReadyQuoteEmail` |
+| `LOOPS_HP_BUILD_READY_PAYMENT_REQUESTED_TEMPLATE_ID` | #11 Build-Ready payment requested | `sendBuildReadyPaymentRequestedEmail` |
+| `LOOPS_HP_REVISION_REQUEST_RECEIVED_TEMPLATE_ID` | #12 Revision request received | `sendRevisionRequestReceivedEmail` |
+| `LOOPS_HP_FINAL_COMPLETION_TEMPLATE_ID` | #13 Final completion | `sendFinalCompletionEmail` |
+| `LOOPS_HP_RIGHTS_PERMISSION_REQUEST_TEMPLATE_ID` | #14 Rights/case-study permission request | `sendRightsPermissionRequestEmail` |
+| `LOOPS_HP_PACK_EXPIRATION_REMINDER_TEMPLATE_ID` | #15 Pack expiration reminder | `sendPackExpirationReminderEmail` |
+| `LOOPS_HP_INTERNAL_ALERT_TEMPLATE_ID` | Internal team alert | `sendInternalTeamAlertEmail` |
+
+### Loops dashboard setup (manual)
+
+1. In Loops, create one **transactional** email template per row above. Add the
+   `dataVariables` each template needs (see the param interfaces in
+   `lib/human-polish/email.ts`; e.g. `contactName`, `requestId`, `package`,
+   `serviceFamily`, `recoveryUrl`, `amount`, `deliveryTarget`, `downloadUrl`, etc.).
+2. Copy each template's transactional id and set the matching `LOOPS_HP_*_TEMPLATE_ID`
+   env var in the deployment environment (and `.env.local` for local testing).
+3. Confirm `LOOPS_API_KEY` is present in the environment where emails should send.
+4. Confirm none of these are prefixed with `NEXT_PUBLIC_` (they must stay server-only).
+5. Until a template id is set, that milestone email is silently skipped (guarded
+   no-op) — safe to deploy incrementally.
+
 ## Manual setup checklist
 
 1. Create an Upstash Redis database.
