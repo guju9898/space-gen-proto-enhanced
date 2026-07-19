@@ -24,7 +24,7 @@ export const runtime = "nodejs"
 
 export async function POST(request: Request) {
   const ip = getClientIp(request)
-  const rl = checkRateLimit(
+  const rl = await checkRateLimit(
     `hp-upload-sign:${ip}`,
     HP_RATE_LIMITS.uploadSign.limit,
     HP_RATE_LIMITS.uploadSign.windowMs

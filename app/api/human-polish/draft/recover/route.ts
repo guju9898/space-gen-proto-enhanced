@@ -21,7 +21,7 @@ export const runtime = "nodejs"
 
 export async function POST(request: Request) {
   const ip = getClientIp(request)
-  const rl = checkRateLimit(
+  const rl = await checkRateLimit(
     `hp-draft-recover:${ip}`,
     HP_RATE_LIMITS.draftRecover.limit,
     HP_RATE_LIMITS.draftRecover.windowMs

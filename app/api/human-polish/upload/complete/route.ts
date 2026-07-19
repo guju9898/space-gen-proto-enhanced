@@ -33,7 +33,7 @@ function isPathBoundToRequest(objectPath: string, requestId: string, fileType: s
 
 export async function POST(request: Request) {
   const ip = getClientIp(request)
-  const rl = checkRateLimit(
+  const rl = await checkRateLimit(
     `hp-upload-complete:${ip}`,
     HP_RATE_LIMITS.uploadComplete.limit,
     HP_RATE_LIMITS.uploadComplete.windowMs
