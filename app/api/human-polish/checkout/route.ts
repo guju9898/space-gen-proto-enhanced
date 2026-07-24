@@ -46,6 +46,10 @@
  */
 
 import { NextResponse } from "next/server"
+import {
+  humanPolishAbsoluteUrl,
+  resolveHumanPolishAppUrl,
+} from "@/lib/human-polish/app-url"
 import { authenticateDraftRequest } from "@/lib/human-polish/draft-auth"
 import { checkRateLimit, getClientIp, HP_RATE_LIMITS } from "@/lib/human-polish/rate-limit"
 import {
@@ -116,9 +120,13 @@ export async function POST(request: Request) {
   }
 
   // 3) Authenticate the draft request (requestId + draftToken).
+  // Successful auth extends the inactivity-based draft expiration.
   const auth = await authenticateDraftRequest(supabase, body.requestId, body.draftToken)
   if (!auth.ok) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status })
+    return NextResponse.json(
+      { error: auth.error, ...(auth.code ? { code: auth.code } : {}) },
+      { status: auth.status }
+    )
   }
   const req = auth.request
 
@@ -215,16 +223,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: amount.error }, { status: 409 })
   }
 
-  // 9) Success/cancel routes (spec §5.5).
-  const origin =
-    request.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  // 9) Success/cancel routes (spec §5.5) — fixed relative paths only (no open redirect).
+  let origin: string
   try {
-    new URL(origin)
+    origin = resolveHumanPolishAppUrl({ request })
   } catch {
-    return NextResponse.json({ error: "Invalid origin configuration." }, { status: 500 })
+    return NextResponse.json(
+      { error: "Application URL is not configured." },
+      { status: 500 }
+    )
   }
-  const successUrl = `${origin}/human-polish/success?session_id={CHECKOUT_SESSION_ID}`
-  const cancelUrl = `${origin}/human-polish`
+  const successUrl = humanPolishAbsoluteUrl(
+    origin,
+    "/human-polish/success?session_id={CHECKOUT_SESSION_ID}"
+  )
+  const cancelUrl = humanPolishAbsoluteUrl(origin, "/human-polish")
 
   const metadata = buildHumanPolishMetadata({
     requestId,

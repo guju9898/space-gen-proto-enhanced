@@ -1,11 +1,13 @@
 /**
  * POST /api/human-polish/draft
- * Create a draft Human Polish request with a 15-minute recovery token.
+ * Create a draft Human Polish request with a recovery token.
  *
  * Body: { family, package, leadSource? }
  * Returns: { requestId, draftToken, expiresAt, family, package, standardAmountCents }
  *
  * The plaintext draftToken is returned once. Only its SHA-256 hash is stored.
+ * expiresAt is an inactivity window (15 minutes); successful authenticated
+ * recover / submit / upload actions extend it server-side.
  */
 
 import { NextResponse } from "next/server"

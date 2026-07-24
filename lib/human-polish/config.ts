@@ -41,7 +41,11 @@ export const HUMAN_POLISH_ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "pdf"] as 
 /** Signed upload / download URL lifetime (seconds). Short-lived only. */
 export const HUMAN_POLISH_SIGNED_URL_EXPIRES_IN = 60
 
-/** Draft recovery window (§4.1 / §7.3). */
+/**
+ * Draft recovery inactivity window (§4.1 / §7.3).
+ * Clock resets on every successful authenticated draft/upload action —
+ * not from original draft creation.
+ */
 export const HUMAN_POLISH_DRAFT_TTL_MS = 15 * 60 * 1000
 
 export const HUMAN_POLISH_DRAFT_TTL_MINUTES = 15

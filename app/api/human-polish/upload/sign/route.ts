@@ -54,7 +54,10 @@ export async function POST(request: Request) {
 
   const auth = await authenticateDraftRequest(supabase, body.requestId, body.draftToken)
   if (!auth.ok) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status })
+    return NextResponse.json(
+      { error: auth.error, ...(auth.code ? { code: auth.code } : {}) },
+      { status: auth.status }
+    )
   }
 
   if (!isHumanPolishFileType(body.fileType)) {
@@ -122,5 +125,7 @@ export async function POST(request: Request) {
     fileType: body.fileType,
     originalFilename: typeof body.filename === "string" ? body.filename.trim() : meta.sanitizedFilename,
     sizeBytes: body.sizeBytes,
+    // Renewed inactivity expiry after successful authenticated sign.
+    expiresAt: auth.request.draft_expires_at,
   })
 }
