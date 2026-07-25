@@ -25,10 +25,17 @@ export const runtime = "nodejs"
 export async function POST(request: Request) {
   const ip = getClientIp(request)
   const rl = await checkRateLimit(
-    `hp-upload-sign:${ip}`,
+    "upload-sign",
+    ip,
     HP_RATE_LIMITS.uploadSign.limit,
     HP_RATE_LIMITS.uploadSign.windowMs
   )
+  if (rl.configurationError) {
+    return NextResponse.json(
+      { error: "Human Polish rate limiting is not configured." },
+      { status: 503 }
+    )
+  }
   if (!rl.ok) {
     return NextResponse.json(
       { error: "Too many upload requests. Please try again later." },

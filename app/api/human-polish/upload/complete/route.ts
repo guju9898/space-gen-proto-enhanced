@@ -34,10 +34,17 @@ function isPathBoundToRequest(objectPath: string, requestId: string, fileType: s
 export async function POST(request: Request) {
   const ip = getClientIp(request)
   const rl = await checkRateLimit(
-    `hp-upload-complete:${ip}`,
+    "upload-complete",
+    ip,
     HP_RATE_LIMITS.uploadComplete.limit,
     HP_RATE_LIMITS.uploadComplete.windowMs
   )
+  if (rl.configurationError) {
+    return NextResponse.json(
+      { error: "Human Polish rate limiting is not configured." },
+      { status: 503 }
+    )
+  }
   if (!rl.ok) {
     return NextResponse.json(
       { error: "Too many upload completions. Please try again later." },

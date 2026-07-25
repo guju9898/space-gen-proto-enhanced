@@ -79,10 +79,17 @@ export async function POST(request: Request) {
   // 1) Rate limit checkout initiation by client IP (spec §7.3).
   const ip = getClientIp(request)
   const rl = await checkRateLimit(
-    `hp-checkout:${ip}`,
+    "checkout",
+    ip,
     HP_RATE_LIMITS.checkout.limit,
     HP_RATE_LIMITS.checkout.windowMs
   )
+  if (rl.configurationError) {
+    return NextResponse.json(
+      { error: "Human Polish rate limiting is not configured." },
+      { status: 503 }
+    )
+  }
   if (!rl.ok) {
     return NextResponse.json(
       { error: "Too many checkout attempts. Please try again shortly." },

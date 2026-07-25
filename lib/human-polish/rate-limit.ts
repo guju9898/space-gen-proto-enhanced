@@ -1,20 +1,28 @@
 /**
  * Rate limiting for Human Polish guest endpoints.
  *
- * Production: Upstash Redis sliding-window limiter (distributed, works across
- * serverless instances). Requires UPSTASH_REDIS_REST_URL and
- * UPSTASH_REDIS_REST_TOKEN.
+ * One Upstash Redis database is intentionally shared across Production,
+ * Preview, and local Development. Environments are isolated by key prefix
+ * (`UPSTASH_RATELIMIT_PREFIX`, e.g. `hp:production`).
  *
- * Local development (Upstash env vars absent): a controlled in-memory fallback
- * is used. It is NOT distributed and must not be relied on in production —
- * it resets per process and is per-instance only.
+ * Production: Upstash is required. Missing credentials or prefix → controlled
+ * configuration error (no in-memory fallback).
  *
- * Failure policy: if Upstash is configured but the request errors, we FAIL
+ * Preview: Upstash when configured; otherwise a documented in-memory fallback
+ * (non-distributed). Prefix defaults to `hp:preview` when
+ * `VERCEL_ENV === "preview"` and `UPSTASH_RATELIMIT_PREFIX` is unset.
+ *
+ * Development: in-memory fallback when Upstash is not configured. Prefix
+ * defaults to `hp:development`.
+ *
+ * Failure policy: if Upstash is configured but a request errors, we FAIL
  * CLOSED (deny with a short retry) so an outage cannot silently disable limits.
  *
- * Never log tokens or submitted PII.
+ * Identifiers that may contain IPs (or other potentially identifying data) are
+ * hashed before use. Never log the raw identifier.
  */
 
+import { createHash } from "crypto"
 import { Ratelimit } from "@upstash/ratelimit"
 import { Redis } from "@upstash/redis"
 
@@ -22,7 +30,20 @@ export type RateLimitResult = {
   ok: boolean
   remaining: number
   retryAfterSeconds: number
+  /** True when production (or required config) cannot rate-limit safely. */
+  configurationError?: boolean
 }
+
+/** Stable endpoint suffixes — limits remain independent per feature. */
+export type HpRateLimitFeature =
+  | "draft-create"
+  | "draft-recover"
+  | "draft-submit"
+  | "upload-sign"
+  | "upload-complete"
+  | "checkout"
+
+export type DeployEnvironment = "production" | "preview" | "development"
 
 const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL
 const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN
@@ -33,19 +54,68 @@ if (upstashConfigured) {
   redis = new Redis({ url: REDIS_URL as string, token: REDIS_TOKEN as string })
 }
 
-/** One Ratelimit instance per (limit, windowMs) pair, created lazily. */
+/** Resolve deploy environment without trusting request headers. */
+export function resolveDeployEnvironment(): DeployEnvironment {
+  if (process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production") {
+    // Vercel Preview sets NODE_ENV=production but VERCEL_ENV=preview.
+    if (process.env.VERCEL_ENV === "preview") return "preview"
+    if (process.env.VERCEL_ENV === "development") return "development"
+    return "production"
+  }
+  if (process.env.VERCEL_ENV === "preview") return "preview"
+  return "development"
+}
+
+/**
+ * Resolve the Redis key namespace prefix.
+ * Production must set UPSTASH_RATELIMIT_PREFIX explicitly (never inferred from headers).
+ */
+export function resolveRateLimitPrefix():
+  | { ok: true; prefix: string }
+  | { ok: false; error: string } {
+  const configured = process.env.UPSTASH_RATELIMIT_PREFIX?.trim()
+  if (configured) {
+    return { ok: true, prefix: configured.replace(/:+$/, "") }
+  }
+
+  const env = resolveDeployEnvironment()
+  if (env === "production") {
+    return {
+      ok: false,
+      error:
+        "UPSTASH_RATELIMIT_PREFIX is required in production (expected e.g. hp:production).",
+    }
+  }
+  if (env === "preview") {
+    return { ok: true, prefix: "hp:preview" }
+  }
+  return { ok: true, prefix: "hp:development" }
+}
+
+/** Hash a potentially identifying identifier (IP, etc.) — never log the raw value. */
+export function hashRateLimitIdentifier(raw: string): string {
+  return createHash("sha256").update(raw, "utf8").digest("hex").slice(0, 32)
+}
+
+/** One Ratelimit instance per (prefix, feature, limit, windowMs), created lazily. */
 const limiterCache = new Map<string, Ratelimit>()
 
-function getLimiter(limit: number, windowMs: number): Ratelimit | null {
+function getLimiter(
+  prefix: string,
+  feature: HpRateLimitFeature,
+  limit: number,
+  windowMs: number
+): Ratelimit | null {
   if (!redis) return null
-  const cacheKey = `${limit}:${windowMs}`
+  const fullPrefix = `${prefix}:human-polish:${feature}`
+  const cacheKey = `${fullPrefix}:${limit}:${windowMs}`
   let limiter = limiterCache.get(cacheKey)
   if (!limiter) {
     const windowSeconds = Math.max(1, Math.ceil(windowMs / 1000))
     limiter = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(limit, `${windowSeconds} s`),
-      prefix: "hp-rl",
+      prefix: fullPrefix,
       analytics: false,
     })
     limiterCache.set(cacheKey, limiter)
@@ -53,7 +123,7 @@ function getLimiter(limit: number, windowMs: number): Ratelimit | null {
   return limiter
 }
 
-// --- In-memory fallback (local dev only; non-distributed) ------------------
+// --- In-memory fallback (preview/dev only; non-distributed) ----------------
 
 type Bucket = { timestamps: number[] }
 const buckets = new Map<string, Bucket>()
@@ -80,29 +150,53 @@ function checkInMemory(key: string, limit: number, windowMs: number): RateLimitR
   }
 }
 
+function configurationErrorResult(message: string): RateLimitResult {
+  console.error(`[human-polish] rate limiter configuration error: ${message}`)
+  return {
+    ok: false,
+    remaining: 0,
+    retryAfterSeconds: 0,
+    configurationError: true,
+  }
+}
+
 // --- Public API ------------------------------------------------------------
 
 /**
- * Check and consume one unit against a sliding-window rate limit.
- *
- * @param key Stable key (e.g. `hp-draft-create:${ip}`)
- * @param limit Max events allowed in the window
- * @param windowMs Window length in milliseconds
+ * Check and consume one unit against a sliding-window rate limit for a
+ * Human Polish feature. The identifier (e.g. client IP) is hashed server-side
+ * before it is used as a Redis key component.
  */
 export async function checkRateLimit(
-  key: string,
+  feature: HpRateLimitFeature,
+  identifier: string,
   limit: number,
   windowMs: number
 ): Promise<RateLimitResult> {
-  const limiter = getLimiter(limit, windowMs)
+  const env = resolveDeployEnvironment()
+  const prefixResult = resolveRateLimitPrefix()
+  if (!prefixResult.ok) {
+    return configurationErrorResult(prefixResult.error)
+  }
 
-  // Local dev / unconfigured: controlled in-memory fallback (non-distributed).
+  if (env === "production" && !upstashConfigured) {
+    return configurationErrorResult(
+      "UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required in production."
+    )
+  }
+
+  const hashedId = hashRateLimitIdentifier(identifier)
+  const limiter = getLimiter(prefixResult.prefix, feature, limit, windowMs)
+
+  // Preview / development: controlled in-memory fallback when Upstash is absent.
   if (!limiter) {
-    return checkInMemory(key, limit, windowMs)
+    const memoryKey = `${prefixResult.prefix}:human-polish:${feature}:${hashedId}`
+    return checkInMemory(memoryKey, limit, windowMs)
   }
 
   try {
-    const res = await limiter.limit(key)
+    // Identifier is the hashed value only — feature/env live in the Ratelimit prefix.
+    const res = await limiter.limit(hashedId)
     const retryAfterSeconds = res.success
       ? 0
       : Math.max(1, Math.ceil((res.reset - Date.now()) / 1000))
@@ -114,7 +208,7 @@ export async function checkRateLimit(
   }
 }
 
-/** Best-effort client IP from common proxy headers. */
+/** Best-effort client IP from common proxy headers. Never log the returned value. */
 export function getClientIp(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for")
   if (forwarded) {
@@ -126,10 +220,11 @@ export function getClientIp(request: Request): string {
   return "unknown"
 }
 
-/** Default limits for Human Polish routes (checkout may consume this later). */
+/** Default limits for Human Polish routes (thresholds unchanged). */
 export const HP_RATE_LIMITS = {
   draftCreate: { limit: 10, windowMs: 15 * 60 * 1000 },
   draftRecover: { limit: 30, windowMs: 15 * 60 * 1000 },
+  draftSubmit: { limit: 10, windowMs: 15 * 60 * 1000 },
   uploadSign: { limit: 60, windowMs: 15 * 60 * 1000 },
   uploadComplete: { limit: 60, windowMs: 15 * 60 * 1000 },
   checkout: { limit: 20, windowMs: 15 * 60 * 1000 },
