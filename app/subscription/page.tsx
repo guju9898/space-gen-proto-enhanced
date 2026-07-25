@@ -14,6 +14,7 @@ interface BillingProfile {
 }
 
 const planNames: Record<string, string> = {
+  intro: "Intro Trial",
   professional: "Professional",
   business: "Business",
 }
@@ -24,6 +25,11 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
     color: "text-green-500",
     icon: <CheckCircle2 className="h-4 w-4" />,
   },
+  trialing: {
+    label: "Trial",
+    color: "text-green-500",
+    icon: <CheckCircle2 className="h-4 w-4" />,
+  },
   past_due: {
     label: "Past Due",
     color: "text-amber-500",
@@ -31,6 +37,11 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
   },
   canceled: {
     label: "Canceled",
+    color: "text-muted-foreground",
+    icon: <XCircle className="h-4 w-4" />,
+  },
+  inactive: {
+    label: "Inactive",
     color: "text-muted-foreground",
     icon: <XCircle className="h-4 w-4" />,
   },
@@ -121,8 +132,9 @@ export default function SubscriptionPage() {
   }
 
   const hasActivePlan = profile?.current_plan && 
-                       ["professional", "business"].includes(profile.current_plan) &&
-                       profile.subscription_status === "active"
+                       ["intro", "professional", "business"].includes(profile.current_plan) &&
+                       (profile.subscription_status === "active" ||
+                         profile.subscription_status === "trialing")
 
   const isPastDue = profile?.subscription_status === "past_due"
   const planName = profile?.current_plan ? planNames[profile.current_plan] || profile.current_plan : null

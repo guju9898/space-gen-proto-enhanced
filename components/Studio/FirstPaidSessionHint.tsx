@@ -34,10 +34,11 @@ export function FirstPaidSessionHint({ className }: FirstPaidSessionHintProps) {
           .eq("id", user.id)
           .single()
 
-        // Only show for paid users
+        // Only show for paid/trial users
         const isPaid = profile?.current_plan && 
-                      ["professional", "business"].includes(profile.current_plan) &&
-                      profile.subscription_status === "active"
+                      ["professional", "business", "intro"].includes(profile.current_plan) &&
+                      (profile.subscription_status === "active" ||
+                        profile.subscription_status === "trialing")
 
         if (isPaid) {
           setShouldShow(true)

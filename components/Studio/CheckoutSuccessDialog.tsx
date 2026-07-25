@@ -54,10 +54,11 @@ export function CheckoutSuccessDialog() {
           .eq("id", user.id)
           .single()
 
-        // Only show if user has a paid plan
+        // Only show if user has a paid/trial plan
         const isPaid = profile?.current_plan && 
-                      ["professional", "business"].includes(profile.current_plan) &&
-                      profile.subscription_status === "active"
+                      ["professional", "business", "intro"].includes(profile.current_plan) &&
+                      (profile.subscription_status === "active" ||
+                        profile.subscription_status === "trialing")
 
         if (isPaid) {
           setHasPaidPlan(true)
@@ -74,8 +75,9 @@ export function CheckoutSuccessDialog() {
               .single()
 
             const isPaidRetry = retryProfile?.current_plan && 
-                              ["professional", "business"].includes(retryProfile.current_plan) &&
-                              retryProfile.subscription_status === "active"
+                              ["professional", "business", "intro"].includes(retryProfile.current_plan) &&
+                              (retryProfile.subscription_status === "active" ||
+                                retryProfile.subscription_status === "trialing")
 
             if (isPaidRetry) {
               setHasPaidPlan(true)
