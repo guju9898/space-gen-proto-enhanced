@@ -115,6 +115,16 @@ export async function POST(request: Request) {
           ? new Date(stripeSub.current_period_end * 1000).toISOString()
           : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
+        // Prefer the live Stripe subscription status so trials stay usable.
+        const profileStatus =
+          sub.status === "trialing"
+            ? "trialing"
+            : sub.status === "active"
+              ? "active"
+              : sub.status === "past_due"
+                ? "past_due"
+                : "active"
+
         // Upsert subscriptions table
         await supabase.from("subscriptions").upsert(
           {
@@ -122,7 +132,7 @@ export async function POST(request: Request) {
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
             plan_code: planId,
-            status: "active",
+            status: profileStatus === "trialing" ? "trialing" : "active",
             intro_offer_used: planId === "intro",
             current_period_start: periodStart,
             current_period_end: periodEnd,
@@ -140,7 +150,7 @@ export async function POST(request: Request) {
             current_plan: planId,
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
-            subscription_status: "active",
+            subscription_status: profileStatus,
             past_due_since: null,
           })
           .eq("id", userId)
@@ -308,14 +318,18 @@ export async function POST(request: Request) {
         const periodEnd = stripeSub.current_period_end
           ? new Date(stripeSub.current_period_end * 1000).toISOString()
           : null
+        // Preserve Stripe `trialing` so intro/trial customers keep generation access.
+        // Mapping trialing → inactive was blocking the 40-credit / 7-day intro allowance.
         const status =
           subscription.status === "active"
             ? "active"
-            : subscription.status === "past_due"
-              ? "past_due"
-              : subscription.status === "canceled"
-                ? "canceled"
-                : "inactive"
+            : subscription.status === "trialing"
+              ? "trialing"
+              : subscription.status === "past_due"
+                ? "past_due"
+                : subscription.status === "canceled"
+                  ? "canceled"
+                  : "inactive"
 
         await supabase
           .from("subscriptions")
@@ -334,7 +348,17 @@ export async function POST(request: Request) {
             .from("profiles")
             .update({
               current_plan: planCode,
+              // Keep canceled as canceled; otherwise persist active | trialing | past_due | inactive
               subscription_status: status === "canceled" ? "canceled" : status,
+            })
+            .eq("id", profile.id)
+        } else if (status === "trialing" || status === "active" || status === "past_due") {
+          // Price ID may not map (env mismatch) but Stripe status is still authoritative —
+          // never leave a trialing customer stuck as inactive.
+          await supabase
+            .from("profiles")
+            .update({
+              subscription_status: status,
             })
             .eq("id", profile.id)
         }

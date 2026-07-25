@@ -50,7 +50,8 @@ export function CheckoutResume() {
 
         const hasPaidPlan = profile?.current_plan &&
                           ["intro", "professional", "business"].includes(profile.current_plan) &&
-                          profile.subscription_status === "active"
+                          (profile.subscription_status === "active" ||
+                            profile.subscription_status === "trialing")
 
         if (hasPaidPlan) {
           // User already has a plan, clear pending checkout

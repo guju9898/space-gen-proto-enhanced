@@ -62,7 +62,8 @@ export function IntroModal() {
         const hasActiveSub =
           profileRes.data?.current_plan &&
           ["intro", "professional", "business"].includes(profileRes.data.current_plan) &&
-          profileRes.data?.subscription_status === "active"
+          (profileRes.data?.subscription_status === "active" ||
+            profileRes.data?.subscription_status === "trialing")
         const alreadyClaimed = !!claimRes.data
         if (hasActiveSub || alreadyClaimed) {
           setChecked(true)

@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js"
+import { isUsableSubscriptionStatus } from "@/lib/usage/subscriptionStatus"
 
 /**
  * SERVER-SIDE CREDIT ENFORCEMENT HELPER
@@ -8,6 +9,8 @@ import { createClient } from "@supabase/supabase-js"
  * 
  * Business plan users are never blocked.
  * Professional plan users are soft-blocked at limit.
+ * Intro (trial) plan: 40 credits for 7 days while status is active/trialing
+ * (and legacy inactive, which older webhooks incorrectly stored for Stripe trialing).
  */
 
 export type DenialReason = "no_plan" | "past_due" | "credits_exhausted" | "subscription_inactive"
@@ -21,6 +24,8 @@ export interface CreditEnforcementResult {
   monthlyLimit: number | null
   reason?: DenialReason
 }
+
+export { isUsableSubscriptionStatus } from "@/lib/usage/subscriptionStatus"
 
 export async function enforceCredits(userId: string): Promise<CreditEnforcementResult> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
@@ -119,10 +124,11 @@ export async function enforceCredits(userId: string): Promise<CreditEnforcementR
       }
     }
 
-    // Check subscription status - must be "active" to proceed
-    if (profile.subscription_status !== "active") {
-      console.warn(`⚠️ Subscription not active for user ${userId}, status: ${profile.subscription_status}`)
-      const reason: DenialReason = profile.subscription_status === "past_due" ? "past_due" : "subscription_inactive"
+    const subscriptionStatus = profile.subscription_status as string | null
+
+    // Hard blocks — payment failure / canceled must never generate
+    if (subscriptionStatus === "past_due") {
+      console.warn(`⚠️ Subscription past_due for user ${userId}`)
       return {
         allow: false,
         nearLimit: false,
@@ -130,11 +136,61 @@ export async function enforceCredits(userId: string): Promise<CreditEnforcementR
         periodStart,
         planId: profile.current_plan,
         monthlyLimit: null,
-        reason,
+        reason: "past_due",
+      }
+    }
+    if (subscriptionStatus === "canceled") {
+      console.warn(`⚠️ Subscription canceled for user ${userId}`)
+      return {
+        allow: false,
+        nearLimit: false,
+        creditsRemaining: 0,
+        periodStart,
+        planId: profile.current_plan,
+        monthlyLimit: null,
+        reason: "subscription_inactive",
       }
     }
 
     let planId = profile.current_plan
+
+    // Intro (7-day / 40-credit) trial: enforce allowance from user_usage.
+    // Allow active, trialing, and legacy inactive (old webhook mapped trialing → inactive).
+    if (planId === "intro") {
+      if (
+        !isUsableSubscriptionStatus(subscriptionStatus) &&
+        subscriptionStatus !== "inactive" &&
+        subscriptionStatus != null
+      ) {
+        console.warn(
+          `⚠️ Intro subscription not usable for user ${userId}, status: ${subscriptionStatus}`
+        )
+        return {
+          allow: false,
+          nearLimit: false,
+          creditsRemaining: 0,
+          periodStart,
+          planId: "intro",
+          monthlyLimit: null,
+          reason: "subscription_inactive",
+        }
+      }
+      // fall through to intro credit window below
+    } else if (!isUsableSubscriptionStatus(subscriptionStatus)) {
+      // Professional / Business (and other non-intro plans): require active or trialing
+      console.warn(
+        `⚠️ Subscription not active for user ${userId}, status: ${subscriptionStatus}`
+      )
+      return {
+        allow: false,
+        nearLimit: false,
+        creditsRemaining: 0,
+        periodStart,
+        planId: profile.current_plan,
+        monthlyLimit: null,
+        reason: "subscription_inactive",
+      }
+    }
 
     // Intro plan: credits from user_usage (plan_code=intro, period_end > now)
     if (planId === "intro") {
