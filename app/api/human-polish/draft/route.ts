@@ -39,10 +39,17 @@ type CreateDraftBody = {
 export async function POST(request: Request) {
   const ip = getClientIp(request)
   const rl = await checkRateLimit(
-    `hp-draft-create:${ip}`,
+    "draft-create",
+    ip,
     HP_RATE_LIMITS.draftCreate.limit,
     HP_RATE_LIMITS.draftCreate.windowMs
   )
+  if (rl.configurationError) {
+    return NextResponse.json(
+      { error: "Human Polish rate limiting is not configured." },
+      { status: 503 }
+    )
+  }
   if (!rl.ok) {
     return NextResponse.json(
       { error: "Too many draft requests. Please try again later." },

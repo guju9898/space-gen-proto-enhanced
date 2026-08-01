@@ -67,10 +67,17 @@ function b(record: Record<string, unknown>, key: string): boolean {
 export async function POST(request: Request) {
   const ip = getClientIp(request)
   const rl = await checkRateLimit(
-    `hp-draft-submit:${ip}`,
-    HP_RATE_LIMITS.draftCreate.limit,
-    HP_RATE_LIMITS.draftCreate.windowMs
+    "draft-submit",
+    ip,
+    HP_RATE_LIMITS.draftSubmit.limit,
+    HP_RATE_LIMITS.draftSubmit.windowMs
   )
+  if (rl.configurationError) {
+    return NextResponse.json(
+      { error: "Human Polish rate limiting is not configured." },
+      { status: 503 }
+    )
+  }
   if (!rl.ok) {
     return NextResponse.json(
       { error: "Too many submissions. Please try again shortly." },

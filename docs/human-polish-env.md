@@ -10,26 +10,72 @@ and never log their values.
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL (also used server-side). |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service-role key for server API routes (draft/upload). Server-only. |
 
-## Rate limiting (Upstash) — added by platform hardening
+## Rate limiting (Upstash) — single shared database
 
 Used by `lib/human-polish/rate-limit.ts` to enforce distributed rate limits on
-the Human Polish guest endpoints (draft create/recover, upload sign/complete,
-and later checkout initiation).
+the Human Polish guest endpoints (draft create/recover/submit, upload
+sign/complete, and checkout initiation).
+
+**One Upstash Redis database is intentionally shared** across Production,
+Preview, and local Development (free-plan limit). Environments are isolated
+with key prefixes — never by creating separate databases.
 
 | Variable | Purpose |
 |---|---|
-| `UPSTASH_REDIS_REST_URL` | Upstash Redis REST endpoint. |
-| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis REST token. Server-only. |
+| `UPSTASH_REDIS_REST_URL` | Upstash Redis REST endpoint (shared). |
+| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis REST token. Server-only (shared). |
+| `UPSTASH_RATELIMIT_PREFIX` | Environment namespace for rate-limit keys. |
 
-Behavior:
+### Expected `UPSTASH_RATELIMIT_PREFIX` values
 
-- **Production:** when both variables are set, an Upstash sliding-window limiter
-  is used across all serverless instances. If Upstash is configured but a request
-  errors, the limiter **fails closed** (denies with a short retry) so an outage
-  cannot silently disable rate limiting.
-- **Local development:** when the variables are absent, a controlled in-memory
-  fallback is used. It is **not distributed** (per-process only) and must not be
-  relied upon in production.
+| Environment | Value |
+|---|---|
+| Production | `hp:production` |
+| Preview | `hp:preview` |
+| Development | `hp:development` |
+
+### Key structure
+
+Each `@upstash/ratelimit` instance uses a prefix of:
+
+```text
+{UPSTASH_RATELIMIT_PREFIX}:human-polish:{feature}
+```
+
+Examples:
+
+```text
+hp:production:human-polish:draft-create
+hp:production:human-polish:draft-recover
+hp:production:human-polish:draft-submit
+hp:production:human-polish:upload-sign
+hp:production:human-polish:upload-complete
+hp:production:human-polish:checkout
+```
+
+The rate-limit **identifier** is a SHA-256 hash of the client IP (truncated).
+Raw IPs, emails, phones, names, auth tokens, and draft recovery tokens are
+**never** stored in Redis keys or logged by the limiter.
+
+### Prefix fallback when `UPSTASH_RATELIMIT_PREFIX` is unset
+
+| Environment | Behavior |
+|---|---|
+| Production | **Fail closed** — controlled configuration error (HTTP 503). Never inferred from request headers. |
+| Preview | Derive `hp:preview` when `VERCEL_ENV === "preview"`. |
+| Development | Derive `hp:development`. |
+
+### Credentials / fallback behavior
+
+- **Production:** `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, and
+  `UPSTASH_RATELIMIT_PREFIX` are **required**. No in-memory fallback. Missing
+  config returns a controlled 503 from Human Polish routes.
+- **Preview:** Use Upstash when credentials are set. If absent, a documented
+  in-memory fallback is permitted (non-distributed; Preview-only convenience).
+- **Development:** In-memory fallback when Upstash is not configured
+  (per-process only).
+- **Upstash runtime errors** (credentials set but Redis fails): always **fail
+  closed** (deny with a short retry) so an outage cannot silently disable limits.
 
 ## Phone normalization — added by platform hardening
 
@@ -135,9 +181,10 @@ email is sent). All are server-only and never logged.
 
 ## Manual setup checklist
 
-1. Create an Upstash Redis database.
-2. Add `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` to the deployment
-   environment (and to `.env.local` for local testing of distributed limits).
+1. Create an Upstash Redis database (one shared DB is intentional).
+2. Add `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, and
+   `UPSTASH_RATELIMIT_PREFIX` to each deployment environment
+   (`hp:production` / `hp:preview` / `hp:development`).
 3. Confirm these are **not** prefixed with `NEXT_PUBLIC_` (they must stay server-only).
 4. Add `STRIPE_HP_WEBHOOK_SECRET` (and optionally `STRIPE_HP_TAX_CODE`) to the
    deployment environment. `STRIPE_SECRET_KEY` and `NEXT_PUBLIC_APP_URL` are shared
