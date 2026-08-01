@@ -15,6 +15,7 @@ export function hashDraftToken(token: string): string {
   return createHash("sha256").update(token, "utf8").digest("hex")
 }
 
+/** Absolute expiry for an inactivity window starting at `fromMs` (default: now). */
 export function draftExpiresAt(fromMs: number = Date.now()): Date {
   return new Date(fromMs + HUMAN_POLISH_DRAFT_TTL_MS)
 }

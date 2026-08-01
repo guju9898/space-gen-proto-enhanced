@@ -95,7 +95,31 @@ integration and must never mutate subscription state.
 | `STRIPE_SECRET_KEY` | Shared Stripe secret key (same key as the subscription integration). Server-only. |
 | `STRIPE_HP_WEBHOOK_SECRET` | Signing secret for the **dedicated** Human Polish webhook endpoint (`/api/human-polish/webhook`). Distinct from `STRIPE_WEBHOOK_SECRET`. Server-only. |
 | `STRIPE_HP_TAX_CODE` | Optional. Stripe Tax product tax code applied to Human Polish line items. Defaults to `txcd_20030000` (general services). |
-| `NEXT_PUBLIC_APP_URL` | Fallback origin for Stripe success/cancel URLs when no `Origin` header is present. |
+
+## Application URL resolution — release hardening
+
+Used by `lib/human-polish/app-url.ts` for Stripe success/cancel URLs, draft
+recovery links in email, and other server-built absolute Human Polish links.
+
+| Variable | Purpose |
+|---|---|
+| `NEXT_PUBLIC_APP_URL` | **Preferred** public origin (e.g. `https://renderspace.ai`). |
+| `NEXT_PUBLIC_DOMAIN` | Fallback origin or bare hostname (normalized to `https://…`). |
+
+Resolution priority (server-side, trailing slashes stripped):
+
+1. `NEXT_PUBLIC_APP_URL`
+2. `NEXT_PUBLIC_DOMAIN`
+3. Trusted request `Origin` header (browser same-origin calls only — not
+   `X-Forwarded-Host` / `X-Forwarded-Proto`)
+4. `http://localhost:3000` **only** when `NODE_ENV !== "production"`
+
+Rules:
+
+- Production env-configured URLs **must** use HTTPS; http values are rejected.
+- Absolute redirect targets are never accepted from the client. Callers append
+  fixed relative paths such as `/human-polish/success?session_id=…`.
+- Do not rename or remove either variable; keep both for compatibility.
 
 Notes:
 
@@ -107,6 +131,13 @@ Notes:
 - The first-purchase promo is verified server-side against paid history for the
   normalized phone; the subscriber discount requires an authenticated active
   Professional/Business session.
+
+## Draft expiration — inactivity window
+
+`draft_expires_at` is a **15-minute inactivity** window, not a timer from draft
+creation. Successful authenticated recover / submit / upload-sign / upload-complete
+(and checkout initiation) extend the window server-side. Invalid, expired, or
+rate-limited requests never refresh it. Clients cannot supply an expiration.
 
 ## Manual Stripe dashboard setup (Human Polish)
 
@@ -187,5 +218,7 @@ email is sent). All are server-only and never logged.
    (`hp:production` / `hp:preview` / `hp:development`).
 3. Confirm these are **not** prefixed with `NEXT_PUBLIC_` (they must stay server-only).
 4. Add `STRIPE_HP_WEBHOOK_SECRET` (and optionally `STRIPE_HP_TAX_CODE`) to the
-   deployment environment. `STRIPE_SECRET_KEY` and `NEXT_PUBLIC_APP_URL` are shared
-   with the existing integration.
+   deployment environment. `STRIPE_SECRET_KEY` is shared with the existing
+   subscription integration. Set `NEXT_PUBLIC_APP_URL` (preferred) or
+   `NEXT_PUBLIC_DOMAIN` so Stripe success/cancel and email recovery links resolve
+   correctly in production.

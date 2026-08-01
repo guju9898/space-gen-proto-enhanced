@@ -26,6 +26,10 @@
  */
 
 import { NextResponse } from "next/server"
+import {
+  humanPolishAbsoluteUrl,
+  resolveHumanPolishAppUrl,
+} from "@/lib/human-polish/app-url"
 import { authenticateDraftRequest } from "@/lib/human-polish/draft-auth"
 import { getDeliveryTarget, HUMAN_POLISH_DRAFT_TTL_MINUTES } from "@/lib/human-polish/config"
 import { normalizePhone } from "@/lib/human-polish/phone"
@@ -107,9 +111,13 @@ export async function POST(request: Request) {
   const intake = body.intake as Record<string, unknown>
 
   // Authenticate against the stored draft (requestId + draftToken).
+  // Successful auth extends the inactivity-based draft expiration.
   const auth = await authenticateDraftRequest(supabase, body.requestId, body.draftToken)
   if (!auth.ok) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status })
+    return NextResponse.json(
+      { error: auth.error, ...(auth.code ? { code: auth.code } : {}) },
+      { status: auth.status }
+    )
   }
   const req = auth.request
 
@@ -219,11 +227,16 @@ export async function POST(request: Request) {
 
   // --- Launch-critical notifications (best-effort; never block the response) -
   // Emails are safe no-ops until LOOPS_API_KEY + template ids are provisioned.
-  const origin =
-    request.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || ""
-  const recoveryUrl = origin
-    ? `${origin}/human-polish/intake?family=${family}&package=${pkg}`
-    : undefined
+  let recoveryUrl: string | undefined
+  try {
+    const origin = resolveHumanPolishAppUrl({ request })
+    recoveryUrl = humanPolishAbsoluteUrl(
+      origin,
+      `/human-polish/intake?family=${encodeURIComponent(family)}&package=${encodeURIComponent(pkg)}`
+    )
+  } catch {
+    recoveryUrl = undefined
+  }
   const packageLabel = HUMAN_POLISH_PACKAGE_LABELS[pkg]
 
   await Promise.allSettled([

@@ -1,6 +1,7 @@
 /**
  * POST /api/human-polish/draft/recover
- * Recover a draft within the 15-minute window using requestId + draftToken.
+ * Recover a draft within the inactivity window using requestId + draftToken.
+ * Successful recovery extends draft_expires_at by the inactivity TTL.
  *
  * Does not expose draft_token_hash. No public table reads.
  */
@@ -58,7 +59,10 @@ export async function POST(request: Request) {
 
   const auth = await authenticateDraftRequest(supabase, body.requestId, body.draftToken)
   if (!auth.ok) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status })
+    return NextResponse.json(
+      { error: auth.error, ...(auth.code ? { code: auth.code } : {}) },
+      { status: auth.status }
+    )
   }
 
   const row = auth.request
@@ -70,6 +74,7 @@ export async function POST(request: Request) {
     status: row.status,
     family,
     package: pkg,
+    // Renewed inactivity expiry (server-authoritative; never client-supplied).
     expiresAt: row.draft_expires_at,
     contactName: row.contact_name ?? null,
     contactEmail: row.contact_email ?? null,

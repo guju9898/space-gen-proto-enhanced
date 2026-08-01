@@ -70,7 +70,10 @@ export async function POST(request: Request) {
 
   const auth = await authenticateDraftRequest(supabase, body.requestId, body.draftToken)
   if (!auth.ok) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status })
+    return NextResponse.json(
+      { error: auth.error, ...(auth.code ? { code: auth.code } : {}) },
+      { status: auth.status }
+    )
   }
 
   if (!isHumanPolishFileType(body.fileType)) {
@@ -114,6 +117,7 @@ export async function POST(request: Request) {
       bucket: HUMAN_POLISH_UPLOAD_BUCKET,
       objectPath,
       alreadyRegistered: true,
+      expiresAt: auth.request.draft_expires_at,
     })
   }
 
@@ -191,5 +195,7 @@ export async function POST(request: Request) {
     mimeType: inserted.mime_type,
     sizeBytes: inserted.size_bytes,
     createdAt: inserted.created_at,
+    // Renewed inactivity expiry after successful authenticated completion.
+    expiresAt: auth.request.draft_expires_at,
   }, { status: 201 })
 }
