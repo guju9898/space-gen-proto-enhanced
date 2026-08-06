@@ -121,6 +121,16 @@ Rules:
   fixed relative paths such as `/human-polish/success?session_id=…`.
 - Do not rename or remove either variable; keep both for compatibility.
 
+## Admin dashboard authorization
+
+Used by `lib/human-polish/admin-auth.ts` for `/admin/human-polish`.
+
+| Variable | Purpose |
+|---|---|
+| `HUMAN_POLISH_ADMIN_EMAILS` | Comma-separated allowlist (e.g. `frank@renderspace.ai,ops@renderspace.ai`). Server-only. Empty/missing fails closed. Never use `NEXT_PUBLIC_*`. |
+
+See `docs/human-polish-admin-dashboard.md`.
+
 Notes:
 
 - Amounts are **server-authoritative** and come exclusively from
@@ -222,3 +232,6 @@ email is sent). All are server-only and never logged.
    subscription integration. Set `NEXT_PUBLIC_APP_URL` (preferred) or
    `NEXT_PUBLIC_DOMAIN` so Stripe success/cancel and email recovery links resolve
    correctly in production.
+5. Add `HUMAN_POLISH_ADMIN_EMAILS` (comma-separated admin emails) for Preview and
+   Production. Server-only — see `docs/human-polish-admin-dashboard.md`.
+6. Provision Loops transactional template IDs as needed (see table above).
