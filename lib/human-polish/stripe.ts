@@ -280,15 +280,20 @@ export type HumanPolishMetadataInput = {
   subscriberDiscountApplied: boolean
   rushApproved: boolean
   leadSource: string | null
+  /** Build-Ready payment-request correlation (non-secret). */
+  paymentRequestId?: string | null
+  /** Build-Ready approved package snapshot for webhook binding. */
+  approvedPackage?: string | null
 }
 
 /**
  * Durable Stripe metadata for the Human Polish payment (spec §5.2). Attached to
  * BOTH the Checkout Session and the underlying PaymentIntent so either webhook
  * event can resolve the originating request. All values must be strings.
+ * Never include secret payment tokens.
  */
 export function buildHumanPolishMetadata(input: HumanPolishMetadataInput): Record<string, string> {
-  return {
+  const meta: Record<string, string> = {
     productType: HUMAN_POLISH_PRODUCT_TYPE,
     requestId: input.requestId,
     family: input.family,
@@ -299,6 +304,13 @@ export function buildHumanPolishMetadata(input: HumanPolishMetadataInput): Recor
     rushApproved: String(input.rushApproved),
     leadSource: input.leadSource ?? "",
   }
+  if (input.paymentRequestId) {
+    meta.paymentRequestId = input.paymentRequestId
+  }
+  if (input.approvedPackage) {
+    meta.approvedPackage = input.approvedPackage
+  }
+  return meta
 }
 
 /** True when a Stripe object's metadata marks it as a Human Polish payment. */

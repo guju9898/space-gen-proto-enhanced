@@ -9,6 +9,7 @@ import {
   adminMarkCompleted,
   adminMarkFirstBatchReady,
   adminRecordBriefMatchCorrection,
+  adminRecordBuildReadyRevisionRequest,
   adminRecordFinalDelivery,
   adminRecordFirstBatchDelivery,
   adminRejectRush,
@@ -16,6 +17,9 @@ import {
   adminStartProduction,
   type AdminActionResult,
 } from "@/lib/human-polish/admin-actions"
+import {
+  getBuildReadyRevisionLimit,
+} from "@/lib/human-polish/build-ready-guards"
 import { isFixedRushApproveAvailable } from "@/lib/human-polish/ops-guards"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -41,6 +45,7 @@ type Props = {
   paymentStatus: string
   family: string
   requestedPackage: string
+  approvedPackage: string | null
   rushRequested: boolean
   rushApproved: boolean
   assignedTo: string | null
@@ -69,7 +74,11 @@ function ConfirmAction({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button type="button" variant={variant === "destructive" ? "destructive" : "secondary"} disabled={disabled || pending}>
+        <Button
+          type="button"
+          variant={variant === "destructive" ? "destructive" : "secondary"}
+          disabled={disabled || pending}
+        >
           {label}
         </Button>
       </AlertDialogTrigger>
@@ -100,6 +109,7 @@ export function AdminActionsPanel(props: Props) {
   const [requestedItems, setRequestedItems] = useState("")
   const [assignee, setAssignee] = useState(props.assignedTo || "")
   const [briefMatchNote, setBriefMatchNote] = useState("")
+  const [revisionNote, setRevisionNote] = useState("")
 
   function run(action: () => Promise<AdminActionResult>) {
     setFeedback(null)
@@ -118,28 +128,51 @@ export function AdminActionsPanel(props: Props) {
     })
   }
 
+  const isAi = props.family === "ai-render-pack"
+  const isBuildReady = props.family === "build-ready"
   const paid = props.paymentStatus === "paid"
   const locked =
     props.status === "cancelled" ||
     props.status === "completed" ||
     props.status === "expired"
 
-  const rushApproveAvailable = isFixedRushApproveAvailable({
-    paymentStatus: props.paymentStatus,
-    requestedPackage: props.requestedPackage,
-    rushRequested: props.rushRequested,
-    rushApproved: props.rushApproved,
-  })
+  const canRequestFiles =
+    !locked &&
+    (isAi
+      ? paid
+      : isBuildReady
+        ? paid ||
+          ["submitted", "under_review", "needs_information"].includes(props.status)
+        : false)
+
+  const rushApproveAvailable =
+    isAi &&
+    isFixedRushApproveAvailable({
+      paymentStatus: props.paymentStatus,
+      requestedPackage: props.requestedPackage,
+      rushRequested: props.rushRequested,
+      rushApproved: props.rushApproved,
+    })
 
   const showBriefMatch =
-    props.family === "ai-render-pack" &&
+    isAi &&
     props.status === "first_batch_delivered" &&
     props.revisionCount === 0 &&
     paid &&
     !locked
 
+  const brRevisionMax = isBuildReady
+    ? getBuildReadyRevisionLimit(props.approvedPackage)
+    : null
+  const showBuildReadyRevision =
+    isBuildReady &&
+    paid &&
+    props.status === "delivered" &&
+    brRevisionMax != null &&
+    !locked
+
   let rushHint: string | null = null
-  if (props.rushRequested && !props.rushApproved) {
+  if (isAi && props.rushRequested && !props.rushApproved) {
     if (props.paymentStatus === "paid") {
       rushHint =
         "Rush approval must occur before payment so the $79 rush fee can be collected. Do not promise rush after payment via this control."
@@ -178,25 +211,25 @@ export function AdminActionsPanel(props: Props) {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Tell the customer exactly what is missing"
-          disabled={pending || locked || !paid}
+          disabled={pending || locked || !canRequestFiles}
         />
         <Input
           value={requestedItems}
           onChange={(e) => setRequestedItems(e.target.value)}
           placeholder="Optional items list (comma-separated)"
-          disabled={pending || locked || !paid}
+          disabled={pending || locked || !canRequestFiles}
           aria-label="Requested items"
         />
         <p className="text-xs text-muted-foreground">
-          Issues a 7-day replacement upload link in the customer email payload
-          (`recoveryUrl`). Confirm the Loops template includes that variable.
+          Issues a 7-day replacement upload link (`recoveryUrl`). For Build-Ready this may
+          be used before payment during scope review; for AI packs it requires payment.
         </p>
         <ConfirmAction
           label="Request files"
           title="Request additional files?"
           description="Sets status to needs_information, rotates the replacement upload token, and emails the customer when a template is configured."
           pending={pending}
-          disabled={locked || !paid || !message.trim()}
+          disabled={locked || !canRequestFiles || !message.trim()}
           onConfirm={() =>
             run(() =>
               adminRequestFilesNeedInfo({
@@ -226,37 +259,41 @@ export function AdminActionsPanel(props: Props) {
             )
           }
         />
-        <ConfirmAction
-          label="Approve rush"
-          title="Approve rush delivery?"
-          description="Marks rush_approved before payment and notifies the customer when configured. Blocked after payment and for 100-packs."
-          pending={pending}
-          disabled={locked || !rushApproveAvailable}
-          onConfirm={() =>
-            run(() =>
-              adminApproveRush({
-                requestId: props.requestId,
-                expectedUpdatedAt: props.expectedUpdatedAt,
-              })
-            )
-          }
-        />
-        <ConfirmAction
-          label="Reject rush"
-          title="Reject rush?"
-          description="Keeps standard timing and notifies the customer when configured."
-          pending={pending}
-          disabled={locked || !props.rushRequested}
-          variant="destructive"
-          onConfirm={() =>
-            run(() =>
-              adminRejectRush({
-                requestId: props.requestId,
-                expectedUpdatedAt: props.expectedUpdatedAt,
-              })
-            )
-          }
-        />
+        {isAi ? (
+          <>
+            <ConfirmAction
+              label="Approve rush"
+              title="Approve rush delivery?"
+              description="Marks rush_approved before payment and notifies the customer when configured. Blocked after payment and for 100-packs."
+              pending={pending}
+              disabled={locked || !rushApproveAvailable}
+              onConfirm={() =>
+                run(() =>
+                  adminApproveRush({
+                    requestId: props.requestId,
+                    expectedUpdatedAt: props.expectedUpdatedAt,
+                  })
+                )
+              }
+            />
+            <ConfirmAction
+              label="Reject rush"
+              title="Reject rush?"
+              description="Keeps standard timing and notifies the customer when configured."
+              pending={pending}
+              disabled={locked || !props.rushRequested}
+              variant="destructive"
+              onConfirm={() =>
+                run(() =>
+                  adminRejectRush({
+                    requestId: props.requestId,
+                    expectedUpdatedAt: props.expectedUpdatedAt,
+                  })
+                )
+              }
+            />
+          </>
+        ) : null}
       </div>
       {rushHint ? (
         <p className="text-xs text-amber-200/90" role="status">
@@ -310,36 +347,40 @@ export function AdminActionsPanel(props: Props) {
             )
           }
         />
-        <ConfirmAction
-          label="First batch ready"
-          title="Mark first batch ready?"
-          description="Moves in_progress → first_batch_ready."
-          pending={pending}
-          disabled={locked || !paid}
-          onConfirm={() =>
-            run(() =>
-              adminMarkFirstBatchReady({
-                requestId: props.requestId,
-                expectedUpdatedAt: props.expectedUpdatedAt,
-              })
-            )
-          }
-        />
-        <ConfirmAction
-          label="Record first-batch delivery"
-          title="Record first-batch delivery?"
-          description="Moves first_batch_ready → first_batch_delivered."
-          pending={pending}
-          disabled={locked || !paid}
-          onConfirm={() =>
-            run(() =>
-              adminRecordFirstBatchDelivery({
-                requestId: props.requestId,
-                expectedUpdatedAt: props.expectedUpdatedAt,
-              })
-            )
-          }
-        />
+        {isAi ? (
+          <>
+            <ConfirmAction
+              label="First batch ready"
+              title="Mark first batch ready?"
+              description="Moves in_progress → first_batch_ready."
+              pending={pending}
+              disabled={locked || !paid}
+              onConfirm={() =>
+                run(() =>
+                  adminMarkFirstBatchReady({
+                    requestId: props.requestId,
+                    expectedUpdatedAt: props.expectedUpdatedAt,
+                  })
+                )
+              }
+            />
+            <ConfirmAction
+              label="Record first-batch delivery"
+              title="Record first-batch delivery?"
+              description="Moves first_batch_ready → first_batch_delivered."
+              pending={pending}
+              disabled={locked || !paid}
+              onConfirm={() =>
+                run(() =>
+                  adminRecordFirstBatchDelivery({
+                    requestId: props.requestId,
+                    expectedUpdatedAt: props.expectedUpdatedAt,
+                  })
+                )
+              }
+            />
+          </>
+        ) : null}
         <ConfirmAction
           label="Record final delivery"
           title="Record final delivery?"
@@ -377,7 +418,7 @@ export function AdminActionsPanel(props: Props) {
           <Label htmlFor="brief-match-note">Record Brief-Match correction</Label>
           <p className="text-xs text-muted-foreground">
             First-Batch Brief-Match Guarantee only — one included correction for AI Render
-            Packs. Returns the request to in_progress. No customer email in this wave.
+            Packs. Returns the request to in_progress.
           </p>
           <Textarea
             id="brief-match-note"
@@ -405,13 +446,70 @@ export function AdminActionsPanel(props: Props) {
         </div>
       ) : null}
 
-      {props.revisionCount >= 1 ? (
+      {showBuildReadyRevision && brRevisionMax != null ? (
+        <div className="space-y-3 rounded-lg border border-[#343434] p-3">
+          <Label htmlFor="br-revision-note">Record Build-Ready revision</Label>
+          <p className="text-xs text-muted-foreground">
+            Revision round {props.revisionCount} of {brRevisionMax} used. Recording the next
+            round returns status to in_progress.
+          </p>
+          <Textarea
+            id="br-revision-note"
+            value={revisionNote}
+            onChange={(e) => setRevisionNote(e.target.value)}
+            placeholder="Describe the revision request"
+            disabled={pending}
+          />
+          <ConfirmAction
+            label="Record Build-Ready revision"
+            title="Record included Build-Ready revision?"
+            description={`Increments revision_count (max ${brRevisionMax}), stores the note, and returns status to in_progress.`}
+            pending={pending}
+            disabled={!revisionNote.trim() || props.revisionCount >= brRevisionMax}
+            onConfirm={() =>
+              run(() =>
+                adminRecordBuildReadyRevisionRequest({
+                  requestId: props.requestId,
+                  expectedUpdatedAt: props.expectedUpdatedAt,
+                  note: revisionNote,
+                })
+              )
+            }
+          />
+        </div>
+      ) : null}
+
+      {isBuildReady && props.approvedPackage === "custom" && paid ? (
+        <p className="text-xs text-muted-foreground" role="status">
+          Custom revision terms apply — the fixed 2D/3D revision control is not shown.
+        </p>
+      ) : null}
+
+      {isAi && props.revisionCount >= 1 ? (
         <div className="rounded-lg border border-[#343434] p-3 text-sm">
           <p className="font-medium">Brief-Match correction used</p>
           <p className="text-muted-foreground">Revision count: {props.revisionCount}</p>
           {props.lastRevisionRequestedAt ? (
             <p className="text-muted-foreground">
               Recorded: {new Date(props.lastRevisionRequestedAt).toLocaleString()}
+            </p>
+          ) : null}
+          {props.lastRevisionNote ? (
+            <p className="mt-2 whitespace-pre-wrap break-words">{props.lastRevisionNote}</p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {isBuildReady && props.revisionCount >= 1 ? (
+        <div className="rounded-lg border border-[#343434] p-3 text-sm">
+          <p className="font-medium">Build-Ready revisions</p>
+          <p className="text-muted-foreground">
+            Revision count: {props.revisionCount}
+            {brRevisionMax != null ? ` of ${brRevisionMax}` : ""}
+          </p>
+          {props.lastRevisionRequestedAt ? (
+            <p className="text-muted-foreground">
+              Last recorded: {new Date(props.lastRevisionRequestedAt).toLocaleString()}
             </p>
           ) : null}
           {props.lastRevisionNote ? (

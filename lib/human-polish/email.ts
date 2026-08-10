@@ -285,7 +285,12 @@ export interface BuildReadyPaymentRequestedEmailParams extends HumanPolishEmailR
   /** Approved amount in cents to be paid, formatted here. */
   amountCents?: number
   currency?: string
-  /** Stripe Checkout / payment-request URL. */
+  /**
+   * Secure Build-Ready payment URL (`/human-polish/pay/...`).
+   * Also mirrored as `checkoutUrl` for older Loops template drafts.
+   */
+  paymentUrl?: string
+  /** @deprecated Prefer paymentUrl — kept as alias for Loops variable compatibility. */
   checkoutUrl?: string
 }
 
@@ -522,6 +527,7 @@ export function sendBuildReadyQuoteEmail(
 export function sendBuildReadyPaymentRequestedEmail(
   params: BuildReadyPaymentRequestedEmailParams
 ): Promise<HumanPolishEmailResult> {
+  const paymentUrl = params.paymentUrl || params.checkoutUrl
   return dispatchTransactional(
     "build_ready_payment_requested",
     params.to,
@@ -533,7 +539,8 @@ export function sendBuildReadyPaymentRequestedEmail(
         typeof params.amountCents === "number"
           ? formatAmountFromCents(params.amountCents, params.currency)
           : undefined,
-      checkoutUrl: params.checkoutUrl,
+      paymentUrl,
+      checkoutUrl: paymentUrl,
     })
   )
 }

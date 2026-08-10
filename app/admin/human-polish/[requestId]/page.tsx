@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { AdminActionsPanel } from "@/components/human-polish/admin/AdminActionsPanel"
+import { AdminBuildReadyPanel } from "@/components/human-polish/admin/AdminBuildReadyPanel"
 import { AdminErrorState } from "@/components/human-polish/admin/AdminStates"
 import { AdminOpenFileButton } from "@/components/human-polish/admin/AdminOpenFileButton"
 import { requireHumanPolishAdminPage } from "@/lib/human-polish/admin-page-auth"
@@ -77,14 +78,16 @@ export default async function HumanPolishAdminDetailPage({
 
   const { request: row, files } = result
   const amount =
-    typeof row.quoted_amount === "number"
-      ? formatAmountFromCents(row.quoted_amount, row.currency)
-      : typeof row.standard_amount === "number"
-        ? formatAmountFromCents(
-            Math.max(0, row.standard_amount - (row.discount_amount || 0)),
-            row.currency
-          )
-        : "—"
+    typeof row.approved_amount === "number"
+      ? formatAmountFromCents(row.approved_amount, row.currency)
+      : typeof row.quoted_amount === "number"
+        ? formatAmountFromCents(row.quoted_amount, row.currency)
+        : typeof row.standard_amount === "number"
+          ? formatAmountFromCents(
+              Math.max(0, row.standard_amount - (row.discount_amount || 0)),
+              row.currency
+            )
+          : "—"
 
   return (
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
@@ -120,7 +123,15 @@ export default async function HumanPolishAdminDetailPage({
         <Field label="Service family" value={familyLabel(row.family)} />
         <Field label="Requested package" value={packageLabel(row.requested_package)} />
         <Field label="Approved package" value={packageLabel(row.approved_package)} />
-        <Field label="Amount" value={amount} />
+        <Field label="Approved amount" value={amount} />
+        <Field
+          label="Legacy quoted amount"
+          value={
+            typeof row.quoted_amount === "number"
+              ? formatAmountFromCents(row.quoted_amount, row.currency)
+              : "—"
+          }
+        />
         <Field label="Promotion" value={row.promotion_type} />
         <Field
           label="Subscriber discount"
@@ -128,6 +139,12 @@ export default async function HumanPolishAdminDetailPage({
         />
         <Field label="Manual quote required" value={row.manual_quote_required ? "Yes" : "No"} />
         <Field label="Payment status" value={paymentStatusLabel(row.payment_status)} />
+        <Field label="Scope reviewed at" value={formatAdminDate(row.scope_reviewed_at)} />
+        <Field label="Scope reviewed by" value={row.scope_reviewed_by} />
+        <Field label="Payment requested at" value={formatAdminDate(row.payment_requested_at)} />
+        <Field label="Payment request id" value={row.payment_request_id} />
+        <Field label="Reviewer message" value={row.reviewer_message} />
+        <Field label="Internal review notes" value={row.internal_review_notes} />
       </Section>
 
       <Section title="Project information">
@@ -228,6 +245,25 @@ export default async function HumanPolishAdminDetailPage({
         </p>
       </section>
 
+      {row.family === "build-ready" ? (
+        <AdminBuildReadyPanel
+          requestId={row.id}
+          expectedUpdatedAt={row.updated_at}
+          status={row.status}
+          paymentStatus={row.payment_status}
+          requestedPackage={row.requested_package}
+          approvedPackage={row.approved_package}
+          approvedAmount={row.approved_amount}
+          scopeReviewedAt={row.scope_reviewed_at}
+          scopeReviewedBy={row.scope_reviewed_by}
+          reviewerMessage={row.reviewer_message}
+          internalReviewNotes={row.internal_review_notes}
+          paymentRequestedAt={row.payment_requested_at}
+          paymentRequestId={row.payment_request_id}
+          currency={row.currency}
+        />
+      ) : null}
+
       <AdminActionsPanel
         requestId={row.id}
         expectedUpdatedAt={row.updated_at}
@@ -235,6 +271,7 @@ export default async function HumanPolishAdminDetailPage({
         paymentStatus={row.payment_status}
         family={row.family}
         requestedPackage={row.requested_package}
+        approvedPackage={row.approved_package}
         rushRequested={row.rush_requested}
         rushApproved={row.rush_approved}
         assignedTo={row.assigned_to}

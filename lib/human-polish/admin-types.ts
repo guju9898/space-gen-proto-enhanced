@@ -71,6 +71,15 @@ export type HumanPolishAdminDetailRow = HumanPolishAdminListRow & {
   rights_permission_granted: boolean
   stripe_checkout_session_id: string | null
   stripe_payment_intent_id: string | null
+  approved_amount: number | null
+  scope_reviewed_at: string | null
+  scope_reviewed_by: string | null
+  reviewer_message: string | null
+  internal_review_notes: string | null
+  payment_requested_at: string | null
+  payment_request_id: string | null
+  build_ready_payment_expires_at: string | null
+  build_ready_payment_issued_at: string | null
 }
 
 export type HumanPolishAdminFileRow = {
@@ -152,6 +161,15 @@ export const ADMIN_DETAIL_SELECT = [
   "rights_permission_granted",
   "stripe_checkout_session_id",
   "stripe_payment_intent_id",
+  "approved_amount",
+  "scope_reviewed_at",
+  "scope_reviewed_by",
+  "reviewer_message",
+  "internal_review_notes",
+  "payment_requested_at",
+  "payment_request_id",
+  "build_ready_payment_expires_at",
+  "build_ready_payment_issued_at",
 ].join(", ")
 
 export const ADMIN_FILE_SELECT = [

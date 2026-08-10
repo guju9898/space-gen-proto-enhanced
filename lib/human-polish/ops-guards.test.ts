@@ -109,6 +109,31 @@ describe("evaluateReplacementUploadAccess", () => {
     })
     assert.equal(decision.ok, false)
   })
+
+  it("accepts unpaid Build-Ready needs_information token", () => {
+    const decision = evaluateReplacementUploadAccess({
+      row: {
+        ...baseRow,
+        family: "build-ready",
+        payment_status: "unpaid",
+      },
+      providedHash: hashReplacementUploadToken("good-token"),
+      hashesEqual: replacementHashesEqual,
+    })
+    assert.equal(decision.ok, true)
+  })
+
+  it("rejects unpaid AI Render Pack token", () => {
+    const decision = evaluateReplacementUploadAccess({
+      row: {
+        ...baseRow,
+        payment_status: "unpaid",
+      },
+      providedHash: hashReplacementUploadToken("good-token"),
+      hashesEqual: replacementHashesEqual,
+    })
+    assert.equal(decision.ok, false)
+  })
 })
 
 describe("rush approve guards", () => {

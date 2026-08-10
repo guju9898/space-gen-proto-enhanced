@@ -155,11 +155,24 @@ export function evaluateReplacementUploadAccess(input: {
     return deny(403)
   }
 
-  if (row.payment_status !== "paid") return deny(403)
   if (row.status !== "needs_information") return deny(403)
-  // Prefer AI Render Pack; also allow if somehow Build-Ready used the same path
-  // only when status/payment match — Phase 6B scopes AI packs in Admin issue path.
-  if (row.family !== "ai-render-pack") return deny(403)
 
-  return { ok: true }
+  if (row.family === "ai-render-pack") {
+    // Phase 6B: AI replacement uploads require paid + needs_information.
+    if (row.payment_status !== "paid") return deny(403)
+    return { ok: true }
+  }
+
+  if (row.family === "build-ready") {
+    // Phase 7B: Build-Ready may request files before or after payment.
+    if (
+      row.payment_status === "refunded" ||
+      row.payment_status === "cancelled"
+    ) {
+      return deny(403)
+    }
+    return { ok: true }
+  }
+
+  return deny(403)
 }

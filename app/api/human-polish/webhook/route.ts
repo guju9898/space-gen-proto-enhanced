@@ -1,41 +1,26 @@
 /**
  * POST /api/human-polish/webhook
  *
- * Dedicated Stripe webhook for Human Polish one-time payments. This is a SEPARATE
- * endpoint from the subscription webhook (`/api/stripe/webhook`) and uses its own
- * signing secret (`STRIPE_HP_WEBHOOK_SECRET`).
- *
- * NOTE ON SPEC: docs/human-polish-v1-spec.md §5.2 suggests extending the existing
- * subscription webhook with a guarded branch. This implementation instead uses a
- * dedicated endpoint (as directed for this workstream). The safety guarantees are
- * preserved: every branch is guarded by `mode === "payment"` and
- * `metadata.productType === "human_polish"`, and NO subscription table, plan,
- * credit, or lifecycle record is ever touched here.
- *
- * Events handled:
- *   - checkout.session.completed   → mark the request paid (idempotent)
- *   - payment_intent.succeeded     → mark the request paid (idempotent)
- *   - payment_intent.payment_failed→ log only (payment stays pending)
- *
- * Configure this endpoint in the Stripe Dashboard (Developers → Webhooks) pointing
- * at `/api/human-polish/webhook` and copy its signing secret into
- * `STRIPE_HP_WEBHOOK_SECRET`. Do NOT reuse the subscription webhook secret.
+ * Dedicated Stripe webhook for Human Polish one-time payments.
+ * Phase 7B: Build-Ready paid reconciliation validates approved amount +
+ * payment_request_id version binding. AI Render Pack path unchanged.
  */
 
 import { NextResponse } from "next/server"
 import type { SupabaseClient } from "@supabase/supabase-js"
 import Stripe from "stripe"
+import { evaluateBuildReadyWebhookPaid } from "@/lib/human-polish/build-ready-guards"
+import { getDeliveryTarget, getFirstBatchSize } from "@/lib/human-polish/config"
+import {
+  sendInternalTeamAlertEmail,
+  sendPaymentReceivedEmail,
+} from "@/lib/human-polish/email"
 import {
   getHumanPolishStripe,
   getHumanPolishWebhookSecret,
   isHumanPolishMetadata,
 } from "@/lib/human-polish/stripe"
 import { getHumanPolishSupabaseService } from "@/lib/human-polish/supabase"
-import { getDeliveryTarget, getFirstBatchSize } from "@/lib/human-polish/config"
-import {
-  sendInternalTeamAlertEmail,
-  sendPaymentReceivedEmail,
-} from "@/lib/human-polish/email"
 import {
   HUMAN_POLISH_PACKAGE_LABELS,
   isAiRenderPackPackage,
@@ -52,20 +37,20 @@ type PaidUpdate = {
   sessionId?: string | null
   paymentIntentId?: string | null
   customerId?: string | null
+  amountTotalCents?: number | null
+  currency?: string | null
+  stripePaid: boolean
+  metadata: Stripe.Metadata | null | undefined
+  source: "checkout.session.completed" | "payment_intent.succeeded"
 }
 
-/**
- * Idempotently mark a Human Polish request as paid. Re-delivery of the same event
- * (or overlap between checkout.session.completed and payment_intent.succeeded) is
- * a no-op once payment_status is already "paid".
- */
 async function markRequestPaid(supabase: SupabaseClient, update: PaidUpdate): Promise<void> {
   const { requestId, sessionId, paymentIntentId, customerId } = update
 
   const { data: existing, error: readErr } = await supabase
     .from("human_polish_requests")
     .select(
-      "id, status, payment_status, contact_email, contact_name, family, requested_package, quoted_amount, currency"
+      "id, status, payment_status, contact_email, contact_name, family, requested_package, approved_package, approved_amount, quoted_amount, currency, payment_request_id, stripe_checkout_session_id"
     )
     .eq("id", requestId)
     .maybeSingle()
@@ -79,7 +64,42 @@ async function markRequestPaid(supabase: SupabaseClient, update: PaidUpdate): Pr
     return
   }
   if (existing.payment_status === "paid") {
-    // Idempotent: already processed — do not re-send confirmation emails.
+    return
+  }
+
+  const family: HumanPolishServiceFamily | null = isHumanPolishServiceFamily(existing.family)
+    ? existing.family
+    : null
+
+  if (family === "build-ready") {
+    const guard = evaluateBuildReadyWebhookPaid({
+      family: existing.family,
+      paymentStatus: existing.payment_status,
+      status: existing.status,
+      approvedPackage: existing.approved_package,
+      approvedAmountCents: existing.approved_amount,
+      paymentRequestId: existing.payment_request_id,
+      storedCheckoutSessionId: existing.stripe_checkout_session_id,
+      metadata: {
+        productType: update.metadata?.productType,
+        family: update.metadata?.family,
+        requestId: update.metadata?.requestId,
+        paymentRequestId: update.metadata?.paymentRequestId,
+        approvedPackage: update.metadata?.approvedPackage,
+      },
+      eventRequestId: requestId,
+      eventCheckoutSessionId:
+        update.source === "checkout.session.completed" ? sessionId : null,
+      amountTotalCents: update.amountTotalCents ?? null,
+      currency: update.currency ?? null,
+      stripePaid: update.stripePaid,
+    })
+    if (!guard.ok) {
+      console.error("[human-polish] webhook: Build-Ready paid guard rejected", guard.error)
+      return
+    }
+  } else if (family !== "ai-render-pack") {
+    console.error("[human-polish] webhook: unknown family")
     return
   }
 
@@ -91,32 +111,33 @@ async function markRequestPaid(supabase: SupabaseClient, update: PaidUpdate): Pr
   if (paymentIntentId) patch.stripe_payment_intent_id = paymentIntentId
   if (customerId) patch.stripe_customer_id = customerId
 
+  if (family === "build-ready") {
+    patch.build_ready_payment_token_hash = null
+    patch.build_ready_payment_expires_at = null
+    patch.build_ready_payment_issued_at = null
+    // Preserve approved_*, scope_reviewed_*, payment_requested_at, payment_request_id.
+  }
+
   const { error: updateErr, count } = await supabase
     .from("human_polish_requests")
     .update(patch, { count: "exact" })
     .eq("id", requestId)
-    // Guard against a racing concurrent delivery flipping it first. This makes
-    // the paid transition — and the confirmation emails below — fire exactly once.
     .neq("payment_status", "paid")
 
   if (updateErr) {
     console.error("[human-polish] webhook: failed to mark request paid")
     return
   }
-  // Another concurrent delivery already flipped the row: skip duplicate emails.
   if (count === 0) return
 
-  // ---------------------------------------------------------------------------
-  // Launch-critical notifications (spec §6.2 #2 + internal alert). Best-effort:
-  // email failures must never fail the webhook, and emails are safe no-ops until
-  // LOOPS_API_KEY + template ids are provisioned. Only reached on the single
-  // unpaid→paid transition above, so no duplicate sends on webhook re-delivery.
-  // ---------------------------------------------------------------------------
-  const family: HumanPolishServiceFamily | null = isHumanPolishServiceFamily(existing.family)
-    ? existing.family
-    : null
-  const pkg: HumanPolishPackage | null = isHumanPolishPackage(existing.requested_package)
-    ? existing.requested_package
+  const pkg: HumanPolishPackage | null = isHumanPolishPackage(
+    family === "build-ready" && existing.approved_package
+      ? existing.approved_package
+      : existing.requested_package
+  )
+    ? ((family === "build-ready" && existing.approved_package
+        ? existing.approved_package
+        : existing.requested_package) as HumanPolishPackage)
     : null
   const contactEmail =
     typeof existing.contact_email === "string" ? existing.contact_email : null
@@ -124,7 +145,11 @@ async function markRequestPaid(supabase: SupabaseClient, update: PaidUpdate): Pr
   if (family && pkg) {
     const packageLabel = HUMAN_POLISH_PACKAGE_LABELS[pkg]
     const amountCents =
-      typeof existing.quoted_amount === "number" ? existing.quoted_amount : undefined
+      family === "build-ready" && typeof existing.approved_amount === "number"
+        ? existing.approved_amount
+        : typeof existing.quoted_amount === "number"
+          ? existing.quoted_amount
+          : undefined
     const currency = typeof existing.currency === "string" ? existing.currency : undefined
     const deliveryTarget = getDeliveryTarget(family, pkg) ?? undefined
     const firstBatchSize = isAiRenderPackPackage(pkg) ? getFirstBatchSize(pkg) : undefined
@@ -191,7 +216,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing stripe-signature header." }, { status: 400 })
   }
 
-  // Raw body is required for signature verification.
   const rawBody = await request.text()
 
   let event: Stripe.Event
@@ -200,7 +224,9 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error("[human-polish] webhook signature verification failed")
     return NextResponse.json(
-      { error: `Webhook signature verification failed: ${err instanceof Error ? err.message : "unknown"}` },
+      {
+        error: `Webhook signature verification failed: ${err instanceof Error ? err.message : "unknown"}`,
+      },
       { status: 400 }
     )
   }
@@ -209,16 +235,13 @@ export async function POST(request: Request) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session
-
-        // Guard: only Human Polish one-time payments (spec §5.2). Never react to
-        // subscription sessions here.
         if (session.mode !== "payment") break
         if (!isHumanPolishMetadata(session.metadata)) break
 
-        // Only act once the money is actually captured.
-        if (session.payment_status !== "paid" && session.payment_status !== "no_payment_required") {
-          break
-        }
+        const stripePaid =
+          session.payment_status === "paid" ||
+          session.payment_status === "no_payment_required"
+        if (!stripePaid) break
 
         const requestId = session.metadata?.requestId
         if (!requestId) {
@@ -229,8 +252,15 @@ export async function POST(request: Request) {
         await markRequestPaid(supabase, {
           requestId,
           sessionId: session.id,
-          paymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : null,
+          paymentIntentId:
+            typeof session.payment_intent === "string" ? session.payment_intent : null,
           customerId: typeof session.customer === "string" ? session.customer : null,
+          amountTotalCents:
+            typeof session.amount_total === "number" ? session.amount_total : null,
+          currency: session.currency ?? null,
+          stripePaid,
+          metadata: session.metadata,
+          source: "checkout.session.completed",
         })
         break
       }
@@ -245,10 +275,22 @@ export async function POST(request: Request) {
           break
         }
 
+        const amountReceived =
+          typeof pi.amount_received === "number" && pi.amount_received > 0
+            ? pi.amount_received
+            : typeof pi.amount === "number"
+              ? pi.amount
+              : null
+
         await markRequestPaid(supabase, {
           requestId,
           paymentIntentId: pi.id,
           customerId: typeof pi.customer === "string" ? pi.customer : null,
+          amountTotalCents: amountReceived,
+          currency: pi.currency ?? null,
+          stripePaid: true,
+          metadata: pi.metadata,
+          source: "payment_intent.succeeded",
         })
         break
       }
@@ -256,8 +298,6 @@ export async function POST(request: Request) {
       case "payment_intent.payment_failed": {
         const pi = event.data.object as Stripe.PaymentIntent
         if (!isHumanPolishMetadata(pi.metadata)) break
-        // The customer can retry from Checkout; the request stays in its pending
-        // state. We do not downgrade status here to avoid clobbering retries.
         console.warn(
           "[human-polish] webhook: payment failed for request",
           asString(pi.metadata?.requestId) ?? "unknown"
@@ -266,7 +306,6 @@ export async function POST(request: Request) {
       }
 
       default:
-        // Ignore unrelated events (including all subscription events).
         break
     }
   } catch (error) {

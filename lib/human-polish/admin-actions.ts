@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import {
   AI_RENDER_PACK_RUSH_FEE_CENTS,
   AI_RENDER_PACK_RUSH_TARGETS,
+  BUILD_READY_REVISION_ROUNDS,
   getDeliveryTarget,
   getFirstBatchSize,
   HUMAN_POLISH_SIGNED_URL_EXPIRES_IN,
@@ -13,11 +14,20 @@ import { requireHumanPolishAdmin } from "@/lib/human-polish/admin-auth"
 import { isUuid, sanitizeSearchText } from "@/lib/human-polish/admin-utils"
 import { humanPolishAbsoluteUrl, resolveHumanPolishAppUrl } from "@/lib/human-polish/app-url"
 import {
+  evaluateBuildReadyApproval,
+  evaluateBuildReadyPaymentRequest,
+  evaluateBuildReadyRevision,
+} from "@/lib/human-polish/build-ready-guards"
+import {
+  sendBuildReadyPaymentRequestedEmail,
+  sendBuildReadyQuoteEmail,
+  sendBuildReadyScopeApprovedEmail,
   sendFilesAcceptedEmail,
   sendFilesNeedInfoEmail,
   sendFinalCompletionEmail,
   sendFinalDeliveryReadyEmail,
   sendFirstBatchReadyEmail,
+  sendRevisionRequestReceivedEmail,
   sendRushApprovedEmail,
   sendRushUnavailableEmail,
   type HumanPolishEmailResult,
@@ -28,11 +38,18 @@ import {
   evaluateRushApprove,
 } from "@/lib/human-polish/ops-guards"
 import {
+  buildBuildReadyPaymentPath,
+  buildReadyPaymentExpiresAt,
+  generateBuildReadyPaymentToken,
+  hashBuildReadyPaymentToken,
+} from "@/lib/human-polish/payment-token"
+import {
   buildReplacementUploadPath,
   generateReplacementUploadToken,
   hashReplacementUploadToken,
   replacementUploadExpiresAt,
 } from "@/lib/human-polish/replacement-token"
+import { getHumanPolishStripe } from "@/lib/human-polish/stripe"
 import {
   HUMAN_POLISH_PACKAGE_LABELS,
   isAiRenderPackPackage,
@@ -41,6 +58,7 @@ import {
   isHumanPolishStatus,
   type HumanPolishStatus,
 } from "@/lib/human-polish/types"
+import { randomUUID } from "crypto"
 
 export type AdminActionResult = {
   ok: boolean
@@ -58,6 +76,8 @@ type RequestRow = {
   contact_email: string | null
   family: string
   requested_package: string
+  approved_package: string | null
+  approved_amount: number | null
   rush_requested: boolean
   rush_approved: boolean
   assigned_to: string | null
@@ -66,6 +86,14 @@ type RequestRow = {
   first_batch_delivered_at: string | null
   final_delivered_at: string | null
   revision_count: number
+  scope_reviewed_at: string | null
+  scope_reviewed_by: string | null
+  reviewer_message: string | null
+  internal_review_notes: string | null
+  payment_requested_at: string | null
+  payment_request_id: string | null
+  stripe_checkout_session_id: string | null
+  currency: string
 }
 
 function emailWarning(result: HumanPolishEmailResult | null): string | undefined {
@@ -95,7 +123,7 @@ async function loadRequest(
   const { data, error } = await supabase
     .from("human_polish_requests")
     .select(
-      "id, status, payment_status, updated_at, contact_name, contact_email, family, requested_package, rush_requested, rush_approved, assigned_to, delivery_clock_started_at, files_accepted_at, first_batch_delivered_at, final_delivered_at, revision_count"
+      "id, status, payment_status, updated_at, contact_name, contact_email, family, requested_package, approved_package, approved_amount, rush_requested, rush_approved, assigned_to, delivery_clock_started_at, files_accepted_at, first_batch_delivered_at, final_delivered_at, revision_count, scope_reviewed_at, scope_reviewed_by, reviewer_message, internal_review_notes, payment_requested_at, payment_request_id, stripe_checkout_session_id, currency"
     )
     .eq("id", requestId)
     .maybeSingle()
@@ -210,19 +238,48 @@ export async function adminRequestFilesNeedInfo(input: {
 
   const terminal = assertNotTerminal(row)
   if (terminal) return { ok: false, error: terminal }
-  const paid = assertPaidForProduction(row)
-  if (paid) return { ok: false, error: paid }
 
-  if (
-    !statusIn(row, [
-      "paid",
-      "needs_information",
-      "files_accepted",
-      "assigned",
-      "in_progress",
-    ])
-  ) {
-    return { ok: false, error: "Files cannot be requested in the current status." }
+  const isBuildReady = row.family === "build-ready"
+  const isAi = row.family === "ai-render-pack"
+
+  if (isAi) {
+    const paid = assertPaidForProduction(row)
+    if (paid) return { ok: false, error: paid }
+    if (
+      !statusIn(row, [
+        "paid",
+        "needs_information",
+        "files_accepted",
+        "assigned",
+        "in_progress",
+      ])
+    ) {
+      return { ok: false, error: "Files cannot be requested in the current status." }
+    }
+  } else if (isBuildReady) {
+    if (row.payment_status === "paid") {
+      if (
+        !statusIn(row, [
+          "paid",
+          "needs_information",
+          "files_accepted",
+          "assigned",
+          "in_progress",
+        ])
+      ) {
+        return { ok: false, error: "Files cannot be requested in the current status." }
+      }
+    } else {
+      // Phase 7B: pre-payment Build-Ready scope review may request more files.
+      if (!statusIn(row, ["submitted", "under_review", "needs_information"])) {
+        return {
+          ok: false,
+          error: "Build-Ready file requests are not available in the current status.",
+        }
+      }
+    }
+  } else {
+    return { ok: false, error: "Unknown service family." }
   }
 
   const message = sanitizeSearchText(input.message, 2000)
@@ -486,6 +543,9 @@ export async function adminMarkFirstBatchReady(input: {
   if (!statusIn(row, ["in_progress"])) {
     return { ok: false, error: "First batch ready requires in_progress." }
   }
+  if (row.family !== "ai-render-pack") {
+    return { ok: false, error: "First-batch controls apply only to AI Render Packs." }
+  }
 
   const updated = await updateRequest(auth.supabase, row.id, input.expectedUpdatedAt, {
     status: "first_batch_ready",
@@ -522,6 +582,9 @@ export async function adminRecordFirstBatchDelivery(input: {
 
   if (!statusIn(row, ["first_batch_ready"])) {
     return { ok: false, error: "Record first-batch delivery from first_batch_ready." }
+  }
+  if (row.family !== "ai-render-pack") {
+    return { ok: false, error: "First-batch controls apply only to AI Render Packs." }
   }
 
   const updated = await updateRequest(auth.supabase, row.id, input.expectedUpdatedAt, {
@@ -650,6 +713,271 @@ export async function adminMarkCompleted(input: {
     packageLabel: isHumanPolishPackage(row.requested_package)
       ? HUMAN_POLISH_PACKAGE_LABELS[row.requested_package]
       : row.requested_package,
+  })
+
+  return { ...updated, warning: emailWarning(mail) }
+}
+
+function clearBuildReadyPaymentFields(): Record<string, unknown> {
+  return {
+    build_ready_payment_token_hash: null,
+    build_ready_payment_expires_at: null,
+    build_ready_payment_issued_at: null,
+    payment_requested_at: null,
+    payment_request_id: null,
+  }
+}
+
+export async function adminApproveBuildReadyScope(input: {
+  requestId: string
+  expectedUpdatedAt: string
+  approvedPackage: string
+  customAmountDollars?: string
+  reviewerMessage?: string
+  internalReviewNotes?: string
+}): Promise<AdminActionResult> {
+  const auth = await requireHumanPolishAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
+
+  const loaded = await loadRequest(auth.supabase, input.requestId)
+  if (!loaded.ok) return loaded
+  const row = loaded.row
+
+  const terminal = assertNotTerminal(row)
+  if (terminal) return { ok: false, error: terminal }
+
+  const hasOpenCheckoutSession =
+    Boolean(row.stripe_checkout_session_id) &&
+    (row.status === "awaiting_payment" || row.payment_status === "pending")
+
+  const decision = evaluateBuildReadyApproval({
+    family: row.family,
+    paymentStatus: row.payment_status,
+    status: row.status,
+    approvedPackage: input.approvedPackage,
+    customAmountDollars: input.customAmountDollars,
+    reviewerMessage: input.reviewerMessage,
+    internalReviewNotes: input.internalReviewNotes,
+    hasOpenCheckoutSession,
+    sanitize: sanitizeSearchText,
+  })
+  if (!decision.ok) return { ok: false, error: decision.error }
+
+  const now = new Date().toISOString()
+  const updated = await updateRequest(auth.supabase, row.id, input.expectedUpdatedAt, {
+    approved_package: decision.approvedPackage,
+    approved_amount: decision.approvedAmountCents,
+    scope_reviewed_at: now,
+    scope_reviewed_by: auth.user.id,
+    reviewer_message: decision.sanitizedReviewerMessage,
+    internal_review_notes: decision.sanitizedInternalNotes,
+    status: "ready_for_payment",
+    manual_quote_required: decision.approvedPackage === "custom",
+    ...clearBuildReadyPaymentFields(),
+    stripe_checkout_session_id: null,
+  })
+  if (!updated.ok) return updated
+
+  revalidateAdmin(row.id)
+
+  let warning: string | undefined
+  try {
+    if (decision.approvedPackage === "custom") {
+      const mail = await sendBuildReadyQuoteEmail({
+        ...recipient(row),
+        quotedAmountCents: decision.approvedAmountCents,
+        currency: row.currency || "usd",
+        message: decision.sanitizedReviewerMessage || undefined,
+      })
+      warning = emailWarning(mail)
+    } else if (isHumanPolishPackage(decision.approvedPackage)) {
+      const mail = await sendBuildReadyScopeApprovedEmail({
+        ...recipient(row),
+        packageLabel: HUMAN_POLISH_PACKAGE_LABELS[decision.approvedPackage],
+        deliveryTarget:
+          getDeliveryTarget("build-ready", decision.approvedPackage) || undefined,
+        revisionRounds:
+          decision.approvedPackage === "essentials-2d" ||
+          decision.approvedPackage === "essentials-3d"
+            ? BUILD_READY_REVISION_ROUNDS[decision.approvedPackage]
+            : undefined,
+      })
+      warning = emailWarning(mail)
+    }
+  } catch {
+    warning = "Request updated, but the customer email could not be sent."
+  }
+
+  return { ...updated, warning }
+}
+
+export async function adminSendBuildReadyPaymentRequest(input: {
+  requestId: string
+  expectedUpdatedAt: string
+}): Promise<AdminActionResult> {
+  const auth = await requireHumanPolishAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
+
+  const loaded = await loadRequest(auth.supabase, input.requestId)
+  if (!loaded.ok) return loaded
+  const row = loaded.row
+
+  const terminal = assertNotTerminal(row)
+  if (terminal) return { ok: false, error: terminal }
+
+  const decision = evaluateBuildReadyPaymentRequest({
+    family: row.family,
+    paymentStatus: row.payment_status,
+    status: row.status,
+    approvedPackage: row.approved_package,
+    approvedAmount: row.approved_amount,
+    scopeReviewedAt: row.scope_reviewed_at,
+  })
+  if (!decision.ok) return { ok: false, error: decision.error }
+
+  const rawToken = generateBuildReadyPaymentToken()
+  const tokenHash = hashBuildReadyPaymentToken(rawToken)
+  const issuedAt = new Date()
+  const expiresAt = buildReadyPaymentExpiresAt(issuedAt.getTime())
+  const paymentRequestId = randomUUID()
+
+  let paymentUrl: string
+  try {
+    const origin = resolveHumanPolishAppUrl()
+    paymentUrl = humanPolishAbsoluteUrl(
+      origin,
+      buildBuildReadyPaymentPath(row.id, rawToken)
+    )
+  } catch {
+    console.error("[human-polish/admin] build-ready payment URL could not be built")
+    return { ok: false, error: "Application URL is not configured for payment requests." }
+  }
+
+  const updated = await updateRequest(auth.supabase, row.id, input.expectedUpdatedAt, {
+    build_ready_payment_token_hash: tokenHash,
+    build_ready_payment_expires_at: expiresAt.toISOString(),
+    build_ready_payment_issued_at: issuedAt.toISOString(),
+    payment_requested_at: issuedAt.toISOString(),
+    payment_request_id: paymentRequestId,
+    status: "ready_for_payment",
+    stripe_checkout_session_id: null,
+  })
+  if (!updated.ok) return updated
+
+  revalidateAdmin(row.id)
+
+  const pkg = row.approved_package
+  const mail = await sendBuildReadyPaymentRequestedEmail({
+    ...recipient(row),
+    packageLabel:
+      pkg && isHumanPolishPackage(pkg) ? HUMAN_POLISH_PACKAGE_LABELS[pkg] : pkg || "Build-Ready",
+    amountCents: row.approved_amount || undefined,
+    currency: row.currency || "usd",
+    paymentUrl,
+  })
+
+  return { ...updated, warning: emailWarning(mail) }
+}
+
+export async function adminRevokeBuildReadyPaymentRequest(input: {
+  requestId: string
+  expectedUpdatedAt: string
+}): Promise<AdminActionResult> {
+  const auth = await requireHumanPolishAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
+
+  const loaded = await loadRequest(auth.supabase, input.requestId)
+  if (!loaded.ok) return loaded
+  const row = loaded.row
+
+  if (row.family !== "build-ready") {
+    return { ok: false, error: "Payment request revoke applies only to Build-Ready." }
+  }
+  if (row.payment_status === "paid") {
+    return { ok: false, error: "Paid requests cannot revoke a payment request." }
+  }
+
+  const terminal = assertNotTerminal(row)
+  if (terminal) return { ok: false, error: terminal }
+
+  if (row.stripe_checkout_session_id) {
+    const stripe = getHumanPolishStripe()
+    if (!stripe) {
+      return {
+        ok: false,
+        error: "Stripe is not configured; cannot expire the open Checkout Session.",
+      }
+    }
+    try {
+      const session = await stripe.checkout.sessions.retrieve(row.stripe_checkout_session_id)
+      if (session.status === "open") {
+        await stripe.checkout.sessions.expire(row.stripe_checkout_session_id)
+      }
+    } catch (err) {
+      console.error(
+        "[human-polish/admin] failed to expire Build-Ready Checkout Session",
+        err instanceof Error ? err.message : "unknown"
+      )
+      return {
+        ok: false,
+        error: "Could not expire the open Checkout Session. Try again before revoking.",
+      }
+    }
+  }
+
+  const updated = await updateRequest(auth.supabase, row.id, input.expectedUpdatedAt, {
+    ...clearBuildReadyPaymentFields(),
+    stripe_checkout_session_id: null,
+    payment_status: "unpaid",
+    status: "under_review",
+  })
+  if (!updated.ok) return updated
+
+  revalidateAdmin(row.id)
+  return updated
+}
+
+export async function adminRecordBuildReadyRevisionRequest(input: {
+  requestId: string
+  expectedUpdatedAt: string
+  note: string
+}): Promise<AdminActionResult> {
+  const auth = await requireHumanPolishAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
+
+  const loaded = await loadRequest(auth.supabase, input.requestId)
+  if (!loaded.ok) return loaded
+  const row = loaded.row
+
+  const terminal = assertNotTerminal(row)
+  if (terminal) return { ok: false, error: terminal }
+
+  const decision = evaluateBuildReadyRevision({
+    family: row.family,
+    paymentStatus: row.payment_status,
+    status: row.status,
+    approvedPackage: row.approved_package,
+    revisionCount: Number(row.revision_count ?? 0),
+    note: input.note,
+    sanitize: sanitizeSearchText,
+  })
+  if (!decision.ok) return { ok: false, error: decision.error }
+
+  const now = new Date().toISOString()
+  const updated = await updateRequest(auth.supabase, row.id, input.expectedUpdatedAt, {
+    revision_count: decision.nextCount,
+    last_revision_note: decision.sanitizedNote,
+    last_revision_requested_at: now,
+    status: "in_progress",
+  })
+  if (!updated.ok) return updated
+
+  revalidateAdmin(row.id)
+
+  const mail = await sendRevisionRequestReceivedEmail({
+    ...recipient(row),
+    revisionNumber: decision.nextCount,
+    message: decision.sanitizedNote,
   })
 
   return { ...updated, warning: emailWarning(mail) }
