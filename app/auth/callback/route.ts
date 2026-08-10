@@ -2,21 +2,7 @@ import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { upsertLoopsContact, sendLoopsEvent } from "@/lib/loops"
-
-/**
- * Safe redirect path: must be relative (start with "/") to prevent open redirect.
- * Cookie value is stored with encodeURIComponent; decode before validating.
- */
-function safeRedirectPath(raw: string | null | undefined): string | null {
-  if (!raw || typeof raw !== "string") return null
-  try {
-    const decoded = decodeURIComponent(raw)
-    if (decoded.startsWith("/")) return decoded
-  } catch {
-    /* ignore invalid encoding */
-  }
-  return null
-}
+import { trySafeLocalReturnPath } from "@/lib/auth/safe-return-path"
 
 /**
  * Redirect destination after successful auth.
@@ -26,10 +12,10 @@ async function getRedirectPath(request: Request): Promise<string> {
   const requestUrl = new URL(request.url)
   const cookieStore = await cookies()
   const cookieRaw = cookieStore.get("auth_redirect_next")?.value
-  const fromCookie = safeRedirectPath(cookieRaw)
+  const fromCookie = trySafeLocalReturnPath(cookieRaw)
   if (fromCookie) return fromCookie
   const queryNext = requestUrl.searchParams.get("next")
-  const fromQuery = safeRedirectPath(queryNext)
+  const fromQuery = trySafeLocalReturnPath(queryNext)
   if (fromQuery) return fromQuery
   return "/studio/exterior"
 }

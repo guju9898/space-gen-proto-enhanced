@@ -2,7 +2,7 @@ import { AdminErrorState } from "@/components/human-polish/admin/AdminStates"
 import { AdminRequestFilters } from "@/components/human-polish/admin/AdminRequestFilters"
 import { AdminRequestPagination } from "@/components/human-polish/admin/AdminRequestPagination"
 import { AdminRequestTable } from "@/components/human-polish/admin/AdminRequestTable"
-import { requireHumanPolishAdmin } from "@/lib/human-polish/admin-auth"
+import { requireHumanPolishAdminPage } from "@/lib/human-polish/admin-page-auth"
 import { listHumanPolishAdminRequests } from "@/lib/human-polish/admin-queries"
 import { sanitizeSearchText } from "@/lib/human-polish/admin-utils"
 
@@ -21,9 +21,9 @@ export default async function HumanPolishAdminListPage({
 }: {
   searchParams: SearchParams
 }) {
-  // Independent auth (in addition to layout).
-  const auth = await requireHumanPolishAdmin()
-  if (!auth.ok) {
+  // Independent auth (in addition to layout). Anonymous → login redirect with next.
+  const auth = await requireHumanPolishAdminPage("/admin/human-polish")
+  if ("forbidden" in auth) {
     return (
       <main className="mx-auto max-w-7xl px-4 py-8">
         <AdminErrorState message={auth.error} />

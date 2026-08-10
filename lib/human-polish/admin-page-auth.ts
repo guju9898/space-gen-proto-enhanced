@@ -1,5 +1,5 @@
-import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import { buildLoginRedirectHref } from "@/lib/auth/safe-return-path"
 import {
   requireHumanPolishAdmin,
   type HumanPolishAdminAuthSuccess,
@@ -8,6 +8,9 @@ import {
 /**
  * Gate admin pages: login redirect for anonymous users; forbidden UI for others.
  * Mutations must still call requireHumanPolishAdmin independently.
+ *
+ * Does not mutate cookies during Server Component render (Next.js forbids it).
+ * Return path is carried via a validated `next` query param on /?login=1.
  */
 export async function requireHumanPolishAdminPage(
   returnPath: string
@@ -15,13 +18,7 @@ export async function requireHumanPolishAdminPage(
   const auth = await requireHumanPolishAdmin()
 
   if (!auth.ok && auth.code === "unauthenticated") {
-    const cookieStore = await cookies()
-    cookieStore.set("auth_redirect_next", returnPath, {
-      path: "/",
-      maxAge: 600,
-      sameSite: "lax",
-    })
-    redirect("/?login=1")
+    redirect(buildLoginRedirectHref(returnPath))
   }
 
   if (!auth.ok) {

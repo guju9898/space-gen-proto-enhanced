@@ -28,7 +28,7 @@ Rules:
 - Do **not** prefix with `NEXT_PUBLIC_`.
 - Set in both **Preview** and **Production**.
 - Admins must also be authenticated via Supabase Auth (same login as the studio).
-- Unauthenticated users are redirected through `/?login=1` with `auth_redirect_next`.
+- Unauthenticated users are redirected to `/?login=1&next=<encoded-local-path>` (for example `/?login=1&next=%2Fadmin%2Fhuman-polish`). The Admin Server Component does **not** write cookies; the login modal stores `auth_redirect_next` on the client when the user starts magic-link / OAuth so `/auth/callback` can return to the Admin path.
 - Authenticated non-admins receive a controlled forbidden page.
 - Every server action (including signed-file open) re-checks authorization independently.
 

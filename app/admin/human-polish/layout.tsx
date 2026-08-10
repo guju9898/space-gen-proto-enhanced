@@ -1,5 +1,5 @@
 import { AdminForbidden } from "@/components/human-polish/admin/AdminStates"
-import { requireHumanPolishAdminPage } from "@/lib/human-polish/admin-page-auth"
+import { requireHumanPolishAdmin } from "@/lib/human-polish/admin-auth"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -9,10 +9,15 @@ export default async function HumanPolishAdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Soft gate for nested pages; each page/action still authorizes independently.
-  // Detail pages pass their own return path in page-level auth.
-  const auth = await requireHumanPolishAdminPage("/admin/human-polish")
-  if ("forbidden" in auth) {
+  // Soft shell gate. Unauthenticated redirect is owned by each page so the
+  // return `next` path can be the list or a specific detail URL.
+  const auth = await requireHumanPolishAdmin()
+
+  if (!auth.ok && auth.code === "unauthenticated") {
+    return <>{children}</>
+  }
+
+  if (!auth.ok) {
     return <AdminForbidden message={auth.error} />
   }
 

@@ -2,7 +2,7 @@ import Link from "next/link"
 import { AdminActionsPanel } from "@/components/human-polish/admin/AdminActionsPanel"
 import { AdminErrorState } from "@/components/human-polish/admin/AdminStates"
 import { AdminOpenFileButton } from "@/components/human-polish/admin/AdminOpenFileButton"
-import { requireHumanPolishAdmin } from "@/lib/human-polish/admin-auth"
+import { requireHumanPolishAdminPage } from "@/lib/human-polish/admin-page-auth"
 import { getHumanPolishAdminRequest } from "@/lib/human-polish/admin-queries"
 import {
   deliveryClockLabel,
@@ -50,8 +50,11 @@ export default async function HumanPolishAdminDetailPage({
 }: {
   params: Promise<{ requestId: string }>
 }) {
-  const auth = await requireHumanPolishAdmin()
-  if (!auth.ok) {
+  const { requestId } = await params
+  const auth = await requireHumanPolishAdminPage(
+    `/admin/human-polish/${requestId}`
+  )
+  if ("forbidden" in auth) {
     return (
       <main className="mx-auto max-w-5xl px-4 py-8">
         <AdminErrorState message={auth.error} />
@@ -59,7 +62,6 @@ export default async function HumanPolishAdminDetailPage({
     )
   }
 
-  const { requestId } = await params
   const result = await getHumanPolishAdminRequest(auth.supabase, requestId)
 
   if (!result.ok) {
