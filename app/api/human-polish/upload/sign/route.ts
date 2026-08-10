@@ -2,7 +2,7 @@
  * POST /api/human-polish/upload/sign
  * Issue a short-lived signed upload URL for the private human-polish-uploads bucket.
  *
- * Body: { requestId, draftToken, fileType, filename, mimeType, sizeBytes }
+ * Body: { requestId, draftToken | replacementToken, fileType, filename, mimeType, sizeBytes }
  * Validates MIME, extension, per-file size, file count, and total request size server-side.
  */
 
@@ -13,11 +13,11 @@ import {
   HUMAN_POLISH_SIGNED_URL_EXPIRES_IN,
   HUMAN_POLISH_UPLOAD_BUCKET,
 } from "@/lib/human-polish/config"
-import { authenticateDraftRequest } from "@/lib/human-polish/draft-auth"
 import { checkRateLimit, getClientIp, HP_RATE_LIMITS } from "@/lib/human-polish/rate-limit"
 import { buildObjectPath, validateUploadMeta } from "@/lib/human-polish/storage"
 import { getHumanPolishSupabaseService } from "@/lib/human-polish/supabase"
 import { isHumanPolishFileType } from "@/lib/human-polish/types"
+import { authenticateCustomerUpload } from "@/lib/human-polish/upload-auth"
 import { isObject } from "@/lib/types/typeGuards"
 
 export const runtime = "nodejs"
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 })
   }
 
-  const auth = await authenticateDraftRequest(supabase, body.requestId, body.draftToken)
+  const auth = await authenticateCustomerUpload(supabase, body)
   if (!auth.ok) {
     return NextResponse.json(
       { error: auth.error, ...(auth.code ? { code: auth.code } : {}) },
@@ -132,7 +132,7 @@ export async function POST(request: Request) {
     fileType: body.fileType,
     originalFilename: typeof body.filename === "string" ? body.filename.trim() : meta.sanitizedFilename,
     sizeBytes: body.sizeBytes,
-    // Renewed inactivity expiry after successful authenticated sign.
-    expiresAt: auth.request.draft_expires_at,
+    // Draft inactivity window or replacement-upload absolute expiry.
+    expiresAt: auth.expiresAt,
   })
 }

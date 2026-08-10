@@ -8,6 +8,7 @@ import {
   adminAssignTeamMember,
   adminMarkCompleted,
   adminMarkFirstBatchReady,
+  adminRecordBriefMatchCorrection,
   adminRecordFinalDelivery,
   adminRecordFirstBatchDelivery,
   adminRejectRush,
@@ -15,6 +16,7 @@ import {
   adminStartProduction,
   type AdminActionResult,
 } from "@/lib/human-polish/admin-actions"
+import { isFixedRushApproveAvailable } from "@/lib/human-polish/ops-guards"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -37,9 +39,14 @@ type Props = {
   expectedUpdatedAt: string
   status: string
   paymentStatus: string
+  family: string
+  requestedPackage: string
   rushRequested: boolean
   rushApproved: boolean
   assignedTo: string | null
+  revisionCount: number
+  lastRevisionNote: string | null
+  lastRevisionRequestedAt: string | null
 }
 
 function ConfirmAction({
@@ -92,6 +99,7 @@ export function AdminActionsPanel(props: Props) {
   const [message, setMessage] = useState("")
   const [requestedItems, setRequestedItems] = useState("")
   const [assignee, setAssignee] = useState(props.assignedTo || "")
+  const [briefMatchNote, setBriefMatchNote] = useState("")
 
   function run(action: () => Promise<AdminActionResult>) {
     setFeedback(null)
@@ -115,6 +123,31 @@ export function AdminActionsPanel(props: Props) {
     props.status === "cancelled" ||
     props.status === "completed" ||
     props.status === "expired"
+
+  const rushApproveAvailable = isFixedRushApproveAvailable({
+    paymentStatus: props.paymentStatus,
+    requestedPackage: props.requestedPackage,
+    rushRequested: props.rushRequested,
+    rushApproved: props.rushApproved,
+  })
+
+  const showBriefMatch =
+    props.family === "ai-render-pack" &&
+    props.status === "first_batch_delivered" &&
+    props.revisionCount === 0 &&
+    paid &&
+    !locked
+
+  let rushHint: string | null = null
+  if (props.rushRequested && !props.rushApproved) {
+    if (props.paymentStatus === "paid") {
+      rushHint =
+        "Rush approval must occur before payment so the $79 rush fee can be collected. Do not promise rush after payment via this control."
+    } else if (props.requestedPackage === "100") {
+      rushHint =
+        "100-concept expedited delivery requires manual custom review — fixed Approve Rush is disabled."
+    }
+  }
 
   return (
     <section className="space-y-4 rounded-xl border border-[#343434] bg-[#0d1119]/60 p-4">
@@ -154,10 +187,14 @@ export function AdminActionsPanel(props: Props) {
           disabled={pending || locked || !paid}
           aria-label="Requested items"
         />
+        <p className="text-xs text-muted-foreground">
+          Issues a 7-day replacement upload link in the customer email payload
+          (`recoveryUrl`). Confirm the Loops template includes that variable.
+        </p>
         <ConfirmAction
           label="Request files"
           title="Request additional files?"
-          description="Sets status to needs_information and emails the customer when a template is configured."
+          description="Sets status to needs_information, rotates the replacement upload token, and emails the customer when a template is configured."
           pending={pending}
           disabled={locked || !paid || !message.trim()}
           onConfirm={() =>
@@ -177,7 +214,7 @@ export function AdminActionsPanel(props: Props) {
         <ConfirmAction
           label="Mark files accepted"
           title="Accept files and start delivery clock?"
-          description="Sets files_accepted and starts the delivery clock."
+          description="Sets files_accepted, starts the delivery clock, and revokes any replacement upload token."
           pending={pending}
           disabled={locked || !paid}
           onConfirm={() =>
@@ -192,9 +229,9 @@ export function AdminActionsPanel(props: Props) {
         <ConfirmAction
           label="Approve rush"
           title="Approve rush delivery?"
-          description="Marks rush_approved and notifies the customer when configured."
+          description="Marks rush_approved before payment and notifies the customer when configured. Blocked after payment and for 100-packs."
           pending={pending}
-          disabled={locked || !props.rushRequested || props.rushApproved}
+          disabled={locked || !rushApproveAvailable}
           onConfirm={() =>
             run(() =>
               adminApproveRush({
@@ -221,6 +258,11 @@ export function AdminActionsPanel(props: Props) {
           }
         />
       </div>
+      {rushHint ? (
+        <p className="text-xs text-amber-200/90" role="status">
+          {rushHint}
+        </p>
+      ) : null}
 
       <div className="space-y-2 rounded-lg border border-[#343434] p-3">
         <Label htmlFor="assignee">Assign team member</Label>
@@ -316,7 +358,7 @@ export function AdminActionsPanel(props: Props) {
         <ConfirmAction
           label="Mark completed"
           title="Mark request completed?"
-          description="Moves delivered/first_batch_delivered → completed."
+          description="Moves delivered → completed only after final delivery."
           pending={pending}
           disabled={locked || !paid}
           onConfirm={() =>
@@ -329,6 +371,54 @@ export function AdminActionsPanel(props: Props) {
           }
         />
       </div>
+
+      {showBriefMatch ? (
+        <div className="space-y-3 rounded-lg border border-[#343434] p-3">
+          <Label htmlFor="brief-match-note">Record Brief-Match correction</Label>
+          <p className="text-xs text-muted-foreground">
+            First-Batch Brief-Match Guarantee only — one included correction for AI Render
+            Packs. Returns the request to in_progress. No customer email in this wave.
+          </p>
+          <Textarea
+            id="brief-match-note"
+            value={briefMatchNote}
+            onChange={(e) => setBriefMatchNote(e.target.value)}
+            placeholder="Describe the brief-match issue and correction direction"
+            disabled={pending}
+          />
+          <ConfirmAction
+            label="Record Brief-Match correction"
+            title="Use the included Brief-Match correction?"
+            description="Sets revision_count to 1, stores the note, and returns status to in_progress. This can only be used once."
+            pending={pending}
+            disabled={!briefMatchNote.trim()}
+            onConfirm={() =>
+              run(() =>
+                adminRecordBriefMatchCorrection({
+                  requestId: props.requestId,
+                  expectedUpdatedAt: props.expectedUpdatedAt,
+                  note: briefMatchNote,
+                })
+              )
+            }
+          />
+        </div>
+      ) : null}
+
+      {props.revisionCount >= 1 ? (
+        <div className="rounded-lg border border-[#343434] p-3 text-sm">
+          <p className="font-medium">Brief-Match correction used</p>
+          <p className="text-muted-foreground">Revision count: {props.revisionCount}</p>
+          {props.lastRevisionRequestedAt ? (
+            <p className="text-muted-foreground">
+              Recorded: {new Date(props.lastRevisionRequestedAt).toLocaleString()}
+            </p>
+          ) : null}
+          {props.lastRevisionNote ? (
+            <p className="mt-2 whitespace-pre-wrap break-words">{props.lastRevisionNote}</p>
+          ) : null}
+        </div>
+      ) : null}
     </section>
   )
 }

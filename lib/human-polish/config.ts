@@ -50,6 +50,14 @@ export const HUMAN_POLISH_DRAFT_TTL_MS = 15 * 60 * 1000
 
 export const HUMAN_POLISH_DRAFT_TTL_MINUTES = 15
 
+/**
+ * Paid replacement-upload window after Admin requests files (§Phase 6B).
+ * Absolute expiry from issue — not the draft inactivity TTL.
+ */
+export const HUMAN_POLISH_REPLACEMENT_UPLOAD_TTL_MS = 7 * 24 * 60 * 60 * 1000
+
+export const HUMAN_POLISH_REPLACEMENT_UPLOAD_TTL_DAYS = 7
+
 /** Currency for Human Polish one-time payments. */
 export const HUMAN_POLISH_CURRENCY = "usd" as const
 

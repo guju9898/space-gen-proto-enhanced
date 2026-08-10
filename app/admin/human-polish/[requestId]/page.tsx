@@ -179,6 +179,11 @@ export default async function HumanPolishAdminDetailPage({
         />
         <Field label="Final delivered" value={formatAdminDate(row.final_delivered_at)} />
         <Field label="Revision count" value={String(row.revision_count)} />
+        <Field label="Last revision note" value={row.last_revision_note} />
+        <Field
+          label="Last revision requested"
+          value={formatAdminDate(row.last_revision_requested_at)}
+        />
         <Field label="Rights request sent" value={row.rights_request_sent ? "Yes" : "No"} />
         <Field
           label="Rights permission granted"
@@ -228,9 +233,14 @@ export default async function HumanPolishAdminDetailPage({
         expectedUpdatedAt={row.updated_at}
         status={row.status}
         paymentStatus={row.payment_status}
+        family={row.family}
+        requestedPackage={row.requested_package}
         rushRequested={row.rush_requested}
         rushApproved={row.rush_approved}
         assignedTo={row.assigned_to}
+        revisionCount={row.revision_count}
+        lastRevisionNote={row.last_revision_note}
+        lastRevisionRequestedAt={row.last_revision_requested_at}
       />
     </main>
   )

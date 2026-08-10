@@ -65,6 +65,8 @@ export type HumanPolishAdminDetailRow = HumanPolishAdminListRow & {
   revision_count: number
   first_batch_delivered_at: string | null
   final_delivered_at: string | null
+  last_revision_note: string | null
+  last_revision_requested_at: string | null
   rights_request_sent: boolean
   rights_permission_granted: boolean
   stripe_checkout_session_id: string | null
@@ -144,6 +146,8 @@ export const ADMIN_DETAIL_SELECT = [
   "revision_count",
   "first_batch_delivered_at",
   "final_delivered_at",
+  "last_revision_note",
+  "last_revision_requested_at",
   "rights_request_sent",
   "rights_permission_granted",
   "stripe_checkout_session_id",

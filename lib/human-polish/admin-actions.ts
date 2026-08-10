@@ -1,5 +1,6 @@
 "use server"
 
+import { revalidatePath } from "next/cache"
 import {
   AI_RENDER_PACK_RUSH_FEE_CENTS,
   AI_RENDER_PACK_RUSH_TARGETS,
@@ -10,6 +11,7 @@ import {
 } from "@/lib/human-polish/config"
 import { requireHumanPolishAdmin } from "@/lib/human-polish/admin-auth"
 import { isUuid, sanitizeSearchText } from "@/lib/human-polish/admin-utils"
+import { humanPolishAbsoluteUrl, resolveHumanPolishAppUrl } from "@/lib/human-polish/app-url"
 import {
   sendFilesAcceptedEmail,
   sendFilesNeedInfoEmail,
@@ -20,6 +22,17 @@ import {
   sendRushUnavailableEmail,
   type HumanPolishEmailResult,
 } from "@/lib/human-polish/email"
+import {
+  canMarkCompletedFromStatus,
+  evaluateBriefMatchCorrection,
+  evaluateRushApprove,
+} from "@/lib/human-polish/ops-guards"
+import {
+  buildReplacementUploadPath,
+  generateReplacementUploadToken,
+  hashReplacementUploadToken,
+  replacementUploadExpiresAt,
+} from "@/lib/human-polish/replacement-token"
 import {
   HUMAN_POLISH_PACKAGE_LABELS,
   isAiRenderPackPackage,
@@ -52,6 +65,7 @@ type RequestRow = {
   files_accepted_at: string | null
   first_batch_delivered_at: string | null
   final_delivered_at: string | null
+  revision_count: number
 }
 
 function emailWarning(result: HumanPolishEmailResult | null): string | undefined {
@@ -68,6 +82,11 @@ function recipient(row: RequestRow) {
   }
 }
 
+function revalidateAdmin(requestId: string) {
+  revalidatePath("/admin/human-polish")
+  revalidatePath(`/admin/human-polish/${requestId}`)
+}
+
 async function loadRequest(
   supabase: import("@supabase/supabase-js").SupabaseClient,
   requestId: string
@@ -76,7 +95,7 @@ async function loadRequest(
   const { data, error } = await supabase
     .from("human_polish_requests")
     .select(
-      "id, status, payment_status, updated_at, contact_name, contact_email, family, requested_package, rush_requested, rush_approved, assigned_to, delivery_clock_started_at, files_accepted_at, first_batch_delivered_at, final_delivered_at"
+      "id, status, payment_status, updated_at, contact_name, contact_email, family, requested_package, rush_requested, rush_approved, assigned_to, delivery_clock_started_at, files_accepted_at, first_batch_delivered_at, final_delivered_at, revision_count"
     )
     .eq("id", requestId)
     .maybeSingle()
@@ -210,10 +229,33 @@ export async function adminRequestFilesNeedInfo(input: {
   if (!message) return { ok: false, error: "A message is required." }
 
   const items = sanitizeSearchText(input.requestedItems, 500)
+
+  const rawToken = generateReplacementUploadToken()
+  const tokenHash = hashReplacementUploadToken(rawToken)
+  const issuedAt = new Date()
+  const expiresAt = replacementUploadExpiresAt(issuedAt.getTime())
+
+  let recoveryUrl: string
+  try {
+    const origin = resolveHumanPolishAppUrl()
+    recoveryUrl = humanPolishAbsoluteUrl(
+      origin,
+      buildReplacementUploadPath(row.id, rawToken)
+    )
+  } catch {
+    console.error("[human-polish/admin] replacement upload URL could not be built")
+    return { ok: false, error: "Application URL is not configured for replacement uploads." }
+  }
+
   const updated = await updateRequest(auth.supabase, row.id, input.expectedUpdatedAt, {
     status: "needs_information",
+    replacement_upload_token_hash: tokenHash,
+    replacement_upload_expires_at: expiresAt.toISOString(),
+    replacement_upload_issued_at: issuedAt.toISOString(),
   })
   if (!updated.ok) return updated
+
+  revalidateAdmin(row.id)
 
   const mail = await sendFilesNeedInfoEmail({
     ...recipient(row),
@@ -221,6 +263,7 @@ export async function adminRequestFilesNeedInfo(input: {
     requestedItems: items
       ? items.split(",").map((s) => s.trim()).filter(Boolean)
       : undefined,
+    recoveryUrl,
   })
 
   return { ...updated, warning: emailWarning(mail) }
@@ -251,8 +294,13 @@ export async function adminAcceptFiles(input: {
     status: "files_accepted",
     files_accepted_at: now,
     delivery_clock_started_at: row.delivery_clock_started_at || now,
+    replacement_upload_token_hash: null,
+    replacement_upload_expires_at: null,
+    replacement_upload_issued_at: null,
   })
   if (!updated.ok) return updated
+
+  revalidateAdmin(row.id)
 
   if (
     !isHumanPolishServiceFamily(row.family) ||
@@ -287,13 +335,21 @@ export async function adminApproveRush(input: {
 
   const terminal = assertNotTerminal(row)
   if (terminal) return { ok: false, error: terminal }
-  if (!row.rush_requested) return { ok: false, error: "Rush was not requested." }
-  if (row.rush_approved) return { ok: false, error: "Rush is already approved." }
+
+  const decision = evaluateRushApprove({
+    paymentStatus: row.payment_status,
+    requestedPackage: row.requested_package,
+    rushRequested: row.rush_requested,
+    rushApproved: row.rush_approved,
+  })
+  if (!decision.ok) return { ok: false, error: decision.error }
 
   const updated = await updateRequest(auth.supabase, row.id, input.expectedUpdatedAt, {
     rush_approved: true,
   })
   if (!updated.ok) return updated
+
+  revalidateAdmin(row.id)
 
   const rushTarget =
     isAiRenderPackPackage(row.requested_package)
@@ -328,6 +384,8 @@ export async function adminRejectRush(input: {
     rush_approved: false,
   })
   if (!updated.ok) return updated
+
+  revalidateAdmin(row.id)
 
   const standard =
     isHumanPolishServiceFamily(row.family) && isHumanPolishPackage(row.requested_package)
@@ -377,7 +435,9 @@ export async function adminAssignTeamMember(input: {
   const patch: Record<string, unknown> = { assigned_to: assignedTo }
   if (row.status === "files_accepted") patch.status = "assigned"
 
-  return updateRequest(auth.supabase, row.id, input.expectedUpdatedAt, patch)
+  const updated = await updateRequest(auth.supabase, row.id, input.expectedUpdatedAt, patch)
+  if (updated.ok) revalidateAdmin(row.id)
+  return updated
 }
 
 export async function adminStartProduction(input: {
@@ -400,9 +460,11 @@ export async function adminStartProduction(input: {
     return { ok: false, error: "Production can start from files_accepted or assigned." }
   }
 
-  return updateRequest(auth.supabase, row.id, input.expectedUpdatedAt, {
+  const updated = await updateRequest(auth.supabase, row.id, input.expectedUpdatedAt, {
     status: "in_progress",
   })
+  if (updated.ok) revalidateAdmin(row.id)
+  return updated
 }
 
 export async function adminMarkFirstBatchReady(input: {
@@ -429,6 +491,8 @@ export async function adminMarkFirstBatchReady(input: {
     status: "first_batch_ready",
   })
   if (!updated.ok) return updated
+
+  revalidateAdmin(row.id)
 
   const mail = await sendFirstBatchReadyEmail({
     ...recipient(row),
@@ -460,10 +524,50 @@ export async function adminRecordFirstBatchDelivery(input: {
     return { ok: false, error: "Record first-batch delivery from first_batch_ready." }
   }
 
-  return updateRequest(auth.supabase, row.id, input.expectedUpdatedAt, {
+  const updated = await updateRequest(auth.supabase, row.id, input.expectedUpdatedAt, {
     status: "first_batch_delivered",
     first_batch_delivered_at: new Date().toISOString(),
   })
+  if (updated.ok) revalidateAdmin(row.id)
+  return updated
+}
+
+export async function adminRecordBriefMatchCorrection(input: {
+  requestId: string
+  expectedUpdatedAt: string
+  note: string
+}): Promise<AdminActionResult> {
+  const auth = await requireHumanPolishAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
+
+  const loaded = await loadRequest(auth.supabase, input.requestId)
+  if (!loaded.ok) return loaded
+  const row = loaded.row
+
+  const terminal = assertNotTerminal(row)
+  if (terminal) return { ok: false, error: terminal }
+
+  const decision = evaluateBriefMatchCorrection(
+    {
+      family: row.family,
+      paymentStatus: row.payment_status,
+      status: row.status,
+      revisionCount: Number(row.revision_count ?? 0),
+      note: input.note,
+    },
+    sanitizeSearchText
+  )
+  if (!decision.ok) return { ok: false, error: decision.error }
+
+  const now = new Date().toISOString()
+  const updated = await updateRequest(auth.supabase, row.id, input.expectedUpdatedAt, {
+    revision_count: 1,
+    last_revision_note: decision.sanitizedNote,
+    last_revision_requested_at: now,
+    status: "in_progress",
+  })
+  if (updated.ok) revalidateAdmin(row.id)
+  return updated
 }
 
 export async function adminRecordFinalDelivery(input: {
@@ -499,6 +603,8 @@ export async function adminRecordFinalDelivery(input: {
   })
   if (!updated.ok) return updated
 
+  revalidateAdmin(row.id)
+
   const mail = await sendFinalDeliveryReadyEmail({
     ...recipient(row),
     packageLabel: isHumanPolishPackage(row.requested_package)
@@ -528,14 +634,16 @@ export async function adminMarkCompleted(input: {
   const paid = assertPaidForProduction(row)
   if (paid) return { ok: false, error: paid }
 
-  if (!statusIn(row, ["delivered", "first_batch_delivered"])) {
-    return { ok: false, error: "Complete only after delivery." }
+  if (!canMarkCompletedFromStatus(row.status)) {
+    return { ok: false, error: "Complete only after final delivery (status delivered)." }
   }
 
   const updated = await updateRequest(auth.supabase, row.id, input.expectedUpdatedAt, {
     status: "completed",
   })
   if (!updated.ok) return updated
+
+  revalidateAdmin(row.id)
 
   const mail = await sendFinalCompletionEmail({
     ...recipient(row),

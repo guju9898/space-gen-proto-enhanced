@@ -3,7 +3,7 @@
  * Register a file row after the client uploaded to a signed URL.
  *
  * Body: {
- *   requestId, draftToken, objectPath, fileType,
+ *   requestId, draftToken | replacementToken, objectPath, fileType,
  *   originalFilename, mimeType, sizeBytes
  * }
  *
@@ -17,11 +17,11 @@ import {
   HUMAN_POLISH_MAX_FILES_PER_REQUEST,
   HUMAN_POLISH_UPLOAD_BUCKET,
 } from "@/lib/human-polish/config"
-import { authenticateDraftRequest } from "@/lib/human-polish/draft-auth"
 import { checkRateLimit, getClientIp, HP_RATE_LIMITS } from "@/lib/human-polish/rate-limit"
 import { validateUploadMeta } from "@/lib/human-polish/storage"
 import { getHumanPolishSupabaseService } from "@/lib/human-polish/supabase"
 import { isHumanPolishFileType } from "@/lib/human-polish/types"
+import { authenticateCustomerUpload } from "@/lib/human-polish/upload-auth"
 import { isObject, isString } from "@/lib/types/typeGuards"
 
 export const runtime = "nodejs"
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 })
   }
 
-  const auth = await authenticateDraftRequest(supabase, body.requestId, body.draftToken)
+  const auth = await authenticateCustomerUpload(supabase, body)
   if (!auth.ok) {
     return NextResponse.json(
       { error: auth.error, ...(auth.code ? { code: auth.code } : {}) },
@@ -117,7 +117,7 @@ export async function POST(request: Request) {
       bucket: HUMAN_POLISH_UPLOAD_BUCKET,
       objectPath,
       alreadyRegistered: true,
-      expiresAt: auth.request.draft_expires_at,
+      expiresAt: auth.expiresAt,
     })
   }
 
@@ -195,7 +195,7 @@ export async function POST(request: Request) {
     mimeType: inserted.mime_type,
     sizeBytes: inserted.size_bytes,
     createdAt: inserted.created_at,
-    // Renewed inactivity expiry after successful authenticated completion.
-    expiresAt: auth.request.draft_expires_at,
+    // Draft inactivity window or replacement-upload absolute expiry.
+    expiresAt: auth.expiresAt,
   }, { status: 201 })
 }

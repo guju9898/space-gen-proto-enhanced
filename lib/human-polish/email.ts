@@ -212,6 +212,12 @@ export interface FilesNeedInfoEmailParams extends HumanPolishEmailRecipient {
   message?: string
   /** Optional list of specific items/files being requested. */
   requestedItems?: string[]
+  /**
+   * Absolute URL for paid replacement uploads (Phase 6B).
+   * Always supplied by adminRequestFilesNeedInfo after a successful update.
+   * Phase 6C must wire this into the Loops Files Need Information template.
+   */
+  recoveryUrl?: string
 }
 
 // §6.2 #4 — Files accepted and delivery clock started
@@ -384,6 +390,7 @@ export function sendFilesNeedInfoEmail(
         params.requestedItems && params.requestedItems.length > 0
           ? params.requestedItems.join(", ")
           : undefined,
+      recoveryUrl: params.recoveryUrl,
     })
   )
 }
