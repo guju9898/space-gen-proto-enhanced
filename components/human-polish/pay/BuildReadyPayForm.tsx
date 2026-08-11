@@ -4,10 +4,16 @@ import { useState, useTransition } from "react"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { formatAmountFromCents } from "@/lib/human-polish/email"
+import { trackHumanPolishEvent } from "@/components/human-polish/analytics"
+import {
+  isHumanPolishPackage,
+  type HumanPolishPackage,
+} from "@/lib/human-polish/types"
 
 type Props = {
   requestId: string
   paymentToken: string
+  packageId: string
   packageLabel: string
   amountCents: number
   currency: string
@@ -22,6 +28,12 @@ export function BuildReadyPayForm(props: Props) {
     setError(null)
     startTransition(async () => {
       try {
+        if (isHumanPolishPackage(props.packageId)) {
+          trackHumanPolishEvent("initiated_checkout", {
+            family: "build-ready",
+            package: props.packageId as HumanPolishPackage,
+          })
+        }
         const res = await fetch("/api/human-polish/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

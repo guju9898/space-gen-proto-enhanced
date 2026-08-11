@@ -15,6 +15,7 @@ import {
   sendInternalTeamAlertEmail,
   sendPaymentReceivedEmail,
 } from "@/lib/human-polish/email"
+import { buildFirstPaidTransitionFields } from "@/lib/human-polish/pack-expiration"
 import {
   getHumanPolishStripe,
   getHumanPolishWebhookSecret,
@@ -50,7 +51,7 @@ async function markRequestPaid(supabase: SupabaseClient, update: PaidUpdate): Pr
   const { data: existing, error: readErr } = await supabase
     .from("human_polish_requests")
     .select(
-      "id, status, payment_status, contact_email, contact_name, family, requested_package, approved_package, approved_amount, quoted_amount, currency, payment_request_id, stripe_checkout_session_id"
+      "id, status, payment_status, contact_email, contact_name, family, requested_package, approved_package, approved_amount, quoted_amount, currency, payment_request_id, stripe_checkout_session_id, paid_at, pack_expires_at"
     )
     .eq("id", requestId)
     .maybeSingle()
@@ -110,6 +111,14 @@ async function markRequestPaid(supabase: SupabaseClient, update: PaidUpdate): Pr
   if (sessionId) patch.stripe_checkout_session_id = sessionId
   if (paymentIntentId) patch.stripe_payment_intent_id = paymentIntentId
   if (customerId) patch.stripe_customer_id = customerId
+
+  const paidFields = buildFirstPaidTransitionFields({
+    family: existing.family,
+    existingPaidAt: (existing as { paid_at?: string | null }).paid_at ?? null,
+    existingPackExpiresAt:
+      (existing as { pack_expires_at?: string | null }).pack_expires_at ?? null,
+  })
+  Object.assign(patch, paidFields)
 
   if (family === "build-ready") {
     patch.build_ready_payment_token_hash = null

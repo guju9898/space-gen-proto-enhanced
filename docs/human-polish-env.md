@@ -207,6 +207,26 @@ email is sent). All are server-only and never logged.
 | `LOOPS_HP_PACK_EXPIRATION_REMINDER_TEMPLATE_ID` | #15 Pack expiration reminder | `sendPackExpirationReminderEmail` |
 | `LOOPS_HP_INTERNAL_ALERT_TEMPLATE_ID` | Internal team alert | `sendInternalTeamAlertEmail` |
 
+### Phase 8B — rights + pack expiration (required for flywheel)
+
+| Variable | Purpose |
+|---|---|
+| `LOOPS_HP_RIGHTS_PERMISSION_REQUEST_TEMPLATE_ID` | #14 Portfolio permission request (`permissionUrl` required). Safe no-op until provisioned. |
+| `LOOPS_HP_PACK_EXPIRATION_REMINDER_TEMPLATE_ID` | #15 AI pack expiration reminder. Safe no-op until provisioned. |
+| `CRON_SECRET` | Bearer secret for `GET /api/cron/human-polish-pack-expiration`. **Required** for the route to authorize. Fail closed when unset. Never log. Never place in `vercel.json` or client code. |
+
+Vercel Cron schedule (see root `vercel.json`):
+
+```text
+0 15 * * *  →  /api/cron/human-polish-pack-expiration
+```
+
+Authorization header expected by the route:
+
+```text
+Authorization: Bearer <CRON_SECRET>
+```
+
 ### Loops dashboard setup (manual)
 
 1. In Loops, create one **transactional** email template per row above. Add the

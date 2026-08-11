@@ -69,6 +69,13 @@ export type HumanPolishAdminDetailRow = HumanPolishAdminListRow & {
   last_revision_requested_at: string | null
   rights_request_sent: boolean
   rights_permission_granted: boolean
+  rights_permission_status: string
+  rights_requested_at: string | null
+  rights_responded_at: string | null
+  rights_permission_expires_at: string | null
+  paid_at: string | null
+  pack_expires_at: string | null
+  expiration_reminder_sent_at: string | null
   stripe_checkout_session_id: string | null
   stripe_payment_intent_id: string | null
   approved_amount: number | null
@@ -159,6 +166,13 @@ export const ADMIN_DETAIL_SELECT = [
   "last_revision_requested_at",
   "rights_request_sent",
   "rights_permission_granted",
+  "rights_permission_status",
+  "rights_requested_at",
+  "rights_responded_at",
+  "rights_permission_expires_at",
+  "paid_at",
+  "pack_expires_at",
+  "expiration_reminder_sent_at",
   "stripe_checkout_session_id",
   "stripe_payment_intent_id",
   "approved_amount",

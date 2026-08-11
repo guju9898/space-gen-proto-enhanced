@@ -205,7 +205,11 @@ async function handleBuildReadyCheckout(
   )
   const cancelUrl = humanPolishAbsoluteUrl(
     origin,
-    buildBuildReadyCancelPath(requestId, typeof body.paymentToken === "string" ? body.paymentToken : "")
+    buildBuildReadyCancelPath(
+      requestId,
+      typeof body.paymentToken === "string" ? body.paymentToken : "",
+      approvedPackage
+    )
   )
 
   const metadata = buildHumanPolishMetadata({
@@ -293,8 +297,17 @@ async function handleBuildReadyCheckout(
   })
 }
 
-function buildBuildReadyCancelPath(requestId: string, rawToken: string): string {
-  const params = new URLSearchParams({ token: rawToken })
+function buildBuildReadyCancelPath(
+  requestId: string,
+  rawToken: string,
+  approvedPackage: string
+): string {
+  const params = new URLSearchParams({
+    token: rawToken,
+    hp_checkout: "cancelled",
+    family: "build-ready",
+    package: approvedPackage,
+  })
   return `/human-polish/pay/${encodeURIComponent(requestId)}?${params.toString()}`
 }
 
@@ -407,7 +420,12 @@ async function handleAiRenderPackCheckout(
     origin,
     "/human-polish/success?session_id={CHECKOUT_SESSION_ID}"
   )
-  const cancelUrl = humanPolishAbsoluteUrl(origin, "/human-polish")
+  const cancelParams = new URLSearchParams({
+    hp_checkout: "cancelled",
+    family: "ai-render-pack",
+    package: pkg,
+  })
+  const cancelUrl = humanPolishAbsoluteUrl(origin, `/human-polish?${cancelParams.toString()}`)
 
   const metadata = buildHumanPolishMetadata({
     requestId,

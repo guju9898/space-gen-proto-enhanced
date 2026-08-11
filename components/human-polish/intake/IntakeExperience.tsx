@@ -214,6 +214,8 @@ export function IntakeExperience() {
     // 2) AI Render Packs proceed to secure one-time checkout; Build-Ready is
     //    submitted for human scope review (no immediate payment — spec §3.2).
     if (isAiPack && pkg !== "custom") {
+      trackHumanPolishEvent("completed_intake", { family, package: pkg })
+      trackHumanPolishEvent("accepted_scope", { family, package: pkg })
       trackHumanPolishEvent("initiated_checkout", { family, package: pkg })
       try {
         const res = await fetch("/api/human-polish/checkout", {

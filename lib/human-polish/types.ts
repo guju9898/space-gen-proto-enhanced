@@ -216,6 +216,15 @@ export function isHumanPolishStatus(value: unknown): value is HumanPolishStatus 
   return typeof value === "string" && (HUMAN_POLISH_STATUSES as readonly string[]).includes(value)
 }
 
+export function isHumanPolishPromotionType(
+  value: unknown
+): value is HumanPolishPromotionType {
+  return (
+    typeof value === "string" &&
+    (HUMAN_POLISH_PROMOTION_TYPES as readonly string[]).includes(value)
+  )
+}
+
 /** Validates that package belongs to the given service family. */
 export function isPackageForFamily(
   family: HumanPolishServiceFamily,

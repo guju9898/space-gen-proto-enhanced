@@ -28,6 +28,7 @@ import {
   sendFinalDeliveryReadyEmail,
   sendFirstBatchReadyEmail,
   sendRevisionRequestReceivedEmail,
+  sendRightsPermissionRequestEmail,
   sendRushApprovedEmail,
   sendRushUnavailableEmail,
   type HumanPolishEmailResult,
@@ -43,6 +44,13 @@ import {
   generateBuildReadyPaymentToken,
   hashBuildReadyPaymentToken,
 } from "@/lib/human-polish/payment-token"
+import { evaluateRightsPermissionIssue } from "@/lib/human-polish/rights-guards"
+import {
+  buildRightsPermissionPath,
+  generateRightsPermissionToken,
+  hashRightsPermissionToken,
+  rightsPermissionExpiresAt,
+} from "@/lib/human-polish/rights-token"
 import {
   buildReplacementUploadPath,
   generateReplacementUploadToken,
@@ -94,6 +102,13 @@ type RequestRow = {
   payment_request_id: string | null
   stripe_checkout_session_id: string | null
   currency: string
+  rights_permission_status: string
+  rights_requested_at: string | null
+  rights_responded_at: string | null
+  rights_permission_token_hash: string | null
+  rights_permission_expires_at: string | null
+  rights_request_sent: boolean
+  rights_permission_granted: boolean
 }
 
 function emailWarning(result: HumanPolishEmailResult | null): string | undefined {
@@ -123,7 +138,7 @@ async function loadRequest(
   const { data, error } = await supabase
     .from("human_polish_requests")
     .select(
-      "id, status, payment_status, updated_at, contact_name, contact_email, family, requested_package, approved_package, approved_amount, rush_requested, rush_approved, assigned_to, delivery_clock_started_at, files_accepted_at, first_batch_delivered_at, final_delivered_at, revision_count, scope_reviewed_at, scope_reviewed_by, reviewer_message, internal_review_notes, payment_requested_at, payment_request_id, stripe_checkout_session_id, currency"
+      "id, status, payment_status, updated_at, contact_name, contact_email, family, requested_package, approved_package, approved_amount, rush_requested, rush_approved, assigned_to, delivery_clock_started_at, files_accepted_at, first_batch_delivered_at, final_delivered_at, revision_count, scope_reviewed_at, scope_reviewed_by, reviewer_message, internal_review_notes, payment_requested_at, payment_request_id, stripe_checkout_session_id, currency, rights_permission_status, rights_requested_at, rights_responded_at, rights_permission_token_hash, rights_permission_expires_at, rights_request_sent, rights_permission_granted"
     )
     .eq("id", requestId)
     .maybeSingle()
@@ -979,6 +994,89 @@ export async function adminRecordBuildReadyRevisionRequest(input: {
     revisionNumber: decision.nextCount,
     message: decision.sanitizedNote,
   })
+
+  return { ...updated, warning: emailWarning(mail) }
+}
+
+export async function adminSendRightsPermissionRequest(input: {
+  requestId: string
+  expectedUpdatedAt: string
+}): Promise<AdminActionResult> {
+  const auth = await requireHumanPolishAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
+
+  const loaded = await loadRequest(auth.supabase, input.requestId)
+  if (!loaded.ok) return loaded
+  const row = loaded.row
+
+  if (row.status === "cancelled" || row.status === "expired") {
+    return { ok: false, error: "This request cannot receive a rights permission request." }
+  }
+
+  const decision = evaluateRightsPermissionIssue({
+    paymentStatus: row.payment_status,
+    status: row.status,
+    rightsPermissionStatus: row.rights_permission_status || "not_requested",
+    rightsPermissionExpiresAt: row.rights_permission_expires_at,
+  })
+  if (!decision.ok) return { ok: false, error: decision.error }
+
+  const rawToken = generateRightsPermissionToken()
+  const tokenHash = hashRightsPermissionToken(rawToken)
+  const issuedAt = new Date()
+  const expiresAt = rightsPermissionExpiresAt(issuedAt.getTime())
+
+  let permissionUrl: string
+  try {
+    const origin = resolveHumanPolishAppUrl()
+    permissionUrl = humanPolishAbsoluteUrl(
+      origin,
+      buildRightsPermissionPath(row.id, rawToken)
+    )
+  } catch {
+    console.error("[human-polish/admin] rights permission URL could not be built")
+    return {
+      ok: false,
+      error: "Application URL is not configured for rights permission requests.",
+    }
+  }
+
+  const updated = await updateRequest(auth.supabase, row.id, input.expectedUpdatedAt, {
+    rights_permission_status: "requested",
+    rights_request_sent: true,
+    rights_requested_at: issuedAt.toISOString(),
+    rights_permission_token_hash: tokenHash,
+    rights_permission_expires_at: expiresAt.toISOString(),
+    rights_permission_granted: false,
+    rights_responded_at: null,
+  })
+  if (!updated.ok) return updated
+
+  revalidateAdmin(row.id)
+
+  const mail = await sendRightsPermissionRequestEmail({
+    ...recipient(row),
+    permissionUrl,
+  })
+
+  if (!mail.sent && !mail.skipped) {
+    // Permit reissue: clear active token while leaving requested status.
+    await auth.supabase
+      .from("human_polish_requests")
+      .update({
+        rights_permission_token_hash: null,
+        rights_permission_expires_at: null,
+      })
+      .eq("id", row.id)
+      .eq("rights_permission_status", "requested")
+
+    revalidateAdmin(row.id)
+    return {
+      ok: false,
+      error:
+        "Permission request was prepared, but the customer email could not be sent. You can reissue.",
+    }
+  }
 
   return { ...updated, warning: emailWarning(mail) }
 }

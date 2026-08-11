@@ -1,3 +1,4 @@
+import { HumanPolishCheckoutCancelledAnalytics } from "@/components/human-polish/analytics/HumanPolishCheckoutCancelledAnalytics"
 import { BuildReadyPayForm } from "@/components/human-polish/pay/BuildReadyPayForm"
 import { getDeliveryTarget } from "@/lib/human-polish/config"
 import { validateBuildReadyPaymentPageAccess } from "@/lib/human-polish/payment-auth"
@@ -53,6 +54,7 @@ export default async function HumanPolishBuildReadyPayPage({
 
   return (
     <main className="mx-auto max-w-lg space-y-6 px-4 py-16">
+      <HumanPolishCheckoutCancelledAnalytics />
       <div>
         <p className="text-xs uppercase tracking-wide text-muted-foreground">
           Human Polish™ Build-Ready
@@ -66,6 +68,7 @@ export default async function HumanPolishBuildReadyPayPage({
       <BuildReadyPayForm
         requestId={row.id}
         paymentToken={token.trim()}
+        packageId={pkg}
         packageLabel={HUMAN_POLISH_PACKAGE_LABELS[pkg]}
         amountCents={row.approved_amount}
         currency={row.currency || "usd"}

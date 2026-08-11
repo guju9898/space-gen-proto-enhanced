@@ -1,8 +1,10 @@
 import Link from "next/link"
 import { AdminActionsPanel } from "@/components/human-polish/admin/AdminActionsPanel"
 import { AdminBuildReadyPanel } from "@/components/human-polish/admin/AdminBuildReadyPanel"
+import { AdminCopyProjectSummaryButton } from "@/components/human-polish/admin/AdminCopyProjectSummaryButton"
 import { AdminErrorState } from "@/components/human-polish/admin/AdminStates"
 import { AdminOpenFileButton } from "@/components/human-polish/admin/AdminOpenFileButton"
+import { AdminRightsPanel } from "@/components/human-polish/admin/AdminRightsPanel"
 import { requireHumanPolishAdminPage } from "@/lib/human-polish/admin-page-auth"
 import { getHumanPolishAdminRequest } from "@/lib/human-polish/admin-queries"
 import {
@@ -107,6 +109,32 @@ export default async function HumanPolishAdminDetailPage({
               Clock: {deliveryClockLabel(row.delivery_clock_started_at)}
             </Badge>
           </div>
+          <div className="mt-4">
+            <AdminCopyProjectSummaryButton
+              summary={{
+                id: row.id,
+                family: row.family,
+                requested_package: row.requested_package,
+                approved_package: row.approved_package,
+                approved_amount: row.approved_amount,
+                currency: row.currency,
+                project_type: row.project_type,
+                project_city: row.project_city,
+                project_state: row.project_state,
+                status: row.status,
+                payment_status: row.payment_status,
+                rush_requested: row.rush_requested,
+                rush_approved: row.rush_approved,
+                assigned_to: row.assigned_to,
+                revision_count: row.revision_count,
+                last_revision_note: row.last_revision_note,
+                brief_text: row.brief_text,
+                design_objectives: row.design_objectives,
+                must_have_elements: row.must_have_elements,
+                fileCount: files.length,
+              }}
+            />
+          </div>
         </div>
       </div>
 
@@ -195,18 +223,51 @@ export default async function HumanPolishAdminDetailPage({
           value={formatAdminDate(row.first_batch_delivered_at)}
         />
         <Field label="Final delivered" value={formatAdminDate(row.final_delivered_at)} />
+        <Field label="Purchase date" value={formatAdminDate(row.paid_at)} />
+        {row.family === "ai-render-pack" ? (
+          <>
+            <Field label="Pack use-by date" value={formatAdminDate(row.pack_expires_at)} />
+            <Field
+              label="Expiration reminder"
+              value={
+                row.expiration_reminder_sent_at
+                  ? `Sent ${formatAdminDate(row.expiration_reminder_sent_at)}`
+                  : "Not sent"
+              }
+            />
+            <Field
+              label="Pack window note"
+              value={
+                row.pack_expires_at && Date.parse(row.pack_expires_at) < Date.now()
+                  ? "90-day use window has passed"
+                  : "—"
+              }
+            />
+          </>
+        ) : null}
         <Field label="Revision count" value={String(row.revision_count)} />
         <Field label="Last revision note" value={row.last_revision_note} />
         <Field
           label="Last revision requested"
           value={formatAdminDate(row.last_revision_requested_at)}
         />
-        <Field label="Rights request sent" value={row.rights_request_sent ? "Yes" : "No"} />
+        <Field label="Rights request sent (legacy)" value={row.rights_request_sent ? "Yes" : "No"} />
         <Field
-          label="Rights permission granted"
+          label="Rights permission granted (legacy)"
           value={row.rights_permission_granted ? "Yes" : "No"}
         />
       </Section>
+
+      <AdminRightsPanel
+        requestId={row.id}
+        expectedUpdatedAt={row.updated_at}
+        paymentStatus={row.payment_status}
+        status={row.status}
+        rightsPermissionStatus={row.rights_permission_status || "not_requested"}
+        rightsRequestedAt={row.rights_requested_at}
+        rightsRespondedAt={row.rights_responded_at}
+        rightsPermissionExpiresAt={row.rights_permission_expires_at}
+      />
 
       <section className="space-y-4 rounded-xl border border-[#343434] bg-[#0d1119]/60 p-4">
         <h3 className="text-lg font-semibold">Uploaded files</h3>

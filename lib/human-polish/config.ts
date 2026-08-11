@@ -66,6 +66,20 @@ export const HUMAN_POLISH_BUILD_READY_PAYMENT_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
 export const HUMAN_POLISH_BUILD_READY_PAYMENT_TTL_DAYS = 7
 
+/**
+ * Portfolio rights permission window after Admin requests consent (§Phase 8B).
+ * Absolute expiry from issue.
+ */
+export const HUMAN_POLISH_RIGHTS_PERMISSION_TTL_MS = 14 * 24 * 60 * 60 * 1000
+
+export const HUMAN_POLISH_RIGHTS_PERMISSION_TTL_DAYS = 14
+
+/**
+ * Pack expiration reminder fires once when the AI pack use-by date is within
+ * this many days (and still in the future).
+ */
+export const HUMAN_POLISH_PACK_EXPIRATION_REMINDER_DAYS = 14
+
 /** Currency for Human Polish one-time payments. */
 export const HUMAN_POLISH_CURRENCY = "usd" as const
 

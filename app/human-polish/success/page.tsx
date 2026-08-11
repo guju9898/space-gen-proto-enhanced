@@ -11,6 +11,7 @@
 
 import Link from "next/link"
 import { CheckCircle2, AlertTriangle, Clock, LifeBuoy } from "lucide-react"
+import { HumanPolishSuccessAnalytics } from "@/components/human-polish/success/HumanPolishSuccessAnalytics"
 import { getHumanPolishStripe, HUMAN_POLISH_PRODUCT_TYPE } from "@/lib/human-polish/stripe"
 import { getHumanPolishSupabaseService } from "@/lib/human-polish/supabase"
 import { getDeliveryTarget } from "@/lib/human-polish/config"
@@ -18,8 +19,10 @@ import {
   HUMAN_POLISH_PACKAGE_LABELS,
   HUMAN_POLISH_SERVICE_FAMILY_LABELS,
   isHumanPolishPackage,
+  isHumanPolishPromotionType,
   isHumanPolishServiceFamily,
   type HumanPolishPackage,
+  type HumanPolishPromotionType,
   type HumanPolishServiceFamily,
 } from "@/lib/human-polish/types"
 
@@ -30,9 +33,11 @@ type SuccessView =
   | { ok: false; reason: "missing" | "unverified" | "unconfigured" }
   | {
       ok: true
+      sessionId: string
       requestId: string
       family: HumanPolishServiceFamily
       pkg: HumanPolishPackage
+      promotionType: HumanPolishPromotionType
       deliveryTarget: string | null
     }
 
@@ -62,7 +67,7 @@ async function resolveSession(sessionId: string | undefined): Promise<SuccessVie
     // real) session id cannot surface a different customer's request.
     const { data: row, error } = await supabase
       .from("human_polish_requests")
-      .select("id, family, requested_package, stripe_checkout_session_id")
+      .select("id, family, requested_package, approved_package, promotion_type, stripe_checkout_session_id")
       .eq("id", requestId)
       .maybeSingle()
 
@@ -81,12 +86,28 @@ async function resolveSession(sessionId: string | undefined): Promise<SuccessVie
     }
 
     const family = row.family
-    const pkg = row.requested_package
+    const pkg =
+      family === "build-ready" &&
+      row.approved_package &&
+      isHumanPolishPackage(row.approved_package)
+        ? row.approved_package
+        : row.requested_package
+
+    const metaPromo = session.metadata?.promotionType
+    const rowPromo = (row as { promotion_type?: string }).promotion_type
+    const promotionType: HumanPolishPromotionType = isHumanPolishPromotionType(metaPromo)
+      ? metaPromo
+      : isHumanPolishPromotionType(rowPromo)
+        ? rowPromo
+        : "none"
+
     return {
       ok: true,
+      sessionId: session.id,
       requestId: row.id,
       family,
       pkg,
+      promotionType,
       deliveryTarget: getDeliveryTarget(family, pkg),
     }
   } catch {
@@ -107,6 +128,12 @@ export default async function HumanPolishSuccessPage({
       <div className="mx-auto max-w-2xl">
         {view.ok ? (
           <div className="space-y-8">
+            <HumanPolishSuccessAnalytics
+              sessionId={view.sessionId}
+              family={view.family}
+              pkg={view.pkg}
+              promotionType={view.promotionType}
+            />
             <div className="flex items-center gap-3">
               <CheckCircle2 className="h-9 w-9 text-emerald-400" />
               <h1 className="text-3xl font-bold">Payment received</h1>

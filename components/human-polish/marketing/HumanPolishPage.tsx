@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { trackHumanPolishEvent } from "../analytics"
+import { HumanPolishCheckoutCancelledAnalytics } from "../analytics/HumanPolishCheckoutCancelledAnalytics"
 import { HeroSection } from "./HeroSection"
 import { ServiceFamilyForkSection } from "./ServiceFamilyForkSection"
 import { AiRenderPacksSection } from "./AiRenderPacksSection"
@@ -73,6 +74,7 @@ export function HumanPolishPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <HumanPolishCheckoutCancelledAnalytics />
       <header className="border-b border-white/10">
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
