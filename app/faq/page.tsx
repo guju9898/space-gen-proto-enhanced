@@ -45,6 +45,7 @@ export default function FAQPage() {
           <Link href="/contractor-demo" className="text-sm text-muted-foreground hover:text-white">Demo</Link>
           <Link href="/mockup-method" className="text-sm text-muted-foreground hover:text-white">Mockup Method</Link>
           <Link href="/human-polish" className="text-sm text-muted-foreground hover:text-white">Human Polish™</Link>
+          <Link href="/blog" className="text-sm text-muted-foreground hover:text-white">Blog</Link>
         </nav>
         <div className="hidden md:flex items-center gap-4">
           <Link href="/?login=1" className="text-sm text-white hover:text-primary/90">Log in</Link>
@@ -76,9 +77,11 @@ export default function FAQPage() {
               <span className="font-bold text-lg text-white">Renderspace</span>
             </Link>
             <nav className="flex flex-wrap justify-center gap-6 mb-4 md:mb-0">
+              <Link href="/blog" className="text-sm text-muted-foreground hover:text-white">Blog</Link>
               <Link href="/pricing" className="text-sm text-muted-foreground hover:text-white">Pricing</Link>
               <Link href="/faq" className="text-sm text-muted-foreground hover:text-white">FAQ</Link>
               <Link href="/gallery" className="text-sm text-muted-foreground hover:text-white">Gallery</Link>
+              <Link href="/human-polish" className="text-sm text-muted-foreground hover:text-white">Human Polish™</Link>
             </nav>
           </div>
           <div className="text-center text-xs text-muted-foreground">

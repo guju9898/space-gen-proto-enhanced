@@ -1,6 +1,4 @@
-import type React from "react"
-import { Suspense } from "react"
-import "./globals.css"
+import type { Metadata } from "next"
 import { ThemeProvider } from "@/components/theme-provider"
 import { DesignConfigProvider } from "@/hooks/useDesignConfig"
 import { AuthProvider } from "@/components/auth/AuthContext"
@@ -10,12 +8,16 @@ import { CheckoutResume } from "@/components/auth/CheckoutResume"
 import { IntroModal } from "@/components/marketing/IntroModal"
 import { IntroPlanPromo } from "@/components/marketing/IntroPlanPromo"
 import { Inter } from "next/font/google"
-import type { Metadata } from "next"
+import type React from "react"
+import { Suspense } from "react"
+import "./globals.css"
 import Script from "next/script"
+import { getBlogSiteOrigin } from "@/lib/blog/site"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getBlogSiteOrigin()),
   title: "Renderspace – Visualize in Seconds. Win More Projects",
   description: "Create client-ready interior, exterior, and landscape concepts in minutes — before plans, permits, or materials. Renderspace helps contractors, designers, and landscapers visualize concepts in seconds and win more projects.",
   openGraph: {

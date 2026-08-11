@@ -130,6 +130,10 @@ export function HumanPolishPage() {
           <Link href="/faq" className="hover:text-white transition-colors">
             FAQ
           </Link>
+          {" · "}
+          <Link href="/blog" className="hover:text-white transition-colors">
+            Blog
+          </Link>
         </div>
       </footer>
     </div>

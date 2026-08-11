@@ -34,6 +34,9 @@ export default function PricingPage() {
           <Link href="/human-polish" className="text-sm text-muted-foreground hover:text-white">
             Human Polish™
           </Link>
+          <Link href="/blog" className="text-sm text-muted-foreground hover:text-white">
+            Blog
+          </Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
@@ -170,6 +173,9 @@ export default function PricingPage() {
               <span className="font-bold text-lg text-white">Renderspace</span>
             </Link>
             <nav className="flex flex-wrap justify-center gap-6 mb-4 md:mb-0">
+              <Link href="/blog" className="text-sm text-muted-foreground hover:text-white">
+                Blog
+              </Link>
               <Link href="/pricing" className="text-sm text-muted-foreground hover:text-white">
                 Pricing
               </Link>
