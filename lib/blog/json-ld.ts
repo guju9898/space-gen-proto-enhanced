@@ -1,4 +1,5 @@
 import { absoluteBlogUrl } from "./site"
+import { ORG_ID } from "@/lib/seo/schema"
 import type { BlogPostMeta } from "./types"
 
 export function buildBlogPostingJsonLd(post: BlogPostMeta) {
@@ -26,6 +27,7 @@ export function buildBlogPostingJsonLd(post: BlogPostMeta) {
     },
     publisher: {
       "@type": "Organization",
+      "@id": ORG_ID,
       name: "Renderspace",
       url: absoluteBlogUrl("/"),
       logo: {

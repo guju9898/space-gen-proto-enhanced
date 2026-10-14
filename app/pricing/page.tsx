@@ -1,19 +1,22 @@
 import type { Metadata } from "next"
 import { pageMetadata } from "@/lib/seo/metadata"
+import { JsonLd } from "@/components/seo/JsonLd"
+import { PLANS, count, usd } from "@/lib/seo/facts"
+import { softwareApplicationLd } from "@/lib/seo/schema"
 import Image from "next/image"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
 
 export const metadata: Metadata = pageMetadata({
   path: "/pricing",
-  title: "Pricing: $19.99 Trial, Plans From $99/mo",
-  description:
-    "Try Renderspace on a real job: 40 credits for $19.99 over 7 days. Professional is $99/mo for 500 credits; Business is $349/mo for 6,000 credits.",
+  title: `Pricing: ${usd(PLANS.starter.priceUsd)} Trial, Plans From ${usd(PLANS.professional.priceUsd)}/mo`,
+  description: `Try Renderspace on a real job: ${PLANS.starter.credits} credits for ${usd(PLANS.starter.priceUsd)} over ${PLANS.starter.period}. Professional is ${usd(PLANS.professional.priceUsd)}/mo for ${count(PLANS.professional.credits)} credits; Business is ${usd(PLANS.business.priceUsd)}/mo for ${count(PLANS.business.credits)} credits.`,
 })
 
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <JsonLd data={softwareApplicationLd()} />
       {/* Header */}
       <header className="container mx-auto py-4 px-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">

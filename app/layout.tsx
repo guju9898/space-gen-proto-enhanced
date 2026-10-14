@@ -13,6 +13,8 @@ import { Suspense } from "react"
 import "./globals.css"
 import Script from "next/script"
 import { getBlogSiteOrigin } from "@/lib/blog/site"
+import { JsonLd } from "@/components/seo/JsonLd"
+import { siteGraphLd } from "@/lib/seo/schema"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -47,6 +49,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
+        <JsonLd data={siteGraphLd()} />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-95W8Z5DE2P"
           strategy="afterInteractive"

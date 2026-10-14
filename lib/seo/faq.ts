@@ -3,7 +3,10 @@
  * - `surfaces` controls where each item appears (homepage accordion and/or /faq).
  * - FAQPage JSON-LD is rendered on /faq only (Google: mark up a given FAQ in one place).
  * - Answers must open with a direct answer, then detail.
+ * - Prices and credit counts come from ./facts — never retype them.
  */
+
+import { PLANS, count } from "./facts"
 
 export type FaqSurface = "home" | "faq"
 
@@ -30,7 +33,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     id: "credits",
     q: "How do credits work?",
-    a: "Each AI-generated image uses one credit. Professional plans include 500 credits per month; Business plans include 6,000. Unused credits do not roll over. You can upgrade or downgrade your plan at any time.",
+    a: `Each AI-generated image uses one credit. Professional plans include ${count(PLANS.professional.credits)} credits per month; Business plans include ${count(PLANS.business.credits)}. Unused credits do not roll over. You can upgrade or downgrade your plan at any time.`,
     surfaces: ["faq"],
   },
   {

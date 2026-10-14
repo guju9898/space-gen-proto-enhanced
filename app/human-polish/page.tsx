@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 import { pageMetadata } from "@/lib/seo/metadata"
+import { JsonLd } from "@/components/seo/JsonLd"
+import { humanPolishServiceLd } from "@/lib/seo/schema"
 import { HumanPolishPage } from "@/components/human-polish/marketing/HumanPolishPage"
 
 export const metadata: Metadata = pageMetadata({
@@ -10,5 +12,10 @@ export const metadata: Metadata = pageMetadata({
 })
 
 export default function HumanPolishRoute() {
-  return <HumanPolishPage />
+  return (
+    <>
+      <JsonLd data={humanPolishServiceLd()} />
+      <HumanPolishPage />
+    </>
+  )
 }

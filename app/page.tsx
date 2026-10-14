@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 import { pageMetadata } from "@/lib/seo/metadata"
+import { JsonLd } from "@/components/seo/JsonLd"
+import { softwareApplicationLd } from "@/lib/seo/schema"
 import Image from "next/image"
 import Link from "next/link"
 import { Suspense } from "react"
@@ -23,6 +25,7 @@ export const metadata: Metadata = pageMetadata({
 export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <JsonLd data={softwareApplicationLd()} />
       <Suspense fallback={null}>
         <RedirectIfAuthenticated />
       </Suspense>
