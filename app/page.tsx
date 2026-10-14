@@ -4,9 +4,9 @@ import { JsonLd } from "@/components/seo/JsonLd"
 import { softwareApplicationLd } from "@/lib/seo/schema"
 import Image from "next/image"
 import Link from "next/link"
+import { SiteHeader } from "@/components/site/SiteHeader"
 import { Suspense } from "react"
-import { ChevronRight, Menu } from "lucide-react"
-import { LoginButton } from "@/components/auth/LoginButton"
+import { ChevronRight } from "lucide-react"
 import { LoginRedirectHandler } from "@/components/auth/LoginRedirectHandler"
 import { RedirectIfAuthenticated } from "@/components/auth/RedirectIfAuthenticated"
 import ComparisonTable from "@/components/ComparisonTable"
@@ -32,51 +32,7 @@ export default function Home() {
       <Suspense fallback={null}>
         <LoginRedirectHandler />
       </Suspense>
-      {/* Header */}
-      <header className="container mx-auto py-4 px-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Image src="/amethyst-flow.png" alt="Renderspace Logo" width={32} height={32} className="w-8 h-8" />
-          <span className="font-bold text-lg text-white">Renderspace</span>
-        </div>
-
-        <nav className="hidden md:flex items-center gap-8">
-          <Link href="/" className="text-sm text-white hover:text-primary/90">
-            Home
-          </Link>
-          <Link href="/gallery" className="text-sm text-muted-foreground hover:text-white">
-            Gallery
-          </Link>
-          <Link href="/pricing" className="text-sm text-muted-foreground hover:text-white">
-            Pricing
-          </Link>
-          <Link href="/faq" className="text-sm text-muted-foreground hover:text-white">
-            FAQ
-          </Link>
-          <Link href="/contractor-demo" className="text-sm text-muted-foreground hover:text-white">
-            Demo
-          </Link>
-          <Link href="/mockup-method" className="text-sm text-muted-foreground hover:text-white">
-            Mockup Method
-          </Link>
-          <Link href="/human-polish" className="text-sm text-muted-foreground hover:text-white">
-            Human Polish™
-          </Link>
-        </nav>
-
-        <div className="hidden md:flex items-center gap-4">
-          <LoginButton />
-          <Link
-            href="/onboarding"
-            className="text-sm bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-4 py-2 rounded-md"
-          >
-            Redesign Now
-          </Link>
-        </div>
-
-        <button className="md:hidden text-white">
-          <Menu className="w-6 h-6" />
-        </button>
-      </header>
+      <SiteHeader active="home" />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24 text-center">

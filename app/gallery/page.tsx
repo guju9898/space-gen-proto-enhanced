@@ -2,7 +2,8 @@ import type { Metadata } from "next"
 import { pageMetadata } from "@/lib/seo/metadata"
 import Image from "next/image"
 import Link from "next/link"
-import { ChevronRight, Menu } from "lucide-react"
+import { SiteHeader } from "@/components/site/SiteHeader"
+import { ChevronRight } from "lucide-react"
 
 export const metadata: Metadata = pageMetadata({
   path: "/gallery",
@@ -14,53 +15,7 @@ export const metadata: Metadata = pageMetadata({
 export default function GalleryPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <header className="container mx-auto py-4 px-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/amethyst-flow.png" alt="Renderspace Logo" width={32} height={32} className="w-8 h-8" />
-          <span className="font-bold text-lg text-white">Renderspace</span>
-        </Link>
-
-        <nav className="hidden md:flex items-center gap-8">
-          <Link href="/" className="text-sm text-muted-foreground hover:text-white">
-            Home
-          </Link>
-          <Link href="/gallery" className="text-sm text-white hover:text-primary/90">
-            Gallery
-          </Link>
-          <Link href="/pricing" className="text-sm text-muted-foreground hover:text-white">
-            Pricing
-          </Link>
-          <Link href="/faq" className="text-sm text-muted-foreground hover:text-white">
-            FAQ
-          </Link>
-          <Link href="/contractor-demo" className="text-sm text-muted-foreground hover:text-white">
-            Demo
-          </Link>
-          <Link href="/mockup-method" className="text-sm text-muted-foreground hover:text-white">
-            Mockup Method
-          </Link>
-          <Link href="/human-polish" className="text-sm text-muted-foreground hover:text-white">
-            Human Polish™
-          </Link>
-        </nav>
-
-        <div className="hidden md:flex items-center gap-4">
-          <Link href="/?login=1" className="text-sm text-white hover:text-primary/90">
-            Log in
-          </Link>
-          <Link
-            href="/onboarding"
-            className="text-sm bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 text-white px-4 py-2 rounded-md"
-          >
-            Redesign Now
-          </Link>
-        </div>
-
-        <button className="md:hidden text-white">
-          <Menu className="w-6 h-6" />
-        </button>
-      </header>
+      <SiteHeader active="gallery" />
 
       {/* Gallery Hero */}
       <section className="container mx-auto px-4 py-12 md:py-16">
