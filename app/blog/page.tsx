@@ -1,32 +1,16 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo/metadata"
 import Image from "next/image"
 import Link from "next/link"
 import { BlogFooter, BlogHeader } from "@/components/blog/BlogChrome"
 import { getAllPostMetas } from "@/lib/blog/posts"
-import { absoluteBlogUrl } from "@/lib/blog/site"
 
-export const metadata: Metadata = {
-  title: "Contractor Visualization Blog | Renderspace",
+export const metadata: Metadata = pageMetadata({
+  path: "/blog",
+  title: "Contractor Visualization Blog",
   description:
-    "Practical visualization and sales guidance for landscape, hardscape, outdoor-living, and design-build contractors.",
-  alternates: {
-    canonical: absoluteBlogUrl("/blog"),
-  },
-  openGraph: {
-    type: "website",
-    title: "Contractor Visualization Blog | Renderspace",
-    description:
-      "Practical visualization and sales guidance for landscape, hardscape, outdoor-living, and design-build contractors.",
-    url: absoluteBlogUrl("/blog"),
-    siteName: "Renderspace",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Contractor Visualization Blog | Renderspace",
-    description:
-      "Practical visualization and sales guidance for landscape, hardscape, outdoor-living, and design-build contractors.",
-  },
-}
+    "Practical visualization and sales guidance for landscape, hardscape, pool, outdoor-living and design-build contractors, from first photo to signed job.",
+})
 
 function formatDate(iso: string): string {
   const d = new Date(`${iso}T12:00:00Z`)

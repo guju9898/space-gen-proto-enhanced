@@ -1,3 +1,5 @@
+import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo/metadata"
 import Image from "next/image"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
@@ -28,6 +30,14 @@ const faqs = [
     a: "Yes. There is no long-term commitment. You can cancel from your account settings, and you will keep access until the end of your billing period.",
   },
 ]
+
+
+export const metadata: Metadata = pageMetadata({
+  path: "/faq",
+  title: "FAQ: Credits, Licensing, Exports and Billing",
+  description:
+    "Answers about Renderspace credits, 4K exports, commercial licensing, data privacy, supported uploads and canceling. What the tool is for and what it is not.",
+})
 
 export default function FAQPage() {
   return (

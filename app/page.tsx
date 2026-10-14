@@ -1,3 +1,5 @@
+import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo/metadata"
 import Image from "next/image"
 import Link from "next/link"
 import { Suspense } from "react"
@@ -9,6 +11,14 @@ import ComparisonTable from "@/components/ComparisonTable"
 import { RenderspaceBeforeAfterSlider } from "@/components/RenderspaceBeforeAfterSlider"
 import RoiCalculator from "@/components/RoiCalculator"
 import { HomepageFAQ } from "@/components/HomepageFAQ"
+
+export const metadata: Metadata = pageMetadata({
+  path: "/",
+  title: "Renderspace: AI Renderings From a Job-Site Photo",
+  description:
+    "Turn a job-site photo into a photorealistic backyard, patio, exterior or interior concept in about 30 seconds and show clients the result before you quote.",
+  absoluteTitle: true,
+})
 
 export default function Home() {
   return (

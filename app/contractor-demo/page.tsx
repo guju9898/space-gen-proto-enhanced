@@ -1,11 +1,13 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo/metadata"
 import { ContractorDemoPage } from "@/components/contractor-demo/ContractorDemoPage"
 
-export const metadata: Metadata = {
-  title: "Contractor Demo | Close More Outdoor Living Jobs | Renderspace",
+export const metadata: Metadata = pageMetadata({
+  path: "/contractor-demo",
+  title: "Contractor Demo: Close More Outdoor Jobs",
   description:
-    "Landscaping and outdoor living contractors: stop explaining and start showing. Use before/after visuals to close jobs faster, or install our done-for-you premium system.",
-}
+    "For landscaping and outdoor living contractors: show homeowners before-and-after visuals that close jobs faster, or install our done-for-you premium system.",
+})
 
 export default function ContractorDemoRoute() {
   return <ContractorDemoPage />

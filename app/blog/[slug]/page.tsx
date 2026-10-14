@@ -29,7 +29,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     : undefined
 
   return {
-    title: post.seoTitle,
+    // seoTitle already ends in "| Renderspace" — bypass the layout template.
+    title: { absolute: post.seoTitle },
     description: post.description,
     alternates: { canonical: url },
     openGraph: {

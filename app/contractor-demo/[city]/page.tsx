@@ -18,14 +18,14 @@ export async function generateMetadata({ params }: ContractorCityPageProps): Pro
 
   if (!cityLabel) {
     return {
-      title: "Contractor Demo | Outdoor Living Sales Funnel | Renderspace",
+      title: "Contractor Demo | Outdoor Living Sales Funnel",
       description:
         "See how landscaping and outdoor living contractors close projects faster with visual before/after concepts and a premium done-for-you system.",
     }
   }
 
   return {
-    title: `${cityLabel} Contractor Demo | Close More Backyard Projects | Renderspace`,
+    title: `${cityLabel} Contractor Demo: Close More Backyard Projects`,
     description: `Contractors in ${cityLabel}: show homeowners the finished backyard vision before quoting. Close landscaping, patio, pergola, and hardscaping jobs faster with Renderspace.`,
   }
 }

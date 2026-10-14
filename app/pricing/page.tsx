@@ -1,6 +1,15 @@
+import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo/metadata"
 import Image from "next/image"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
+
+export const metadata: Metadata = pageMetadata({
+  path: "/pricing",
+  title: "Pricing: $19.99 Trial, Plans From $99/mo",
+  description:
+    "Try Renderspace on a real job: 40 credits for $19.99 over 7 days. Professional is $99/mo for 500 credits; Business is $349/mo for 6,000 credits.",
+})
 
 export default function PricingPage() {
   return (

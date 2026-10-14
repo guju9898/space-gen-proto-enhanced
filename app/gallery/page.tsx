@@ -1,6 +1,15 @@
+import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo/metadata"
 import Image from "next/image"
 import Link from "next/link"
 import { ChevronRight, Menu } from "lucide-react"
+
+export const metadata: Metadata = pageMetadata({
+  path: "/gallery",
+  title: "Before-and-After AI Rendering Gallery",
+  description:
+    "Real Renderspace outputs, no stock photos: before-and-after concepts for living rooms, kitchens, bedrooms, house exteriors and outdoor spaces from photos.",
+})
 
 export default function GalleryPage() {
   return (
