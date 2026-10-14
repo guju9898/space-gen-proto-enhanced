@@ -3,34 +3,10 @@ import { pageMetadata } from "@/lib/seo/metadata"
 import Image from "next/image"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
+import { JsonLd } from "@/components/seo/JsonLd"
+import { faqFor, faqPageLd } from "@/lib/seo/faq"
 
-const faqs = [
-  {
-    q: "What is Renderspace?",
-    a: "Renderspace is an AI-powered design tool that turns photos of real spaces into client-ready interior, exterior, and landscape concepts. Upload a photo, choose a style, and get high-resolution visuals in minutes.",
-  },
-  {
-    q: "How do credits work?",
-    a: "Each AI-generated image uses one credit. Professional plans include 500 credits per month; Business plans include 6,000. Unused credits do not roll over. You can upgrade or downgrade your plan at any time.",
-  },
-  {
-    q: "What resolution are the images?",
-    a: "All plans include 4K (3840x2160) export so your renders are print- and presentation-ready. Downloads are available in standard image formats.",
-  },
-  {
-    q: "Can I use renders commercially?",
-    a: "Yes. The Business plan includes a commercial license so you can use generated images in client proposals, marketing, and paid projects. The Professional plan is for personal and internal use.",
-  },
-  {
-    q: "Is my data secure?",
-    a: "We process uploads and store assets securely. We do not train our AI on your images or share your data with third parties. Payments are handled by Stripe.",
-  },
-  {
-    q: "Can I cancel anytime?",
-    a: "Yes. There is no long-term commitment. You can cancel from your account settings, and you will keep access until the end of your billing period.",
-  },
-]
-
+const faqs = faqFor("faq")
 
 export const metadata: Metadata = pageMetadata({
   path: "/faq",
@@ -42,6 +18,7 @@ export const metadata: Metadata = pageMetadata({
 export default function FAQPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <JsonLd data={faqPageLd(faqs)} />
       <header className="container mx-auto py-4 px-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <Image src="/amethyst-flow.png" alt="Renderspace Logo" width={32} height={32} className="w-8 h-8" />
@@ -68,8 +45,8 @@ export default function FAQPage() {
       </section>
       <section className="container mx-auto px-4 py-8 max-w-3xl">
         <div className="space-y-6">
-          {faqs.map((faq, i) => (
-            <div key={i} className="bg-[#191f33]/50 rounded-xl p-6 border border-[#343434]">
+          {faqs.map((faq) => (
+            <div key={faq.id} id={faq.id} className="bg-[#191f33]/50 rounded-xl p-6 border border-[#343434]">
               <h2 className="text-lg font-bold text-white mb-3">{faq.q}</h2>
               <p className="text-muted-foreground text-sm leading-relaxed">{faq.a}</p>
             </div>
