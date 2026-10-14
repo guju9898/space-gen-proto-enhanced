@@ -27,6 +27,27 @@ export const SITE = {
   sameAs: ["https://www.instagram.com/renderspace_ai/"],
 } as const
 
+/**
+ * Usage rights (decided 2026-10-14): every paid plan may use renders for
+ * proposals, presentations, websites, social media and ads. Not allowed:
+ * selling or licensing the images themselves to third parties.
+ */
+export const USAGE_RIGHTS =
+  "Use renders in proposals, presentations, your website, social media and ads. Reselling or licensing the images themselves to third parties is not allowed."
+
+/** Proof points KeSean can stand behind publicly. */
+export const PROOF = {
+  /** Display as "10,000+" in UI; "more than 10,000" in sentences. */
+  rendersGenerated: "10,000",
+  /** Typical photo-to-concept time; comparison table says 20–40 seconds. */
+  secondsPerConcept: { typical: 30, min: 20, max: 40 },
+} as const
+
+/** Uploaded source photos are deleted from the account after this many days. */
+export const UPLOAD_RETENTION_DAYS = 30
+
+export const UPLOAD_LIMITS = { formats: "JPG, PNG or WEBP", maxMb: 10 } as const
+
 export type PlanKey = "starter" | "professional" | "business"
 
 export type Plan = {
@@ -38,7 +59,7 @@ export type Plan = {
   period: "7 days" | "month"
   recurring: boolean
   resolution: "4K"
-  /** Current wording. The licensing rule is pending a decision (see SEO audit C3). */
+  /** Usage rights for renders made on this plan. */
   license: string
 }
 
@@ -51,7 +72,7 @@ export const PLANS: Record<PlanKey, Plan> = {
     period: "7 days",
     recurring: false,
     resolution: "4K",
-    license: "trial",
+    license: USAGE_RIGHTS,
   },
   professional: {
     key: "professional",
@@ -61,7 +82,7 @@ export const PLANS: Record<PlanKey, Plan> = {
     period: "month",
     recurring: true,
     resolution: "4K",
-    license: "personal and internal use",
+    license: USAGE_RIGHTS,
   },
   business: {
     key: "business",
@@ -71,7 +92,7 @@ export const PLANS: Record<PlanKey, Plan> = {
     period: "month",
     recurring: true,
     resolution: "4K",
-    license: "commercial",
+    license: USAGE_RIGHTS,
   },
 }
 

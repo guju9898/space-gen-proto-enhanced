@@ -78,12 +78,13 @@ export default function PricingPage() {
               <li className="text-sm text-muted-foreground">500 generations / credits per month</li>
               <li className="text-sm text-muted-foreground">4K resolution</li>
               <li className="text-sm text-muted-foreground">All style options</li>
+              <li className="text-sm text-muted-foreground">Use renders in proposals, marketing &amp; ads</li>
             </ul>
             <Link
               href="/onboarding"
               className="block text-center py-2 bg-gradient-to-r from-orange-500 to-violet-700 rounded-md text-white hover:opacity-90 transition-all"
             >
-              Redesign Your Space
+              Start with Professional
             </Link>
           </div>
 
@@ -98,15 +99,16 @@ export default function PricingPage() {
               <span className="text-3xl font-bold text-white">$349</span>
             </div>
             <ul className="space-y-2 mb-6">
-              <li className="text-sm text-muted-foreground">6000 generations / credits per month</li>
+              <li className="text-sm text-muted-foreground">6,000 generations / credits per month</li>
               <li className="text-sm text-muted-foreground">4K resolution</li>
-              <li className="text-sm text-muted-foreground">Commercial license</li>
+              <li className="text-sm text-muted-foreground">All style options</li>
+              <li className="text-sm text-muted-foreground">Use renders in proposals, marketing &amp; ads</li>
             </ul>
             <Link
               href="/onboarding"
               className="block text-center py-2 bg-gradient-to-r from-orange-500 to-violet-700 rounded-md text-white hover:opacity-90 transition-all"
             >
-              Redesign Your Space
+              Start with Business
             </Link>
           </div>
         </div>

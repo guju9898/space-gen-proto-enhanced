@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { pageMetadata } from "@/lib/seo/metadata"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { softwareApplicationLd } from "@/lib/seo/schema"
+import { PLANS, PROOF, usd } from "@/lib/seo/facts"
 import Image from "next/image"
 import Link from "next/link"
 import { SiteHeader } from "@/components/site/SiteHeader"
@@ -36,43 +37,50 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24 text-center">
+        <p className="text-sm font-medium text-primary mb-4">
+          For pool builders, landscape and outdoor-living contractors, remodelers and designers
+        </p>
         <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
-          Win More Projects in the First Meeting
-          <span className="block mt-1">Show Clients a Photorealistic Design in 30 Seconds</span>
+          Show Clients the Finished Project Before You Quote
+          <span className="block mt-2 text-2xl md:text-3xl font-semibold text-white/90">
+            AI renderings from a job-site photo in about {PROOF.secondsPerConcept.typical} seconds
+          </span>
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-          Upload a jobsite photo, generate a client-ready concept on the spot, and help homeowners visualize the upgrade instantly.
+          Renderspace turns a photo of your client&apos;s yard, home or room into a photorealistic concept: a new
+          pool, patio, outdoor kitchen, facade or interior. Show it on the spot and lock in the direction before
+          anyone prices the job.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
-            href="/onboarding"
+            href="/onboarding?plan=starter"
             className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-6 py-3 rounded-md font-medium"
           >
-            Redesign Now <ChevronRight className="w-4 h-4" />
+            Try {PLANS.starter.credits} Credits for {usd(PLANS.starter.priceUsd)} <ChevronRight className="w-4 h-4" />
           </Link>
           <Link
-            href="/mockup-method"
+            href="/gallery"
             className="inline-flex items-center border border-white/30 hover:bg-white/10 transition-all text-white px-6 py-3 rounded-md font-medium"
           >
-            See How It Works
+            See Real Examples
           </Link>
         </div>
+        <ul className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+          <li>
+            <span className="font-semibold text-white">{PROOF.rendersGenerated}+</span> renders generated
+          </li>
+          <li>
+            <span className="font-semibold text-white">~{PROOF.secondsPerConcept.typical} sec</span> from photo to concept
+          </li>
+          <li>Works from a phone photo</li>
+        </ul>
 
         {/* Featured Renders */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-16 max-w-4xl mx-auto">
           <div className="rounded-lg overflow-hidden">
             <Image
-              src="/landing/renders/interior-hero-01.png"
-              alt="Interior render"
-              width={400}
-              height={300}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="rounded-lg overflow-hidden">
-            <Image
               src="/landing/renders/exterior-hero-01.png"
-              alt="Exterior render"
+              alt="AI rendering of a limestone home with a lap pool and stone pool deck, generated in Renderspace"
               width={400}
               height={300}
               className="w-full h-full object-cover"
@@ -81,21 +89,31 @@ export default function Home() {
           <div className="rounded-lg overflow-hidden">
             <Image
               src="/landing/renders/landscape-hero-01.png"
-              alt="Landscape render"
+              alt="AI landscape rendering of a modern home with a curving flagstone path and native planting"
+              width={400}
+              height={300}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="rounded-lg overflow-hidden">
+            <Image
+              src="/landing/renders/interior-hero-01.png"
+              alt="AI interior rendering of a bright open-plan living room and kitchen"
               width={400}
               height={300}
               className="w-full h-full object-cover"
             />
           </div>
         </div>
-        <p className="text-xs text-muted-foreground mt-4 text-center">Generated in Renderspace AI</p>
+        <p className="text-xs text-muted-foreground mt-4 text-center">All images generated in Renderspace</p>
       </section>
 
       {/* Space Gen Section */}
       <section className="container mx-auto px-4 py-16 text-center">
+        <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white">One photo in, a client-ready concept out</h2>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-          Our AI-powered platform helps you create professional design visualizations quickly. Generate concept renders
-          tailored to your project needs.
+          Drag the slider to compare real before-and-after results for a backyard, a home exterior and an interior.
+          Each one was generated from a single photo.
         </p>
 
         {/* Featured Before / After Slider */}
@@ -108,7 +126,7 @@ export default function Home() {
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-2xl md:text-3xl font-bold mb-8 text-white text-center">How It Works</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-12 text-center">
-          From concept to client alignment in minutes
+          From a job-site photo to client sign-off on direction, in four steps
         </p>
 
         <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -119,7 +137,7 @@ export default function Home() {
               </div>
               <div>
                 <h3 className="font-bold text-white mb-1">Start from real constraints</h3>
-                <p className="text-muted-foreground text-sm">Upload a photo or reference and define the type of space you're working with — interior, exterior, or landscape.</p>
+                <p className="text-muted-foreground text-sm">Take a photo on site (a phone photo works) and choose the space type: landscape, exterior or interior.</p>
               </div>
             </div>
 
@@ -173,7 +191,7 @@ export default function Home() {
       {/* Live Product Demo Video */}
       <section className="container mx-auto px-4 py-16">
         <p className="text-sm font-semibold text-primary uppercase tracking-wide text-center mb-2">
-          Live Product Demo / Actual Renderspace Interface (Sneak Peak)
+          Live product demo: the actual Renderspace interface
         </p>
         <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white text-center">
           See How Renderspace Works in 30 Seconds
@@ -199,88 +217,41 @@ export default function Home() {
 
       <ComparisonTable />
 
-      {/* Design for AI Section */}
+      {/* Who uses Renderspace */}
       <section className="container mx-auto px-4 py-16">
-        <h2 className="text-2xl md:text-3xl font-bold mb-2 text-primary text-center">Design for AI:</h2>
-        <h3 className="text-2xl md:text-3xl font-bold mb-8 text-white text-center">
-          AI Solutions to Transform Your Space
-        </h3>
+        <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white text-center">Who uses Renderspace</h2>
+        <p className="text-muted-foreground max-w-2xl mx-auto mb-12 text-center">
+          Built for people who sell projects clients can&apos;t picture yet, outdoors first and indoors too.
+        </p>
 
-        <div className="grid md:grid-cols-2 gap-8 mt-12">
+        <div className="grid md:grid-cols-2 gap-8">
           <div className="bg-[#191f33]/50 p-6 rounded-xl">
-            <div className="flex gap-4 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#9747ff] to-[#8608fd] flex items-center justify-center">
-                <Image
-                  src="/landing/renders/interior-hero-01.png"
-                  alt="Interior design"
-                  width={24}
-                  height={24}
-                  className="w-6 h-6 object-cover rounded-full"
-                />
-              </div>
-              <h3 className="text-xl font-bold text-white">Interior Designers</h3>
+            <div className="flex items-center gap-4 mb-4">
+              <Image src="/landing/renders/exterior-hero-01.png" alt="" width={40} height={40} className="w-10 h-10 object-cover rounded-full" />
+              <h3 className="text-xl font-bold text-white">Pool builders and outdoor-living contractors</h3>
             </div>
-            <p className="text-muted-foreground">
-              Enhance your workflow and create stunning visualizations for clients in minutes. Explore more design
-              variations and increase productivity.
-            </p>
+            <p className="text-muted-foreground">Show the pool, deck, pergola or outdoor kitchen on the customer&apos;s own backyard during the first visit, before you price the job.</p>
           </div>
-
           <div className="bg-[#191f33]/50 p-6 rounded-xl">
-            <div className="flex gap-4 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#9747ff] to-[#8608fd] flex items-center justify-center">
-                <Image
-                  src="/landing/renders/exterior-hero-01.png"
-                  alt="Exterior design"
-                  width={24}
-                  height={24}
-                  className="w-6 h-6 object-cover rounded-full"
-                />
-              </div>
-              <h3 className="text-xl font-bold text-white">Contractors</h3>
+            <div className="flex items-center gap-4 mb-4">
+              <Image src="/landing/renders/landscape-hero-01.png" alt="" width={40} height={40} className="w-10 h-10 object-cover rounded-full" />
+              <h3 className="text-xl font-bold text-white">Landscape and hardscape contractors</h3>
             </div>
-            <p className="text-muted-foreground">
-              Quickly generate concept visualizations to align with clients before breaking ground. Speed up project
-              approvals and reduce rework.
-            </p>
+            <p className="text-muted-foreground">Turn a photo of a bare or tired yard into planting, paver, path and lighting concepts the homeowner can react to on the spot.</p>
           </div>
-
           <div className="bg-[#191f33]/50 p-6 rounded-xl">
-            <div className="flex gap-4 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#9747ff] to-[#8608fd] flex items-center justify-center">
-                <Image
-                  src="/landing/renders/landscape-hero-01.png"
-                  alt="Landscape design"
-                  width={24}
-                  height={24}
-                  className="w-6 h-6 object-cover rounded-full"
-                />
-              </div>
-              <h3 className="text-xl font-bold text-white">Landscapers</h3>
+            <div className="flex items-center gap-4 mb-4">
+              <Image src="/landing/renders/cta-render-01.png" alt="" width={40} height={40} className="w-10 h-10 object-cover rounded-full" />
+              <h3 className="text-xl font-bold text-white">Remodelers and home builders</h3>
             </div>
-            <p className="text-muted-foreground">
-              Show clients outdoor design concepts on-site during consultations. Close more deals with instant
-              visualizations that demonstrate potential.
-            </p>
+            <p className="text-muted-foreground">Preview new siding, roofing, entries and exterior finishes on the real house so clients commit to a direction faster.</p>
           </div>
-
           <div className="bg-[#191f33]/50 p-6 rounded-xl">
-            <div className="flex gap-4 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#9747ff] to-[#8608fd] flex items-center justify-center">
-                <Image
-                  src="/landing/renders/exterior-hero-01.png"
-                  alt="Architecture"
-                  width={24}
-                  height={24}
-                  className="w-6 h-6 object-cover rounded-full"
-                />
-              </div>
-              <h3 className="text-xl font-bold text-white">Architects</h3>
+            <div className="flex items-center gap-4 mb-4">
+              <Image src="/landing/renders/interior-hero-01.png" alt="" width={40} height={40} className="w-10 h-10 object-cover rounded-full" />
+              <h3 className="text-xl font-bold text-white">Interior designers</h3>
             </div>
-            <p className="text-muted-foreground">
-              Visualize architectural concepts and present them to clients with photorealistic renderings. Iterate
-              designs quickly and efficiently.
-            </p>
+            <p className="text-muted-foreground">Explore layouts, palettes and furnishings from a photo of the actual room and present several directions in minutes.</p>
           </div>
         </div>
       </section>
@@ -327,7 +298,7 @@ export default function Home() {
         <p className="text-muted-foreground max-w-2xl mx-auto mb-8 text-center">
           Even small improvements in client visualization can dramatically increase project approvals.
         </p>
-        <RoiCalculator />
+        <RoiCalculator ctaHref="/onboarding?plan=starter" ctaLabel={`Try ${PLANS.starter.credits} Credits for ${usd(PLANS.starter.priceUsd)}`} />
 
         <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
           {/* Professional Plan */}
@@ -345,12 +316,13 @@ export default function Home() {
               <li className="text-sm text-muted-foreground">500 generations / credits per month</li>
               <li className="text-sm text-muted-foreground">4K resolution</li>
               <li className="text-sm text-muted-foreground">All style options</li>
+              <li className="text-sm text-muted-foreground">Use renders in proposals, marketing &amp; ads</li>
             </ul>
             <Link
               href="/onboarding"
               className="block text-center py-2 bg-gradient-to-r from-orange-500 to-violet-700 rounded-md text-white hover:opacity-90 transition-all"
             >
-              Redesign Your Space
+              Start with Professional
             </Link>
           </div>
 
@@ -366,15 +338,16 @@ export default function Home() {
               <span className="text-3xl font-bold text-white">$349</span>
             </div>
             <ul className="space-y-2 mb-6">
-              <li className="text-sm text-muted-foreground">6000 generations / credits per month</li>
+              <li className="text-sm text-muted-foreground">6,000 generations / credits per month</li>
               <li className="text-sm text-muted-foreground">4K resolution</li>
-              <li className="text-sm text-muted-foreground">Commercial license</li>
+              <li className="text-sm text-muted-foreground">All style options</li>
+              <li className="text-sm text-muted-foreground">Use renders in proposals, marketing &amp; ads</li>
             </ul>
             <Link
               href="/onboarding"
               className="block text-center py-2 bg-gradient-to-r from-orange-500 to-violet-700 rounded-md text-white hover:opacity-90 transition-all"
             >
-              Redesign Your Space
+              Start with Business
             </Link>
           </div>
         </div>
@@ -384,7 +357,7 @@ export default function Home() {
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white text-center">Customer Stories</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-12 text-center">
-          See what our users are saying about Renderspace
+          What contractors say after using Renderspace on real jobs
         </p>
 
         <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
@@ -399,7 +372,7 @@ export default function Home() {
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              "Renderspace has been great at helping us put together mood boards in a fraction on the time and costs as the Fiverr workers we used to use!"
+              &ldquo;Renderspace has been great at helping us put together mood boards in a fraction [of] the time and costs as the Fiverr workers we used to use!&rdquo;
             </p>
           </div>
 
@@ -414,7 +387,7 @@ export default function Home() {
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              "I've been able to double last years deal flow by showing customers concepts for their project on site rather than the back and forth with our in house design team. We've saved hours of rework and on track to add 50% revenue"
+              &ldquo;[We&apos;re] showing customers concepts for their project on site rather than the back and forth with our in house design team. We&apos;ve saved hours of rework.&rdquo;
             </p>
           </div>
         </div>
@@ -422,7 +395,7 @@ export default function Home() {
 
       {/* Expectations Section */}
       <section className="container mx-auto px-4 py-16">
-        <h2 className="text-2xl md:text-3xl font-bold mb-2 text-white text-center">Set Clear Expectations</h2>
+        <h2 className="text-2xl md:text-3xl font-bold mb-2 text-white text-center">What Renderspace is (and isn&apos;t) for</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-12 text-center">
           Renderspace is designed to support early decision-making — not replace detailed design work.
         </p>
@@ -441,7 +414,7 @@ export default function Home() {
           <div className="bg-[#191f33]/50 p-6 rounded-xl border border-[#343434]">
             <h3 className="text-xl font-bold text-white mb-4">Not Intended For</h3>
             <ul className="space-y-3">
-              <li className="text-sm text-muted-foreground">Construction drawings or permits</li>
+              <li className="text-sm text-muted-foreground">Construction drawings or permit plans</li>
               <li className="text-sm text-muted-foreground">Final material specifications</li>
               <li className="text-sm text-muted-foreground">Engineering or architectural documentation</li>
               <li className="text-sm text-muted-foreground">Build-ready plans</li>
@@ -456,22 +429,22 @@ export default function Home() {
       <section className="container mx-auto px-4 py-16">
         <div className="bg-gradient-to-r from-[#9747ff]/20 to-[#8608fd]/20 rounded-xl p-8 flex flex-col md:flex-row items-center gap-8">
           <div className="md:w-1/2">
-            <h2 className="text-2xl md:text-3xl font-bold mb-2 text-primary">Don't wait to Create.</h2>
-            <h3 className="text-2xl md:text-3xl font-bold mb-4 text-white">Start Designing Your Ideal Space Now!</h3>
+            <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white">Try it on your next estimate</h2>
             <p className="text-muted-foreground mb-6">
-              Join professionals using Renderspace to create concept visualizations and align with clients faster.
+              {PLANS.starter.credits} credits, {PLANS.starter.period}, {usd(PLANS.starter.priceUsd)}. Take a photo at your
+              next walkthrough and show the client what their project could look like before you leave.
             </p>
             <Link
-              href="/onboarding"
+              href="/onboarding?plan=starter"
               className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-6 py-3 rounded-md font-medium"
             >
-              Redesign Your Space <ChevronRight className="w-4 h-4" />
+              Start the First Job Test <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
           <div className="md:w-1/2">
             <Image
               src="/landing/renders/cta-render-01.png"
-              alt="Renderspace render"
+              alt="AI rendering of a covered patio with outdoor seating and a stepping-stone path"
               width={500}
               height={300}
               className="w-full rounded-lg"

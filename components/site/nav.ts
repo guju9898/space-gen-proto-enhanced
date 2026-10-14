@@ -1,3 +1,5 @@
+import { PLANS, usd } from "@/lib/seo/facts"
+
 export type NavKey = "home" | "gallery" | "pricing" | "faq" | "demo" | "mockup-method" | "human-polish" | "blog"
 
 export type NavLink = { key: NavKey; href: string; label: string }
@@ -16,4 +18,7 @@ export const NAV_LINKS: NavLink[] = [
 
 export type HeaderCta = { href: string; label: string }
 
-export const DEFAULT_CTA: HeaderCta = { href: "/onboarding", label: "Redesign Now" }
+export const DEFAULT_CTA: HeaderCta = {
+  href: "/onboarding?plan=starter",
+  label: `Try It for ${usd(PLANS.starter.priceUsd)}`,
+}
