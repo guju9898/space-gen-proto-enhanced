@@ -17,12 +17,8 @@ import { OfferSection } from "./OfferSection"
 import { PlanSelectionSection } from "./PlanSelectionSection"
 import { FinalCTASection } from "./FinalCTASection"
 import { trackContractorDemoEvent } from "./analytics"
+import { CITY_LABELS } from "@/lib/contractor-demo/cities"
 
-const CITY_LABELS: Record<string, string> = {
-  houston: "Houston",
-  dallas: "Dallas",
-  austin: "Austin",
-}
 
 interface ContractorDemoPageProps {
   citySlug?: string
