@@ -9,6 +9,7 @@
  * next step, and support info (spec §5.5).
  */
 
+import type { Metadata } from "next"
 import Link from "next/link"
 import { CheckCircle2, AlertTriangle, Clock, LifeBuoy } from "lucide-react"
 import { HumanPolishSuccessAnalytics } from "@/components/human-polish/success/HumanPolishSuccessAnalytics"
@@ -28,6 +29,11 @@ import {
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
+
+export const metadata: Metadata = {
+  title: "Request received | Human Polish™",
+  robots: { index: false, follow: false },
+}
 
 type SuccessView =
   | { ok: false; reason: "missing" | "unverified" | "unconfigured" }

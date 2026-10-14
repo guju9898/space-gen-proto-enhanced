@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getSharedProjectWithRenders } from "@/lib/projects/get-shared-project"
 import { ProjectHeader } from "@/components/share/ProjectHeader"
@@ -8,6 +9,14 @@ import { ProjectVision } from "@/components/share/ProjectVision"
 import { DesignFeatures } from "@/components/share/DesignFeatures"
 import { ContractorCard } from "@/components/share/ContractorCard"
 import { ShareFooter } from "@/components/share/ShareFooter"
+
+export const metadata: Metadata = {
+  title: { absolute: "Concept preview | Renderspace" },
+  description: "A private concept preview shared by your contractor.",
+  // Private sales asset: never index. Also enforced via X-Robots-Tag in next.config.js.
+  // Do NOT add these paths to robots.txt — crawlers must be able to read the noindex.
+  robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
+}
 
 interface ViewProjectPageProps {
   params: Promise<{ slug: string }>

@@ -1,56 +1,24 @@
+import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo/metadata"
+import { JsonLd } from "@/components/seo/JsonLd"
+import { PLANS, count, usd } from "@/lib/seo/facts"
+import { softwareApplicationLd } from "@/lib/seo/schema"
 import Image from "next/image"
 import Link from "next/link"
+import { SiteHeader } from "@/components/site/SiteHeader"
 import { ChevronRight } from "lucide-react"
+
+export const metadata: Metadata = pageMetadata({
+  path: "/pricing",
+  title: `Pricing: ${usd(PLANS.starter.priceUsd)} Trial, Plans From ${usd(PLANS.professional.priceUsd)}/mo`,
+  description: `Try Renderspace on a real job: ${PLANS.starter.credits} credits for ${usd(PLANS.starter.priceUsd)} over ${PLANS.starter.period}. Professional is ${usd(PLANS.professional.priceUsd)}/mo for ${count(PLANS.professional.credits)} credits; Business is ${usd(PLANS.business.priceUsd)}/mo for ${count(PLANS.business.credits)} credits.`,
+})
 
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <header className="container mx-auto py-4 px-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/amethyst-flow.png" alt="Renderspace Logo" width={32} height={32} className="w-8 h-8" />
-          <span className="font-bold text-lg text-white">Renderspace</span>
-        </Link>
-
-        <nav className="hidden md:flex items-center gap-8">
-          <Link href="/" className="text-sm text-muted-foreground hover:text-white">
-            Home
-          </Link>
-          <Link href="/gallery" className="text-sm text-muted-foreground hover:text-white">
-            Gallery
-          </Link>
-          <Link href="/pricing" className="text-sm text-white hover:text-primary/90">
-            Pricing
-          </Link>
-          <Link href="/faq" className="text-sm text-muted-foreground hover:text-white">
-            FAQ
-          </Link>
-          <Link href="/contractor-demo" className="text-sm text-muted-foreground hover:text-white">
-            Demo
-          </Link>
-          <Link href="/mockup-method" className="text-sm text-muted-foreground hover:text-white">
-            Mockup Method
-          </Link>
-          <Link href="/human-polish" className="text-sm text-muted-foreground hover:text-white">
-            Human Polish™
-          </Link>
-          <Link href="/blog" className="text-sm text-muted-foreground hover:text-white">
-            Blog
-          </Link>
-        </nav>
-
-        <div className="hidden md:flex items-center gap-4">
-          <Link href="/?login=1" className="text-sm text-white hover:text-primary/90">
-            Log in
-          </Link>
-          <Link
-            href="/onboarding"
-            className="text-sm bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 text-white px-4 py-2 rounded-md"
-          >
-            Redesign Now
-          </Link>
-        </div>
-      </header>
+      <JsonLd data={softwareApplicationLd()} />
+      <SiteHeader active="pricing" />
 
       {/* Hero */}
       <section className="container mx-auto px-4 py-16 md:py-24 text-center">

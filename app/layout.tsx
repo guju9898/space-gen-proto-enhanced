@@ -13,23 +13,31 @@ import { Suspense } from "react"
 import "./globals.css"
 import Script from "next/script"
 import { getBlogSiteOrigin } from "@/lib/blog/site"
+import { JsonLd } from "@/components/seo/JsonLd"
+import { siteGraphLd } from "@/lib/seo/schema"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBlogSiteOrigin()),
-  title: "Renderspace – Visualize in Seconds. Win More Projects",
-  description: "Create client-ready interior, exterior, and landscape concepts in minutes — before plans, permits, or materials. Renderspace helps contractors, designers, and landscapers visualize concepts in seconds and win more projects.",
+  // Child pages set `title: "Page name"` and get " | Renderspace" appended.
+  // Pages whose title already contains the brand must use `title: { absolute: ... }`.
+  title: {
+    default: "Renderspace: AI Renderings From a Job-Site Photo",
+    template: "%s | Renderspace",
+  },
+  description: "Turn a job-site photo into a photorealistic backyard, patio, exterior or interior concept in about 30 seconds and show clients the result before you quote.",
   openGraph: {
-    title: "Renderspace – Visualize in Seconds. Win More Projects",
-    description: "Create client-ready interior, exterior, and landscape concepts in minutes — before plans, permits, or materials.",
+    title: "Renderspace: AI Renderings From a Job-Site Photo",
+    description: "Turn a job-site photo into a photorealistic backyard, patio, exterior or interior concept in about 30 seconds and show clients the result before you quote.",
     siteName: "Renderspace",
     type: "website",
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Renderspace – Visualize in Seconds. Win More Projects",
-    description: "Create client-ready interior, exterior, and landscape concepts in minutes — before plans, permits, or materials.",
+    title: "Renderspace: AI Renderings From a Job-Site Photo",
+    description: "Turn a job-site photo into a photorealistic backyard, patio, exterior or interior concept in about 30 seconds and show clients the result before you quote.",
   },
 }
 
@@ -41,6 +49,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
+        <JsonLd data={siteGraphLd()} />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-95W8Z5DE2P"
           strategy="afterInteractive"

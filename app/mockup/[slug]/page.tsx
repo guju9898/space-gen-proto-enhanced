@@ -1,9 +1,18 @@
+import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getProspectMockupBySlug } from "@/lib/projects/get-prospect-mockup"
 import { BeforeAfterHero } from "@/components/share/BeforeAfterHero"
 import { ShareFooter } from "@/components/share/ShareFooter"
 import { ContractorCard } from "@/components/share/ContractorCard"
 import type { ContractorInfo } from "@/types/share-project"
+
+export const metadata: Metadata = {
+  title: { absolute: "Concept preview | Renderspace" },
+  description: "A private concept preview shared by your contractor.",
+  // Private sales asset: never index. Also enforced via X-Robots-Tag in next.config.js.
+  // Do NOT add these paths to robots.txt — crawlers must be able to read the noindex.
+  robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
+}
 
 interface MockupPageProps {
   params: Promise<{ slug: string }>

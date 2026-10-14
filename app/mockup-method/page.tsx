@@ -1,3 +1,5 @@
+import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo/metadata"
 import Image from "next/image"
 import Link from "next/link"
 import { HeroSection } from "@/components/mockup/HeroSection"
@@ -7,6 +9,13 @@ import { MockupMethodSteps } from "@/components/mockup/MockupMethodSteps"
 import { CaseStudySection } from "@/components/mockup/CaseStudySection"
 import { UseCasesSection } from "@/components/mockup/UseCasesSection"
 import { FinalCTA } from "@/components/mockup/FinalCTA"
+
+export const metadata: Metadata = pageMetadata({
+  path: "/mockup-method",
+  title: "The Mockup Method: Win Jobs Before You Build",
+  description:
+    "The Mockup Method: show a prospect a photorealistic concept of their own property before you pitch, so the sale starts with a picture, not a price.",
+})
 
 export default function MockupMethodPage() {
   return (

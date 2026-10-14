@@ -1,32 +1,31 @@
 import type { Metadata } from "next"
 import { ContractorDemoPage } from "@/components/contractor-demo/ContractorDemoPage"
-
-const CITY_LABELS: Record<string, string> = {
-  houston: "Houston",
-  dallas: "Dallas",
-  austin: "Austin",
-}
+import { CITY_LABELS, CITY_SLUGS } from "@/lib/contractor-demo/cities"
 
 interface ContractorCityPageProps {
   params: Promise<{ city: string }>
 }
 
+// Only the cities in CITY_LABELS exist. Every other slug 404s instead of
+// rendering a duplicate copy of /contractor-demo.
+export const dynamicParams = false
+
+export function generateStaticParams() {
+  return CITY_SLUGS.map((city) => ({ city }))
+}
+
 export async function generateMetadata({ params }: ContractorCityPageProps): Promise<Metadata> {
   const { city } = await params
-  const normalized = city.toLowerCase()
-  const cityLabel = CITY_LABELS[normalized] ?? null
-
-  if (!cityLabel) {
-    return {
-      title: "Contractor Demo | Outdoor Living Sales Funnel | Renderspace",
-      description:
-        "See how landscaping and outdoor living contractors close projects faster with visual before/after concepts and a premium done-for-you system.",
-    }
-  }
+  const cityLabel = CITY_LABELS[city.toLowerCase()] ?? city
 
   return {
-    title: `${cityLabel} Contractor Demo | Close More Backyard Projects | Renderspace`,
+    title: `${cityLabel} Contractor Demo: Close More Backyard Projects`,
     description: `Contractors in ${cityLabel}: show homeowners the finished backyard vision before quoting. Close landscaping, patio, pergola, and hardscaping jobs faster with Renderspace.`,
+    alternates: { canonical: `/contractor-demo/${city}` },
+    // TODO(seo): remove noindex only once this page has unique local content:
+    // local project photos, local climate/HOA/permit notes, a local testimonial,
+    // and local price ranges. Until then it duplicates /contractor-demo.
+    robots: { index: false, follow: true },
   }
 }
 
@@ -34,4 +33,3 @@ export default async function ContractorCityPage({ params }: ContractorCityPageP
   const { city } = await params
   return <ContractorDemoPage citySlug={city} />
 }
-
