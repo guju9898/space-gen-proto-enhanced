@@ -13,12 +13,14 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
 import { generateImageFromOpenRouter } from "@/lib/api/generateImageFromOpenRouter"
 import {
+  CONCEPTS,
   chicagoDate,
   isAllowedStockUrl,
   planJobs,
   type Scene,
   type SourceForPlan,
 } from "@/lib/content/concepts"
+import { describeRender } from "@/lib/content/describe"
 
 export const CONTENT_SOURCES_BUCKET = "content-sources"
 export const DAILY_RENDER_TARGET = 18
@@ -30,6 +32,7 @@ export type RunSummary = {
   ingested: number
   ingestFailed: number
   planned: number
+  described: number
   rendered: number
   failed: number
   stillQueued: number
@@ -168,6 +171,8 @@ export async function ensureTodayPlan(
 type JobRow = {
   id: string
   batch_date: string
+  concept_key: string | null
+  region: string | null
   render_type: "landscape" | "exterior" | "interior"
   prompt: string
   slug: string | null
@@ -232,7 +237,64 @@ async function runOne(supabase: SupabaseClient, job: JobRow): Promise<"done" | "
       finished_at: new Date().toISOString(),
     })
     .eq("id", job.id)
+
+  await describeOne(supabase, {
+    id: job.id,
+    result_url: url,
+    concept_key: job.concept_key,
+    region: job.region,
+    source_id: job.source_id,
+  })
   return "done"
+}
+
+/** Vision quality check + SEO title/alt/description. Never blocks a render. */
+async function describeOne(
+  supabase: SupabaseClient,
+  job: { id: string; result_url: string; concept_key: string | null; region: string | null; source_id: string | null }
+): Promise<boolean> {
+  const concept = CONCEPTS.find((c) => c.key === job.concept_key)
+  const d = await describeRender({
+    imageUrl: job.result_url,
+    conceptLabel: concept?.label ?? "outdoor living concept",
+    region: job.region,
+    fromPhoto: Boolean(job.source_id),
+  })
+  if (!d) return false
+  await supabase
+    .from("content_render_jobs")
+    .update({
+      qc_score: d.qcScore,
+      qc_notes: d.qcNotes,
+      title: d.title,
+      alt_text: d.altText,
+      description: d.description,
+      tags: d.tags,
+      described_at: new Date().toISOString(),
+    })
+    .eq("id", job.id)
+  return true
+}
+
+/** Backfill descriptions for finished renders that don't have one yet. */
+export async function describePending(
+  supabase: SupabaseClient,
+  options: { deadlineMs: number; max?: number }
+): Promise<number> {
+  const { data } = await supabase
+    .from("content_render_jobs")
+    .select("id, result_url, concept_key, region, source_id")
+    .eq("status", "done")
+    .is("described_at", null)
+    .not("result_url", "is", null)
+    .order("finished_at", { ascending: false })
+    .limit(options.max ?? 20)
+  let n = 0
+  for (const row of data ?? []) {
+    if (Date.now() > options.deadlineMs) break
+    if (await describeOne(supabase, row as { id: string; result_url: string; concept_key: string | null; region: string | null; source_id: string | null })) n++
+  }
+  return n
 }
 
 export async function runQueuedJobs(
@@ -241,7 +303,7 @@ export async function runQueuedJobs(
 ): Promise<{ rendered: number; failed: number; stillQueued: number; error?: string }> {
   const { data, error } = await supabase
     .from("content_render_jobs")
-    .select("id, batch_date, render_type, prompt, slug, source_id, attempts")
+    .select("id, batch_date, concept_key, region, render_type, prompt, slug, source_id, attempts")
     .eq("status", "queued")
     .lte("batch_date", options.date)
     .lt("attempts", 3)
@@ -282,7 +344,7 @@ export async function runQueuedJobs(
 /** Full daily run with a time budget (ms) so it finishes inside the function limit. */
 export async function runContentRenders(
   supabase: SupabaseClient,
-  budgetMs = 240_000
+  budgetMs = 200_000
 ): Promise<RunSummary> {
   const started = Date.now()
   const date = chicagoDate()
@@ -304,11 +366,14 @@ export async function runContentRenders(
   const run = await runQueuedJobs(supabase, { date, deadlineMs: started + budgetMs })
   if (run.error) errors.push(run.error)
 
+  const described = await describePending(supabase, { deadlineMs: started + budgetMs + 30_000 })
+
   return {
     date,
     ingested: ingest.ingested,
     ingestFailed: ingest.failed,
     planned: plan.planned,
+    described,
     rendered: run.rendered,
     failed: run.failed,
     stillQueued: run.stillQueued,

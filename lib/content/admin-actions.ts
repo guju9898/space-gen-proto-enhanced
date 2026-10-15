@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { requireHumanPolishAdmin } from "@/lib/human-polish/admin-auth"
 import { SCENES, type Scene } from "@/lib/content/concepts"
 import { CONTENT_SOURCES_BUCKET, runContentRenders, type RunSummary } from "@/lib/content/run"
+import { publicSlugFor } from "@/lib/content/describe"
 
 const ALLOWED_TYPES: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -80,7 +81,40 @@ export async function setContentSourceStatus(formData: FormData): Promise<void> 
 export async function runContentRendersNow(): Promise<{ ok: true; summary: RunSummary } | Fail> {
   const auth = await requireHumanPolishAdmin()
   if (!auth.ok) return { ok: false, error: auth.error }
-  const summary = await runContentRenders(auth.supabase, 240_000)
+  const summary = await runContentRenders(auth.supabase, 200_000)
   revalidatePath("/admin/content")
   return { ok: true, summary }
+}
+
+/** Publish or unpublish a finished render on the public gallery. */
+export async function setRenderPublished(formData: FormData): Promise<void> {
+  const auth = await requireHumanPolishAdmin()
+  if (!auth.ok) return
+  const id = String(formData.get("id") ?? "")
+  const publish = formData.get("publish") === "true"
+  if (!/^[0-9a-f-]{36}$/.test(id)) return
+
+  const { data: job } = await auth.supabase
+    .from("content_render_jobs")
+    .select("id, slug, title, status, description, public_slug")
+    .eq("id", id)
+    .maybeSingle()
+  if (!job || job.status !== "done") return
+  if (publish && !job.description) return // needs SEO text first
+
+  await auth.supabase
+    .from("content_render_jobs")
+    .update(
+      publish
+        ? {
+            published: true,
+            published_at: new Date().toISOString(),
+            public_slug: job.public_slug ?? publicSlugFor(job),
+          }
+        : { published: false }
+    )
+    .eq("id", id)
+  revalidatePath("/admin/content")
+  revalidatePath("/gallery")
+  if (job.public_slug) revalidatePath(`/gallery/${job.public_slug}`)
 }

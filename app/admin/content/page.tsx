@@ -1,7 +1,7 @@
 import { AdminErrorState } from "@/components/human-polish/admin/AdminStates"
 import { RunNowButton, SourceUploader } from "@/components/admin/content/ContentAdminClient"
 import { requireHumanPolishAdminPage } from "@/lib/human-polish/admin-page-auth"
-import { setContentSourceStatus } from "@/lib/content/admin-actions"
+import { setContentSourceStatus, setRenderPublished } from "@/lib/content/admin-actions"
 import { DAILY_RENDER_TARGET } from "@/lib/content/run"
 
 export const runtime = "nodejs"
@@ -32,6 +32,11 @@ type JobRow = {
   error: string | null
   source_id: string | null
   created_by: string
+  qc_score: number | null
+  qc_notes: string | null
+  description: string | null
+  published: boolean
+  public_slug: string | null
 }
 
 export default async function ContentAdminPage() {
@@ -52,9 +57,9 @@ export default async function ContentAdminPage() {
       .limit(120),
     auth.supabase
       .from("content_render_jobs")
-      .select("id, batch_date, status, title, alt_text, result_url, error, source_id, created_by")
+      .select("id, batch_date, status, title, alt_text, result_url, error, source_id, created_by, qc_score, qc_notes, description, published, public_slug")
       .order("created_at", { ascending: false })
-      .limit(60),
+      .limit(90),
   ])
 
   const sourceRows = (sources ?? []) as SourceRow[]
@@ -86,15 +91,24 @@ export default async function ContentAdminPage() {
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-semibold">Recent renders</h2>
+          <div>
+            <h2 className="text-xl font-semibold">Recent renders</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Publish the good ones to the public gallery. Each published render gets its own page at /gallery/&lt;name&gt;.
+              QC is an automatic quality score (1-10); 8+ is usually safe to publish.
+            </p>
+          </div>
           <RunNowButton />
         </div>
         {jobRows.length === 0 ? (
           <p className="text-sm text-muted-foreground">No renders yet.</p>
         ) : (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {jobRows.map((j) => (
-              <figure key={j.id} className="overflow-hidden rounded-lg border border-[#343434] bg-[#0d1119]">
+              <figure
+                key={j.id}
+                className={`overflow-hidden rounded-lg border bg-[#0d1119] ${j.published ? "border-emerald-500/60" : "border-[#343434]"}`}
+              >
                 {j.result_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={j.result_url} alt={j.alt_text ?? ""} className="aspect-[4/3] w-full object-cover" loading="lazy" />
@@ -103,11 +117,45 @@ export default async function ContentAdminPage() {
                     {j.status === "failed" ? `Failed: ${j.error ?? "unknown"}` : j.status}
                   </div>
                 )}
-                <figcaption className="space-y-0.5 p-2 text-xs">
-                  <p className="font-medium">{j.title ?? "Untitled"}</p>
+                <figcaption className="space-y-1.5 p-3 text-xs">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-medium text-sm">{j.title ?? "Untitled"}</p>
+                    {j.qc_score != null && (
+                      <span
+                        className={`shrink-0 rounded px-1.5 py-0.5 font-mono ${j.qc_score >= 8 ? "bg-emerald-500/20 text-emerald-300" : j.qc_score >= 6 ? "bg-amber-500/20 text-amber-300" : "bg-red-500/20 text-red-300"}`}
+                      >
+                        QC {j.qc_score}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-muted-foreground">
-                    {j.batch_date} · {j.source_id ? "from photo" : "text only"} · {j.created_by}
+                    {j.batch_date} · {j.source_id ? "from photo" : "text only"}
+                    {j.qc_notes && j.qc_notes !== "clean" ? ` · ${j.qc_notes}` : ""}
                   </p>
+                  {j.description && <p className="line-clamp-3 text-muted-foreground">{j.description}</p>}
+                  {j.status === "done" && (
+                    <div className="flex items-center gap-3 pt-1">
+                      {j.description ? (
+                        <form action={setRenderPublished}>
+                          <input type="hidden" name="id" value={j.id} />
+                          <input type="hidden" name="publish" value={j.published ? "false" : "true"} />
+                          <button
+                            type="submit"
+                            className={j.published ? "underline underline-offset-2" : "rounded bg-white px-2.5 py-1 font-medium text-black"}
+                          >
+                            {j.published ? "Remove from gallery" : "Publish to gallery"}
+                          </button>
+                        </form>
+                      ) : (
+                        <span className="text-muted-foreground">Writing SEO text…</span>
+                      )}
+                      {j.published && j.public_slug && (
+                        <a href={`/gallery/${j.public_slug}`} target="_blank" rel="noreferrer" className="underline underline-offset-2">
+                          View page
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </figcaption>
               </figure>
             ))}
