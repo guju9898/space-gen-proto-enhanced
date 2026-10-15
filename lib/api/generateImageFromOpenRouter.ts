@@ -47,6 +47,8 @@ export async function generateImageFromOpenRouter(config: {
   prompt: string
   image?: string | null
   renderType: "exterior" | "landscape"
+  /** Storage path inside the "renders" bucket. Defaults to renders/<type>/<timestamp>.png */
+  filePath?: string
 }): Promise<string | null> {
   const apiKey = process.env.OPENROUTER_API_KEY
 
@@ -269,7 +271,7 @@ export async function generateImageFromOpenRouter(config: {
       const { uploadBase64ToSupabase } = await import("./uploadBase64ToSupabase")
       const uploadedUrl = await uploadBase64ToSupabase({
         base64DataUrl: imageUrl,
-        filePath: `renders/${config.renderType}/${Date.now()}.png`
+        filePath: config.filePath ?? `renders/${config.renderType}/${Date.now()}.png`
       })
 
       if (!uploadedUrl) {
