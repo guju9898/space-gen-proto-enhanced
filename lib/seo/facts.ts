@@ -18,13 +18,25 @@ import {
 } from "@/lib/human-polish/config"
 import { HUMAN_POLISH_PACKAGE_LABELS } from "@/lib/human-polish/types"
 
+/**
+ * Official profiles, shown in the site footer and used as Organization sameAs.
+ * Leave url empty until a profile is live; empty entries are hidden everywhere.
+ */
+export const SOCIAL_PROFILES = [
+  { key: "instagram", name: "Instagram", url: "https://www.instagram.com/renderspace_ai/" },
+  { key: "capterra", name: "Capterra", url: "" },
+  { key: "g2", name: "G2", url: "" },
+] as const
+
+export const LIVE_PROFILES = SOCIAL_PROFILES.filter((p) => p.url.length > 0)
+
 export const SITE = {
   name: "Renderspace",
   url: "https://www.renderspace.ai",
   logoPath: "/amethyst-flow.png",
   logoSize: 1024,
   founder: "KeSean Fallon",
-  sameAs: ["https://www.instagram.com/renderspace_ai/"],
+  sameAs: LIVE_PROFILES.map((p) => p.url) as readonly string[],
 } as const
 
 /**
