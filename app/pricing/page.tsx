@@ -3,10 +3,10 @@ import { pageMetadata } from "@/lib/seo/metadata"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { PLANS, count, usd } from "@/lib/seo/facts"
 import { softwareApplicationLd } from "@/lib/seo/schema"
-import Image from "next/image"
 import Link from "next/link"
 import { SiteHeader } from "@/components/site/SiteHeader"
 import { ChevronRight } from "lucide-react"
+import { SiteFooter } from "@/components/site/SiteFooter"
 
 export const metadata: Metadata = pageMetadata({
   path: "/pricing",
@@ -135,33 +135,7 @@ export default function PricingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#101010] border-t border-[#343434] py-12 mt-16">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-            <Link href="/" className="flex items-center gap-2 mb-4 md:mb-0">
-              <Image src="/amethyst-flow.png" alt="Renderspace Logo" width={32} height={32} className="w-8 h-8" />
-              <span className="font-bold text-lg text-white">Renderspace</span>
-            </Link>
-            <nav className="flex flex-wrap justify-center gap-6 mb-4 md:mb-0">
-              <Link href="/blog" className="text-sm text-muted-foreground hover:text-white">
-                Blog
-              </Link>
-              <Link href="/pricing" className="text-sm text-muted-foreground hover:text-white">
-                Pricing
-              </Link>
-              <Link href="/faq" className="text-sm text-muted-foreground hover:text-white">
-                FAQ
-              </Link>
-              <Link href="/gallery" className="text-sm text-muted-foreground hover:text-white">
-                Gallery
-              </Link>
-            </nav>
-          </div>
-          <div className="text-center text-xs text-muted-foreground">
-            <p>© 2024 Renderspace. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter className="mt-16" />
     </div>
   )
 }
