@@ -1,5 +1,6 @@
 import { absoluteBlogUrl } from "./site"
 import { ORG_ID } from "@/lib/seo/schema"
+import { SITE } from "@/lib/seo/facts"
 import type { BlogPostMeta } from "./types"
 
 export function buildBlogPostingJsonLd(post: BlogPostMeta) {
@@ -20,11 +21,16 @@ export function buildBlogPostingJsonLd(post: BlogPostMeta) {
       "@type": "WebPage",
       "@id": url,
     },
-    author: {
-      "@type": "Organization",
-      name: post.author,
-      url: absoluteBlogUrl("/"),
-    },
+    author:
+      post.author === "Renderspace"
+        ? { "@type": "Organization", name: post.author, url: absoluteBlogUrl("/") }
+        : {
+            "@type": "Person",
+            name: post.author,
+            url: absoluteBlogUrl("/"),
+            worksFor: { "@id": ORG_ID },
+            jobTitle: post.author === SITE.founder ? "Founder" : undefined,
+          },
     publisher: {
       "@type": "Organization",
       "@id": ORG_ID,

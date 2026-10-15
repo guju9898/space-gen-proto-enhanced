@@ -5,15 +5,20 @@ import Link from "next/link"
 import { SiteHeader } from "@/components/site/SiteHeader"
 import { ChevronRight } from "lucide-react"
 import { SiteFooter } from "@/components/site/SiteFooter"
+import { listPublishedRenders } from "@/lib/content/gallery"
+
+// New renders are published from the admin page; refresh the list hourly.
+export const revalidate = 3600
 
 export const metadata: Metadata = pageMetadata({
   path: "/gallery",
   title: "Before-and-After AI Rendering Gallery",
   description:
-    "Real Renderspace outputs, no stock photos: before-and-after concepts for living rooms, kitchens, bedrooms, house exteriors and outdoor spaces from photos.",
+    "Real Renderspace outputs: before-and-after concepts for pools, patios, outdoor kitchens, landscapes, house exteriors and interiors, made from photos in about 30 seconds.",
 })
 
-export default function GalleryPage() {
+export default async function GalleryPage() {
+  const fresh = await listPublishedRenders(48)
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader active="gallery" />
@@ -21,7 +26,7 @@ export default function GalleryPage() {
       {/* Gallery Hero */}
       <section className="container mx-auto px-4 py-12 md:py-16">
         <h1 className="text-4xl md:text-5xl font-bold mb-2 text-white text-center">Explore designs from the Renderspace community</h1>
-        <p className="text-muted-foreground text-center mb-12">All images below are real Renderspace outputs—no stock photos.</p>
+        <p className="text-muted-foreground text-center mb-12">Every concept below is a real Renderspace output. Source photos are labeled.</p>
 
         {/* Gallery Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -147,12 +152,43 @@ export default function GalleryPage() {
         </div>
 
         {/* Load More Button */}
-        <div className="flex justify-center mt-12">
-          <button className="bg-[#191f33] hover:bg-[#232a45] text-white px-6 py-3 rounded-md font-medium transition-colors">
-            Load More Designs
-          </button>
-        </div>
       </section>
+
+      {fresh.length > 0 && (
+        <section className="container mx-auto px-4 py-12" aria-labelledby="fresh-concepts">
+          <h2 id="fresh-concepts" className="text-2xl md:text-3xl font-bold mb-2 text-white text-center">
+            Fresh concepts from Renderspace
+          </h2>
+          <p className="text-muted-foreground text-center mb-10 max-w-2xl mx-auto">
+            Pool, patio, outdoor kitchen, landscape and exterior ideas made with Renderspace. Open any design to see the
+            source photo, the materials and how the space would work.
+          </p>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {fresh.map((r) => (
+              <li key={r.id}>
+                <Link href={`/gallery/${r.slug}`} className="group block rounded-xl overflow-hidden border border-[#343434] bg-[#101010]">
+                  <div className="relative aspect-[4/3]">
+                    <Image
+                      src={r.imageUrl}
+                      alt={r.altText}
+                      fill
+                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                      className="object-cover transition-transform group-hover:scale-[1.02]"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-white font-semibold">{r.title}</h3>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {r.before ? (r.before.kind === "own" ? "From a job-site photo" : "From a stock photo") : "Concept from a text brief"}
+                      {r.region ? ` · ${r.region}` : ""}
+                    </p>
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-16">

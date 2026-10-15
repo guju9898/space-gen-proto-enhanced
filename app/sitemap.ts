@@ -1,8 +1,11 @@
 import type { MetadataRoute } from "next"
 import { getAllPostMetas } from "@/lib/blog/posts"
 import { absoluteBlogUrl } from "@/lib/blog/site"
+import { listPublishedRenders } from "@/lib/content/gallery"
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const revalidate = 3600
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: absoluteBlogUrl("/"), lastModified: new Date("2026-08-11") },
     { url: absoluteBlogUrl("/pricing"), lastModified: new Date("2026-08-11") },
@@ -19,5 +22,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(post.dateModified || post.datePublished),
   }))
 
-  return [...staticRoutes, ...posts]
+  const renders = (await listPublishedRenders(500)).map((r) => ({
+    url: absoluteBlogUrl(`/gallery/${r.slug}`),
+    lastModified: new Date(r.publishedAt),
+    images: [r.imageUrl],
+  }))
+
+  return [...staticRoutes, ...posts, ...renders]
 }
