@@ -4,17 +4,17 @@ const STUDIOS = [
   {
     title: "Interior Studio",
     description: "Redesign rooms, finishes, and layouts from a single photo.",
-    image: "/landing/renders/interior-hero-01.png",
+    image: "/landing/renders/interior-hero-01.jpg",
   },
   {
     title: "Exterior Studio",
     description: "Transform facades, siding, and curb appeal.",
-    image: "/landing/renders/exterior-hero-01.png",
+    image: "/landing/renders/exterior-hero-01.jpg",
   },
   {
     title: "Landscape Studio",
     description: "Visualize patios, plantings, and outdoor living spaces.",
-    image: "/landing/renders/landscape-hero-01.png",
+    image: "/landing/renders/landscape-hero-01.jpg",
   },
 ]
 

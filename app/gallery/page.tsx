@@ -33,7 +33,7 @@ export default async function GalleryPage() {
           {/* Row 1 */}
           <div className="relative rounded-xl overflow-hidden">
             <Image
-              src="/gallery/replace-1.jpg"
+              src="/gallery/modern-limestone-house-olive-trees-courtyard-concept.jpg"
               alt="Concept rendering of a modern limestone house with olive trees, terracotta urns and a gravel front courtyard"
               width={600}
               height={400}
@@ -42,7 +42,7 @@ export default async function GalleryPage() {
           </div>
           <div className="relative rounded-xl overflow-hidden">
             <Image
-              src="/gallery/replace-2.jpg"
+              src="/gallery/brick-house-entry-lanterns-night-concept.jpg"
               alt="Night concept rendering of a symmetrical brick house entry with lit lanterns, clay pots and a flagstone walk"
               width={600}
               height={400}
@@ -53,7 +53,7 @@ export default async function GalleryPage() {
           {/* Row 2 */}
           <div className="relative rounded-xl overflow-hidden">
             <Image
-              src="/gallery/replace-3.jpg"
+              src="/gallery/modern-infill-townhouse-stone-wood-concept.jpg"
               alt="Concept rendering of a modern infill townhouse with stone and wood cladding between city high-rises"
               width={600}
               height={400}
@@ -62,7 +62,7 @@ export default async function GalleryPage() {
           </div>
           <div className="relative rounded-xl overflow-hidden">
             <Image
-              src="/gallery/replace-4.jpg"
+              src="/gallery/corner-house-wood-concrete-cladding-concept.jpg"
               alt="Concept rendering of a three-story corner house with wood and concrete panel cladding and street planting"
               width={600}
               height={400}
@@ -73,7 +73,7 @@ export default async function GalleryPage() {
           {/* Row 3 */}
           <div className="relative rounded-xl overflow-hidden">
             <Image
-              src="/gallery/replace-5.jpg"
+              src="/gallery/open-plan-living-room-gray-sectional-concept.jpg"
               alt="Interior concept rendering of an open-plan living room with a gray sectional, oak staircase and modern kitchen"
               width={600}
               height={400}
@@ -82,7 +82,7 @@ export default async function GalleryPage() {
           </div>
           <div className="relative rounded-xl overflow-hidden">
             <Image
-              src="/gallery/replace-6.jpg"
+              src="/gallery/single-story-limestone-house-gravel-forecourt-concept.jpg"
               alt="Concept rendering of a single-story limestone house with a wood front door and a gravel forecourt"
               width={600}
               height={400}
@@ -93,7 +93,7 @@ export default async function GalleryPage() {
           {/* Row 4 */}
           <div className="relative rounded-xl overflow-hidden">
             <Image
-              src="/gallery/replace-7.jpg"
+              src="/gallery/garden-tiered-fountain-hammock-deck-concept.jpg"
               alt="Garden concept rendering with a tiered stone fountain, stepping-stone paths, dense planting and a hammock deck"
               width={600}
               height={400}
@@ -102,48 +102,8 @@ export default async function GalleryPage() {
           </div>
           <div className="relative rounded-xl overflow-hidden">
             <Image
-              src="/gallery/replace-8.jpg"
+              src="/gallery/backyard-deck-pergola-hammock-concept.jpg"
               alt="Backyard concept rendering with a wood deck, pergola, hammock, raised planters and white flowering beds"
-              width={600}
-              height={400}
-              className="w-full aspect-[4/3] object-cover"
-            />
-          </div>
-
-          {/* Row 5 */}
-          <div className="relative rounded-xl overflow-hidden">
-            <Image
-              src="/gallery/replace-9.jpg"
-              alt="Concept rendering of a modern limestone house with olive trees, terracotta urns and a gravel front courtyard"
-              width={600}
-              height={400}
-              className="w-full aspect-[4/3] object-cover"
-            />
-          </div>
-          <div className="relative rounded-xl overflow-hidden">
-            <Image
-              src="/gallery/replace-10.jpg"
-              alt="Night concept rendering of a symmetrical brick house entry with lit lanterns, clay pots and a flagstone walk"
-              width={600}
-              height={400}
-              className="w-full aspect-[4/3] object-cover"
-            />
-          </div>
-
-          {/* Row 6 */}
-          <div className="relative rounded-xl overflow-hidden">
-            <Image
-              src="/gallery/replace-11.jpg"
-              alt="Concept rendering of a modern infill townhouse with stone and wood cladding between city high-rises"
-              width={600}
-              height={400}
-              className="w-full aspect-[4/3] object-cover"
-            />
-          </div>
-          <div className="relative rounded-xl overflow-hidden">
-            <Image
-              src="/gallery/replace-12.jpg"
-              alt="Interior concept rendering of an open-plan living room with a gray sectional, oak staircase and modern kitchen"
               width={600}
               height={400}
               className="w-full aspect-[4/3] object-cover"
@@ -151,7 +111,6 @@ export default async function GalleryPage() {
           </div>
         </div>
 
-        {/* Load More Button */}
       </section>
 
       {fresh.length > 0 && (
@@ -208,7 +167,7 @@ export default async function GalleryPage() {
           </div>
           <div className="md:w-1/2">
             <Image
-              src="/gallery/replace-13.jpg"
+              src="/gallery/single-story-limestone-house-gravel-forecourt-concept.jpg"
               alt="Concept rendering of a single-story limestone house with a wood front door and a gravel forecourt"
               width={500}
               height={300}
