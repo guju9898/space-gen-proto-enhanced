@@ -14,15 +14,28 @@ export type RenderDescription = {
   tags: string[]
 }
 
-export function buildDescribePrompt(input: { conceptLabel: string; region: string | null; fromPhoto: boolean }): string {
+export function buildDescribePrompt(input: {
+  conceptLabel: string
+  region: string | null
+  fromPhoto: boolean
+  requested?: string[]
+}): string {
+  const requested = (input.requested ?? []).slice(0, 6)
   return [
     "You are reviewing an AI concept rendering made by Renderspace for a contractor's marketing gallery.",
     `Intended concept: ${input.conceptLabel}.${input.region ? ` Region style: ${input.region}.` : ""}`,
     input.fromPhoto ? "It was generated from a photo of a real space." : "It was generated from a text prompt only.",
+    ...(requested.length
+      ? [
+          "Requested details (custom materials and focal objects):",
+          ...requested.map((r) => `- ${r}`),
+          "Check each one is visibly represented. Lower qc_score by 1-2 if a requested material or focal object is clearly missing or wrong, and name it in qc_notes. In the title, alt text and description, name the materials and objects you can actually see, not ones that are missing.",
+        ]
+      : []),
     "Return ONLY a JSON object with these keys:",
     '- "qc_score": integer 1-10. 9-10 = photorealistic, correct scale, clean edges, no warped geometry, no text, no watermark, no people, matches the concept. 6-8 = minor flaws. 1-5 = obvious AI artifacts, melted or impossible structures, garbled text, people, or does not match the concept.',
     '- "qc_notes": one short sentence naming the main flaw, or "clean" if none.',
-    '- "title": a descriptive title under 60 characters, e.g. "Rectangular Pool With Travertine Deck".',
+    '- "title": a descriptive title under 60 characters that names the standout material or feature, e.g. "Formal Courtyard With Slate Paving and Bronze Statues".',
     '- "alt_text": a literal description of what is visible, under 125 characters, no "image of".',
     '- "description": 60-110 words describing the design for a homeowner or contractor: layout, materials, plants, lighting, how the space would be used. Plain and factual. No prices, no claims about Renderspace, no invented locations or clients.',
     '- "tags": 3-6 lowercase keywords people search for, e.g. ["pool deck", "travertine", "backyard pool ideas"].',
@@ -58,6 +71,7 @@ export async function describeRender(input: {
   conceptLabel: string
   region: string | null
   fromPhoto: boolean
+  requested?: string[]
 }): Promise<{ data: RenderDescription | null; error?: string }> {
   const apiKey = process.env.OPENROUTER_API_KEY
   if (!apiKey) return { data: null, error: "OPENROUTER_API_KEY is not set" }
