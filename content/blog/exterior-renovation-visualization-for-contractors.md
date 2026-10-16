@@ -9,7 +9,7 @@ datePublished: 2026-08-11
 dateModified: 2026-08-11
 author: Renderspace
 featuredImage: /images/after-exterior.webp
-featuredImageAlt: Exterior renovation concept visualization on a real house photo
+featuredImageAlt: Exterior renovation concept of a ranch house with dark siding, stone accents and a red front door
 primaryIntent: Learn how exterior renovation visualization helps contractor sales
 ctaType: self-serve
 relatedSlugs:

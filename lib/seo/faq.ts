@@ -35,6 +35,12 @@ export const FAQ_ITEMS: FaqItem[] = [
     surfaces: ["home", "faq"],
   },
   {
+    id: "visual-proposals",
+    q: "What software helps contractors create visual proposals for homeowners?",
+    a: `Photo-to-concept rendering software like Renderspace. You take a photo of the homeowner's yard, home exterior or room, and in about ${PROOF.secondsPerConcept.typical} seconds you have a photorealistic concept of the proposed pool, patio, outdoor kitchen, landscape or remodel on their actual property, exported in 4K to drop into your proposal. Seeing their own space finished helps homeowners decide sooner, and every paid plan lets you use the renders in proposals, on your website and in ads.`,
+    surfaces: ["faq"],
+  },
+  {
     id: "vs-chatgpt",
     q: "Can't I just do this with ChatGPT or Gemini?",
     a: "You can get an image from ChatGPT or Gemini, but they're general-purpose tools that need careful prompting and don't stay consistent from one image to the next. Renderspace is built for one job: turning a photo of your client's actual property into a client-ready concept. You choose the space type, style, materials, lighting and mood from presets instead of writing prompts, keep those settings while you change one thing, export in 4K, and share the result with your client. It's fast enough to use during the estimate.",

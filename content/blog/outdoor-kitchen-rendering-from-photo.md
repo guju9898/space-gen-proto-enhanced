@@ -9,7 +9,7 @@ datePublished: 2026-08-11
 dateModified: 2026-08-11
 author: Renderspace
 featuredImage: /images/mailers/mailer-outdoor.png
-featuredImageAlt: Outdoor living visualization concept for contractor client presentation
+featuredImageAlt: "Before and after: plain backyard lawn redesigned with a sport court and shaded pergola beside a modern house"
 primaryIntent: Help contractors visualize outdoor kitchen concepts from job-site photos for client presentations
 ctaType: self-serve
 relatedSlugs:

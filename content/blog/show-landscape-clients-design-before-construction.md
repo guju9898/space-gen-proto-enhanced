@@ -9,7 +9,7 @@ datePublished: 2026-08-11
 dateModified: 2026-08-11
 author: Renderspace
 featuredImage: /images/before-landscape.webp
-featuredImageAlt: Job-site landscape photo before concept visualization
+featuredImageAlt: "Before: plain backyard lawn behind a single-story brick home, the job-site photo used for a landscape concept"
 primaryIntent: Help landscape contractors visualize designs on-site before construction starts
 ctaType: self-serve
 relatedSlugs:

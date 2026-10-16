@@ -80,7 +80,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-16 max-w-4xl mx-auto">
           <div className="rounded-lg overflow-hidden">
             <Image
-              src="/landing/renders/exterior-hero-01.png"
+              src="/landing/renders/exterior-hero-01.jpg"
               alt="AI rendering of a limestone home with a lap pool and stone pool deck, generated in Renderspace"
               width={400}
               height={300}
@@ -89,7 +89,7 @@ export default function Home() {
           </div>
           <div className="rounded-lg overflow-hidden">
             <Image
-              src="/landing/renders/landscape-hero-01.png"
+              src="/landing/renders/landscape-hero-01.jpg"
               alt="AI landscape rendering of a modern home with a curving flagstone path and native planting"
               width={400}
               height={300}
@@ -98,7 +98,7 @@ export default function Home() {
           </div>
           <div className="rounded-lg overflow-hidden">
             <Image
-              src="/landing/renders/interior-hero-01.png"
+              src="/landing/renders/interior-hero-01.jpg"
               alt="AI interior rendering of a bright open-plan living room and kitchen"
               width={400}
               height={300}
@@ -228,28 +228,28 @@ export default function Home() {
         <div className="grid md:grid-cols-2 gap-8">
           <div className="bg-[#191f33]/50 p-6 rounded-xl">
             <div className="flex items-center gap-4 mb-4">
-              <Image src="/landing/renders/exterior-hero-01.png" alt="" width={40} height={40} className="w-10 h-10 object-cover rounded-full" />
+              <Image src="/landing/renders/exterior-hero-01.jpg" alt="" width={40} height={40} className="w-10 h-10 object-cover rounded-full" />
               <h3 className="text-xl font-bold text-white">Pool builders and outdoor-living contractors</h3>
             </div>
             <p className="text-muted-foreground">Show the pool, deck, pergola or outdoor kitchen on the customer&apos;s own backyard during the first visit, before you price the job.</p>
           </div>
           <div className="bg-[#191f33]/50 p-6 rounded-xl">
             <div className="flex items-center gap-4 mb-4">
-              <Image src="/landing/renders/landscape-hero-01.png" alt="" width={40} height={40} className="w-10 h-10 object-cover rounded-full" />
+              <Image src="/landing/renders/landscape-hero-01.jpg" alt="" width={40} height={40} className="w-10 h-10 object-cover rounded-full" />
               <h3 className="text-xl font-bold text-white">Landscape and hardscape contractors</h3>
             </div>
             <p className="text-muted-foreground">Turn a photo of a bare or tired yard into planting, paver, path and lighting concepts the homeowner can react to on the spot.</p>
           </div>
           <div className="bg-[#191f33]/50 p-6 rounded-xl">
             <div className="flex items-center gap-4 mb-4">
-              <Image src="/landing/renders/cta-render-01.png" alt="" width={40} height={40} className="w-10 h-10 object-cover rounded-full" />
+              <Image src="/landing/renders/cta-render-01.jpg" alt="" width={40} height={40} className="w-10 h-10 object-cover rounded-full" />
               <h3 className="text-xl font-bold text-white">Remodelers and home builders</h3>
             </div>
             <p className="text-muted-foreground">Preview new siding, roofing, entries and exterior finishes on the real house so clients commit to a direction faster.</p>
           </div>
           <div className="bg-[#191f33]/50 p-6 rounded-xl">
             <div className="flex items-center gap-4 mb-4">
-              <Image src="/landing/renders/interior-hero-01.png" alt="" width={40} height={40} className="w-10 h-10 object-cover rounded-full" />
+              <Image src="/landing/renders/interior-hero-01.jpg" alt="" width={40} height={40} className="w-10 h-10 object-cover rounded-full" />
               <h3 className="text-xl font-bold text-white">Interior designers</h3>
             </div>
             <p className="text-muted-foreground">Explore layouts, palettes and furnishings from a photo of the actual room and present several directions in minutes.</p>
@@ -444,7 +444,7 @@ export default function Home() {
           </div>
           <div className="md:w-1/2">
             <Image
-              src="/landing/renders/cta-render-01.png"
+              src="/landing/renders/cta-render-01.jpg"
               alt="AI rendering of a covered patio with outdoor seating and a stepping-stone path"
               width={500}
               height={300}

@@ -8,8 +8,8 @@ category: Comparison
 datePublished: 2026-08-11
 dateModified: 2026-08-11
 author: Renderspace
-featuredImage: /landing/renders/cta-render-01.png
-featuredImageAlt: Photorealistic concept render for contractor client alignment
+featuredImage: /landing/renders/cta-render-01.jpg
+featuredImageAlt: Concept rendering of a stone and cedar home with a covered patio, outdoor sofa, planters and a stepping-stone path
 primaryIntent: Compare AI rendering vs traditional rendering for contractors
 ctaType: fork
 relatedSlugs:
