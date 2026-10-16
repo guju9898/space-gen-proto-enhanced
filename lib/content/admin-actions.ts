@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { requireHumanPolishAdmin } from "@/lib/human-polish/admin-auth"
 import { SCENES, type Scene } from "@/lib/content/concepts"
-import { CONTENT_SOURCES_BUCKET, runContentRenders, type RunSummary } from "@/lib/content/run"
+import { CONTENT_SOURCES_BUCKET, describeOne, describePending, runContentRenders, type RunSummary } from "@/lib/content/run"
 import { publicSlugFor } from "@/lib/content/describe"
 
 const ALLOWED_TYPES: Record<string, string> = {
@@ -117,4 +117,101 @@ export async function setRenderPublished(formData: FormData): Promise<void> {
   revalidatePath("/admin/content")
   revalidatePath("/gallery")
   if (job.public_slug) revalidatePath(`/gallery/${job.public_slug}`)
+}
+
+type ActionResult = { ok: true; message: string } | Fail
+
+const ID_RE = /^[0-9a-f-]{36}$/
+
+/** Approve (publish to the gallery) or reject a finished render. Writes SEO text first if missing. */
+export async function reviewRender(id: string, decision: "approve" | "reject" | "reset"): Promise<ActionResult> {
+  const auth = await requireHumanPolishAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
+  if (!ID_RE.test(id)) return { ok: false, error: "Invalid render." }
+
+  const { data: job } = await auth.supabase
+    .from("content_render_jobs")
+    .select("id, slug, title, status, description, public_slug, result_url, concept_key, region, source_id")
+    .eq("id", id)
+    .maybeSingle()
+  if (!job || job.status !== "done" || !job.result_url) return { ok: false, error: "This render isn't finished." }
+
+  if (decision === "reject" || decision === "reset") {
+    await auth.supabase
+      .from("content_render_jobs")
+      .update({ review_status: decision === "reject" ? "rejected" : "pending", published: false })
+      .eq("id", id)
+    revalidatePath("/admin/content")
+    revalidatePath("/gallery")
+    if (job.public_slug) revalidatePath(`/gallery/${job.public_slug}`)
+    return { ok: true, message: decision === "reject" ? "Rejected" : "Moved back to review" }
+  }
+
+  let title = job.title
+  if (!job.description) {
+    const r = await describeOne(auth.supabase, {
+      id: job.id,
+      result_url: job.result_url,
+      concept_key: job.concept_key,
+      region: job.region,
+      source_id: job.source_id,
+    })
+    if (!r.ok) return { ok: false, error: `Couldn't write the SEO text: ${r.error ?? "unknown error"}` }
+    const { data: fresh } = await auth.supabase.from("content_render_jobs").select("title").eq("id", id).maybeSingle()
+    title = fresh?.title ?? title
+  }
+
+  const publicSlug = job.public_slug ?? publicSlugFor({ id: job.id, slug: job.slug, title })
+  await auth.supabase
+    .from("content_render_jobs")
+    .update({ review_status: "approved", published: true, published_at: new Date().toISOString(), public_slug: publicSlug })
+    .eq("id", id)
+  revalidatePath("/admin/content")
+  revalidatePath("/gallery")
+  revalidatePath(`/gallery/${publicSlug}`)
+  return { ok: true, message: "Published to the gallery" }
+}
+
+/** Write SEO text for one render without publishing it. */
+export async function writeRenderSeoText(id: string): Promise<ActionResult> {
+  const auth = await requireHumanPolishAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
+  if (!ID_RE.test(id)) return { ok: false, error: "Invalid render." }
+  const { data: job } = await auth.supabase
+    .from("content_render_jobs")
+    .select("id, result_url, concept_key, region, source_id, status")
+    .eq("id", id)
+    .maybeSingle()
+  if (!job || job.status !== "done" || !job.result_url) return { ok: false, error: "This render isn't finished." }
+  const r = await describeOne(auth.supabase, job as { id: string; result_url: string; concept_key: string | null; region: string | null; source_id: string | null })
+  revalidatePath("/admin/content")
+  return r.ok ? { ok: true, message: "SEO text written" } : { ok: false, error: r.error ?? "Couldn't write the SEO text." }
+}
+
+/** Write SEO text for every finished render that is still missing it (up to ~3 minutes). */
+export async function writeAllRenderSeoText(): Promise<ActionResult> {
+  const auth = await requireHumanPolishAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
+  const n = await describePending(auth.supabase, { deadlineMs: Date.now() + 180_000, max: 60 })
+  const { count } = await auth.supabase
+    .from("content_render_jobs")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "done")
+    .neq("review_status", "rejected")
+    .is("described_at", null)
+  revalidatePath("/admin/content")
+  return { ok: true, message: `SEO text written for ${n} render${n === 1 ? "" : "s"}${count ? `; ${count} still missing (run again)` : ""}` }
+}
+
+/** Approve, reject or restore a source photo. Approved stock photos become usable by the render bot. */
+export async function reviewSource(formData: FormData): Promise<void> {
+  const auth = await requireHumanPolishAdmin()
+  if (!auth.ok) return
+  const id = String(formData.get("id") ?? "")
+  const decision = String(formData.get("decision") ?? "")
+  if (!ID_RE.test(id)) return
+  const status = decision === "approve" || decision === "restore" ? "ready" : decision === "reject" ? "rejected" : null
+  if (!status) return
+  await auth.supabase.from("content_sources").update({ status }).eq("id", id).not("public_url", "is", null)
+  revalidatePath("/admin/content")
 }

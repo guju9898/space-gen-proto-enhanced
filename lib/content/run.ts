@@ -93,7 +93,7 @@ export async function ingestStockSources(
       const { data: pub } = supabase.storage.from(CONTENT_SOURCES_BUCKET).getPublicUrl(path)
       await supabase
         .from("content_sources")
-        .update({ status: "ready", storage_path: path, public_url: pub.publicUrl })
+        .update({ status: "review", storage_path: path, public_url: pub.publicUrl })
         .eq("id", row.id)
       ingested++
     } catch (e) {
@@ -249,18 +249,18 @@ async function runOne(supabase: SupabaseClient, job: JobRow): Promise<"done" | "
 }
 
 /** Vision quality check + SEO title/alt/description. Never blocks a render. */
-async function describeOne(
+export async function describeOne(
   supabase: SupabaseClient,
   job: { id: string; result_url: string; concept_key: string | null; region: string | null; source_id: string | null }
-): Promise<boolean> {
+): Promise<{ ok: boolean; error?: string }> {
   const concept = CONCEPTS.find((c) => c.key === job.concept_key)
-  const d = await describeRender({
+  const { data: d, error } = await describeRender({
     imageUrl: job.result_url,
     conceptLabel: concept?.label ?? "outdoor living concept",
     region: job.region,
     fromPhoto: Boolean(job.source_id),
   })
-  if (!d) return false
+  if (!d) return { ok: false, error }
   await supabase
     .from("content_render_jobs")
     .update({
@@ -273,7 +273,7 @@ async function describeOne(
       described_at: new Date().toISOString(),
     })
     .eq("id", job.id)
-  return true
+  return { ok: true }
 }
 
 /** Backfill descriptions for finished renders that don't have one yet. */
@@ -281,10 +281,12 @@ export async function describePending(
   supabase: SupabaseClient,
   options: { deadlineMs: number; max?: number }
 ): Promise<number> {
+  // Rejected renders don't need SEO text.
   const { data } = await supabase
     .from("content_render_jobs")
     .select("id, result_url, concept_key, region, source_id")
     .eq("status", "done")
+    .neq("review_status", "rejected")
     .is("described_at", null)
     .not("result_url", "is", null)
     .order("finished_at", { ascending: false })
@@ -292,7 +294,8 @@ export async function describePending(
   let n = 0
   for (const row of data ?? []) {
     if (Date.now() > options.deadlineMs) break
-    if (await describeOne(supabase, row as { id: string; result_url: string; concept_key: string | null; region: string | null; source_id: string | null })) n++
+    const r = await describeOne(supabase, row as { id: string; result_url: string; concept_key: string | null; region: string | null; source_id: string | null })
+    if (r.ok) n++
   }
   return n
 }

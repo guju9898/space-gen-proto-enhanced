@@ -5,8 +5,11 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
   registerContentUpload,
+  reviewRender,
   runContentRendersNow,
   signContentUpload,
+  writeAllRenderSeoText,
+  writeRenderSeoText,
 } from "@/lib/content/admin-actions"
 
 const SCENE_OPTIONS: { value: string; label: string }[] = [
@@ -140,6 +143,100 @@ export function RunNowButton() {
         }
       >
         {pending ? "Rendering (up to 4 min)…" : "Run today's renders now"}
+      </Button>
+      {result && <p className="text-sm text-muted-foreground">{result}</p>}
+    </div>
+  )
+}
+
+type ReviewProps = {
+  id: string
+  reviewStatus: string
+  published: boolean
+  hasSeoText: boolean
+  publicSlug: string | null
+}
+
+/** Approve / reject controls for one render. Approve writes SEO text first when it's missing. */
+export function RenderReviewButtons({ id, reviewStatus, published, hasSeoText, publicSlug }: ReviewProps) {
+  const router = useRouter()
+  const [pending, startTransition] = useTransition()
+  const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null)
+
+  const run = (fn: () => Promise<{ ok: true; message: string } | { ok: false; error: string }>) =>
+    startTransition(async () => {
+      setNote(null)
+      const res = await fn()
+      setNote(res.ok ? { ok: true, text: res.message } : { ok: false, text: res.error })
+      router.refresh()
+    })
+
+  return (
+    <div className="space-y-1.5 pt-1">
+      <div className="flex flex-wrap items-center gap-2">
+        {reviewStatus === "rejected" ? (
+          <button disabled={pending} onClick={() => run(() => reviewRender(id, "reset"))} className="underline underline-offset-2">
+            Undo reject
+          </button>
+        ) : published ? (
+          <>
+            {publicSlug && (
+              <a href={`/gallery/${publicSlug}`} target="_blank" rel="noreferrer" className="underline underline-offset-2">
+                View page
+              </a>
+            )}
+            <button disabled={pending} onClick={() => run(() => reviewRender(id, "reset"))} className="underline underline-offset-2">
+              Unpublish
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              disabled={pending}
+              onClick={() => run(() => reviewRender(id, "approve"))}
+              className="rounded bg-emerald-500 px-2.5 py-1 font-medium text-black disabled:opacity-50"
+            >
+              {pending ? "Working…" : hasSeoText ? "Approve & publish" : "Write SEO text & publish"}
+            </button>
+            <button
+              disabled={pending}
+              onClick={() => run(() => reviewRender(id, "reject"))}
+              className="rounded border border-red-400/60 px-2.5 py-1 text-red-300 disabled:opacity-50"
+            >
+              Reject
+            </button>
+            {!hasSeoText && (
+              <button disabled={pending} onClick={() => run(() => writeRenderSeoText(id))} className="underline underline-offset-2">
+                Write SEO text only
+              </button>
+            )}
+          </>
+        )}
+      </div>
+      {note && <p className={note.ok ? "text-emerald-300" : "text-red-300"}>{note.text}</p>}
+    </div>
+  )
+}
+
+export function WriteAllSeoButton({ missing }: { missing: number }) {
+  const router = useRouter()
+  const [pending, startTransition] = useTransition()
+  const [result, setResult] = useState<string | null>(null)
+  if (missing === 0 && !result) return null
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <Button
+        variant="outline"
+        disabled={pending}
+        onClick={() =>
+          startTransition(async () => {
+            const res = await writeAllRenderSeoText()
+            setResult(res.ok ? res.message : res.error)
+            router.refresh()
+          })
+        }
+      >
+        {pending ? "Writing SEO text (up to 3 min)…" : `Write SEO text for all (${missing})`}
       </Button>
       {result && <p className="text-sm text-muted-foreground">{result}</p>}
     </div>

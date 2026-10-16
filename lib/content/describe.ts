@@ -58,9 +58,9 @@ export async function describeRender(input: {
   conceptLabel: string
   region: string | null
   fromPhoto: boolean
-}): Promise<RenderDescription | null> {
+}): Promise<{ data: RenderDescription | null; error?: string }> {
   const apiKey = process.env.OPENROUTER_API_KEY
-  if (!apiKey) return null
+  if (!apiKey) return { data: null, error: "OPENROUTER_API_KEY is not set" }
   try {
     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -84,7 +84,10 @@ export async function describeRender(input: {
         temperature: 0.2,
       }),
     })
-    if (!res.ok) return null
+    if (!res.ok) {
+      const body = await res.text().catch(() => "")
+      return { data: null, error: `OpenRouter ${res.status}: ${body.slice(0, 160)}` }
+    }
     const json = (await res.json()) as { choices?: { message?: { content?: unknown } }[] }
     const content = json.choices?.[0]?.message?.content
     const text = typeof content === "string"
@@ -92,9 +95,10 @@ export async function describeRender(input: {
       : Array.isArray(content)
         ? content.map((p: { text?: string }) => p?.text ?? "").join("")
         : ""
-    return parseDescription(text)
-  } catch {
-    return null
+    const parsed = parseDescription(text)
+    return parsed ? { data: parsed } : { data: null, error: `Could not read the model's reply: ${text.slice(0, 120)}` }
+  } catch (e) {
+    return { data: null, error: e instanceof Error ? e.message : "request failed" }
   }
 }
 
