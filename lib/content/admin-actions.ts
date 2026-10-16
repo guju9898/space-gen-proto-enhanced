@@ -3,7 +3,14 @@
 import { revalidatePath } from "next/cache"
 import { requireHumanPolishAdmin } from "@/lib/human-polish/admin-auth"
 import { SCENES, type Scene } from "@/lib/content/concepts"
-import { CONTENT_SOURCES_BUCKET, describeOne, describePending, runContentRenders, type RunSummary } from "@/lib/content/run"
+import {
+  CONTENT_SOURCES_BUCKET,
+  describeOne,
+  describePending,
+  runContentRenders,
+  type DescribeJob,
+  type RunSummary,
+} from "@/lib/content/run"
 import { publicSlugFor } from "@/lib/content/describe"
 
 const ALLOWED_TYPES: Record<string, string> = {
@@ -131,7 +138,7 @@ export async function reviewRender(id: string, decision: "approve" | "reject" | 
 
   const { data: job } = await auth.supabase
     .from("content_render_jobs")
-    .select("id, slug, title, status, description, public_slug, result_url, concept_key, region, source_id")
+    .select("id, slug, title, status, description, public_slug, result_url, concept_key, region, source_id, details")
     .eq("id", id)
     .maybeSingle()
   if (!job || job.status !== "done" || !job.result_url) return { ok: false, error: "This render isn't finished." }
@@ -155,6 +162,7 @@ export async function reviewRender(id: string, decision: "approve" | "reject" | 
       concept_key: job.concept_key,
       region: job.region,
       source_id: job.source_id,
+      details: job.details,
     })
     if (!r.ok) return { ok: false, error: `Couldn't write the SEO text: ${r.error ?? "unknown error"}` }
     const { data: fresh } = await auth.supabase.from("content_render_jobs").select("title").eq("id", id).maybeSingle()
@@ -179,11 +187,11 @@ export async function writeRenderSeoText(id: string): Promise<ActionResult> {
   if (!ID_RE.test(id)) return { ok: false, error: "Invalid render." }
   const { data: job } = await auth.supabase
     .from("content_render_jobs")
-    .select("id, result_url, concept_key, region, source_id, status")
+    .select("id, result_url, concept_key, region, source_id, status, details")
     .eq("id", id)
     .maybeSingle()
   if (!job || job.status !== "done" || !job.result_url) return { ok: false, error: "This render isn't finished." }
-  const r = await describeOne(auth.supabase, job as { id: string; result_url: string; concept_key: string | null; region: string | null; source_id: string | null })
+  const r = await describeOne(auth.supabase, job as DescribeJob)
   revalidatePath("/admin/content")
   return r.ok ? { ok: true, message: "SEO text written" } : { ok: false, error: r.error ?? "Couldn't write the SEO text." }
 }

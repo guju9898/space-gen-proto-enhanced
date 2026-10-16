@@ -17,6 +17,8 @@ import {
   chicagoDate,
   isAllowedStockUrl,
   planJobs,
+  sanitizeExtraDetails,
+  type DetailPick,
   type Scene,
   type SourceForPlan,
 } from "@/lib/content/concepts"
@@ -135,7 +137,7 @@ export async function ensureTodayPlan(
   // Editor bot's guidance (optional): concept keys to boost or avoid.
   const { data: guide } = await supabase
     .from("content_render_guidance")
-    .select("boost_keys, avoid_keys, photo_share")
+    .select("boost_keys, avoid_keys, photo_share, prefer_details, avoid_details, extra_details, compare_pairs")
     .eq("id", 1)
     .maybeSingle()
 
@@ -147,6 +149,10 @@ export async function ensureTodayPlan(
     boostKeys: (guide?.boost_keys as string[] | null) ?? [],
     avoidKeys: (guide?.avoid_keys as string[] | null) ?? [],
     photoShare: typeof guide?.photo_share === "number" ? guide.photo_share : undefined,
+    preferDetails: (guide?.prefer_details as string[] | null) ?? [],
+    avoidDetails: (guide?.avoid_details as string[] | null) ?? [],
+    extraDetails: sanitizeExtraDetails(guide?.extra_details),
+    comparePairs: typeof guide?.compare_pairs === "number" ? guide.compare_pairs : 2,
   })
 
   const { error } = await supabase.from("content_render_jobs").insert(
@@ -161,6 +167,8 @@ export async function ensureTodayPlan(
       caption: j.caption,
       slug: j.slug,
       region: j.region,
+      details: j.details,
+      compare_group: j.compareGroup,
       created_by: "auto",
     }))
   )
@@ -178,6 +186,7 @@ type JobRow = {
   slug: string | null
   source_id: string | null
   attempts: number
+  details?: DetailPick[] | null
 }
 
 async function runOne(supabase: SupabaseClient, job: JobRow): Promise<"done" | "failed" | "skipped"> {
@@ -244,21 +253,35 @@ async function runOne(supabase: SupabaseClient, job: JobRow): Promise<"done" | "
     concept_key: job.concept_key,
     region: job.region,
     source_id: job.source_id,
+    details: job.details,
   })
   return "done"
 }
 
 /** Vision quality check + SEO title/alt/description. Never blocks a render. */
+export type DescribeJob = {
+  id: string
+  result_url: string
+  concept_key: string | null
+  region: string | null
+  source_id: string | null
+  details?: DetailPick[] | null
+}
+
 export async function describeOne(
   supabase: SupabaseClient,
-  job: { id: string; result_url: string; concept_key: string | null; region: string | null; source_id: string | null }
+  job: DescribeJob
 ): Promise<{ ok: boolean; error?: string }> {
   const concept = CONCEPTS.find((c) => c.key === job.concept_key)
+  const requested = Array.isArray(job.details)
+    ? job.details.filter((x) => x && x.slot !== "lighting" && typeof x.text === "string").map((x) => x.text)
+    : []
   const { data: d, error } = await describeRender({
     imageUrl: job.result_url,
     conceptLabel: concept?.label ?? "outdoor living concept",
     region: job.region,
     fromPhoto: Boolean(job.source_id),
+    requested,
   })
   if (!d) return { ok: false, error }
   await supabase
@@ -284,7 +307,7 @@ export async function describePending(
   // Rejected renders don't need SEO text.
   const { data } = await supabase
     .from("content_render_jobs")
-    .select("id, result_url, concept_key, region, source_id")
+    .select("id, result_url, concept_key, region, source_id, details")
     .eq("status", "done")
     .neq("review_status", "rejected")
     .is("described_at", null)
@@ -294,7 +317,7 @@ export async function describePending(
   let n = 0
   for (const row of data ?? []) {
     if (Date.now() > options.deadlineMs) break
-    const r = await describeOne(supabase, row as { id: string; result_url: string; concept_key: string | null; region: string | null; source_id: string | null })
+    const r = await describeOne(supabase, row as DescribeJob)
     if (r.ok) n++
   }
   return n
@@ -306,7 +329,7 @@ export async function runQueuedJobs(
 ): Promise<{ rendered: number; failed: number; stillQueued: number; error?: string }> {
   const { data, error } = await supabase
     .from("content_render_jobs")
-    .select("id, batch_date, concept_key, region, render_type, prompt, slug, source_id, attempts")
+    .select("id, batch_date, concept_key, region, render_type, prompt, slug, source_id, attempts, details")
     .eq("status", "queued")
     .lte("batch_date", options.date)
     .lt("attempts", 3)
