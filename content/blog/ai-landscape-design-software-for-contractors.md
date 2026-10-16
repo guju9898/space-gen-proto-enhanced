@@ -24,7 +24,7 @@ You are a contractor, not a hobbyist. You do not have time to test six apps to l
 
 ## What AI landscape software does well
 
-**Concept speed from real photos.** The core value is unglamorous and extremely practical. You photograph an actual job site — not a stock image — and get a photorealistic concept of what that specific space could look like. Paver patio, fire pit, layered planting, outdoor structure — whatever direction the conversation is already heading. Renderspace generates concepts in seconds; full-resolution output is typically available [in minutes](/faq).
+**Concept speed from real photos.** The core value is unglamorous and extremely practical. You photograph an actual job site — not a stock image — and get a photorealistic concept of what that specific space could look like. Paver patio, fire pit, layered planting, outdoor structure — whatever direction the conversation is already heading. You can see real examples in the [Renderspace gallery](/gallery). Renderspace generates concepts in seconds; full-resolution output is typically available [in minutes](/faq).
 
 **On-site decision support.** Homeowners struggle to imagine transformation from a verbal description. They react well to something they can see. Software in this category earns its keep when it is fast enough to use *while you are still standing in the yard* with the client — which is the workflow described in [How Landscape Contractors Show Clients a Design Before Construction](/blog/show-landscape-clients-design-before-construction).
 
