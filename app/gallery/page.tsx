@@ -34,7 +34,7 @@ export default async function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <Image
               src="/gallery/replace-1.jpg"
-              alt="Living room before redesign"
+              alt="Concept rendering of a modern limestone house with olive trees, terracotta urns and a gravel front courtyard"
               width={600}
               height={400}
               className="w-full aspect-[4/3] object-cover"
@@ -43,7 +43,7 @@ export default async function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <Image
               src="/gallery/replace-2.jpg"
-              alt="Living room after redesign"
+              alt="Night concept rendering of a symmetrical brick house entry with lit lanterns, clay pots and a flagstone walk"
               width={600}
               height={400}
               className="w-full aspect-[4/3] object-cover"
@@ -54,7 +54,7 @@ export default async function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <Image
               src="/gallery/replace-3.jpg"
-              alt="House exterior before redesign"
+              alt="Concept rendering of a modern infill townhouse with stone and wood cladding between city high-rises"
               width={600}
               height={400}
               className="w-full aspect-[4/3] object-cover"
@@ -63,7 +63,7 @@ export default async function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <Image
               src="/gallery/replace-4.jpg"
-              alt="House exterior after redesign"
+              alt="Concept rendering of a three-story corner house with wood and concrete panel cladding and street planting"
               width={600}
               height={400}
               className="w-full aspect-[4/3] object-cover"
@@ -74,7 +74,7 @@ export default async function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <Image
               src="/gallery/replace-5.jpg"
-              alt="Patio before redesign"
+              alt="Interior concept rendering of an open-plan living room with a gray sectional, oak staircase and modern kitchen"
               width={600}
               height={400}
               className="w-full aspect-[4/3] object-cover"
@@ -83,7 +83,7 @@ export default async function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <Image
               src="/gallery/replace-6.jpg"
-              alt="Patio after redesign"
+              alt="Concept rendering of a single-story limestone house with a wood front door and a gravel forecourt"
               width={600}
               height={400}
               className="w-full aspect-[4/3] object-cover"
@@ -94,7 +94,7 @@ export default async function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <Image
               src="/gallery/replace-7.jpg"
-              alt="Office before redesign"
+              alt="Garden concept rendering with a tiered stone fountain, stepping-stone paths, dense planting and a hammock deck"
               width={600}
               height={400}
               className="w-full aspect-[4/3] object-cover"
@@ -103,7 +103,7 @@ export default async function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <Image
               src="/gallery/replace-8.jpg"
-              alt="Office after redesign"
+              alt="Backyard concept rendering with a wood deck, pergola, hammock, raised planters and white flowering beds"
               width={600}
               height={400}
               className="w-full aspect-[4/3] object-cover"
@@ -114,7 +114,7 @@ export default async function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <Image
               src="/gallery/replace-9.jpg"
-              alt="Kitchen before redesign"
+              alt="Concept rendering of a modern limestone house with olive trees, terracotta urns and a gravel front courtyard"
               width={600}
               height={400}
               className="w-full aspect-[4/3] object-cover"
@@ -123,7 +123,7 @@ export default async function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <Image
               src="/gallery/replace-10.jpg"
-              alt="Kitchen after redesign"
+              alt="Night concept rendering of a symmetrical brick house entry with lit lanterns, clay pots and a flagstone walk"
               width={600}
               height={400}
               className="w-full aspect-[4/3] object-cover"
@@ -134,7 +134,7 @@ export default async function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <Image
               src="/gallery/replace-11.jpg"
-              alt="Bedroom before redesign"
+              alt="Concept rendering of a modern infill townhouse with stone and wood cladding between city high-rises"
               width={600}
               height={400}
               className="w-full aspect-[4/3] object-cover"
@@ -143,7 +143,7 @@ export default async function GalleryPage() {
           <div className="relative rounded-xl overflow-hidden">
             <Image
               src="/gallery/replace-12.jpg"
-              alt="Bedroom after redesign"
+              alt="Interior concept rendering of an open-plan living room with a gray sectional, oak staircase and modern kitchen"
               width={600}
               height={400}
               className="w-full aspect-[4/3] object-cover"
@@ -209,7 +209,7 @@ export default async function GalleryPage() {
           <div className="md:w-1/2">
             <Image
               src="/gallery/replace-13.jpg"
-              alt="Modern living room design"
+              alt="Concept rendering of a single-story limestone house with a wood front door and a gravel forecourt"
               width={500}
               height={300}
               className="w-full rounded-lg"

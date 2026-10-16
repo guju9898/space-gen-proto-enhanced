@@ -9,7 +9,7 @@ datePublished: 2026-08-11
 dateModified: 2026-08-11
 author: Renderspace
 featuredImage: /landing/renders/landscape-hero-01.png
-featuredImageAlt: Landscape concept visualization for contractor sales presentations
+featuredImageAlt: Landscape concept rendering of a modern black A-frame home with a curving flagstone path and native planting
 primaryIntent: Evaluate outsourced visualization options for landscape contractors
 ctaType: human-polish
 relatedSlugs:

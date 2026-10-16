@@ -9,7 +9,7 @@ datePublished: 2026-08-11
 dateModified: 2026-08-11
 author: Renderspace
 featuredImage: /landing/renders/studio-ui.png
-featuredImageAlt: Contractor reviewing concept mood boards in Renderspace
+featuredImageAlt: Renderspace studio screen with exterior style settings and a finished render of a courtyard pool
 primaryIntent: Compare freelance rendering workflows with Renderspace self-serve and Human Polish options
 ctaType: human-polish
 relatedSlugs:

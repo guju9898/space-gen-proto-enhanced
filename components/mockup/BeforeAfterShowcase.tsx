@@ -41,7 +41,7 @@ export function BeforeAfterShowcase() {
         <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg">
           <Image
             src={BEFORE_SRC}
-            alt="Job site photo"
+            alt="Job-site photo of a plain backyard lawn behind a single-story brick home"
             fill
             className="object-cover"
             sizes="(min-width: 768px) 50vw, 100vw"
@@ -62,7 +62,7 @@ export function BeforeAfterShowcase() {
           <div className="absolute inset-0">
             <Image
               src={BEFORE_SRC}
-              alt="Before"
+              alt="Before: plain backyard lawn behind a single-story brick home"
               fill
               className="object-cover"
               sizes="(min-width: 768px) 50vw, 100vw"
@@ -74,7 +74,7 @@ export function BeforeAfterShowcase() {
           >
             <Image
               src={AFTER_SRC}
-              alt="Generated render"
+              alt="After: concept of the same backyard with a pool, paver patio, planting beds and lounge seating"
               fill
               className="object-cover"
               sizes="(min-width: 768px) 50vw, 100vw"

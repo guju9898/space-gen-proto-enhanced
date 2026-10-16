@@ -9,7 +9,7 @@ datePublished: 2026-08-11
 dateModified: 2026-08-11
 author: Renderspace
 featuredImage: /images/contractor-demo/front-yard-after-fountain-plum-tree.png
-featuredImageAlt: Landscape presentation concept suitable for design-review discussion
+featuredImageAlt: Front yard concept with a tiered fountain, flowering plum trees, paver walk and seating at a white farmhouse
 primaryIntent: Plan an HOA landscape presentation package for design review
 ctaType: build-ready
 relatedSlugs:

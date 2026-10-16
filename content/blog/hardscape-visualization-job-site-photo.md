@@ -9,7 +9,7 @@ datePublished: 2026-08-11
 dateModified: 2026-08-11
 author: Renderspace
 featuredImage: /images/contractor-demo/patio-pergola-after-rustic-backyard.png
-featuredImageAlt: Hardscape patio concept visualization generated from a job-site photo
+featuredImageAlt: Dusk backyard concept with a covered patio, string lights, dining set, TV wall and a gravel cornhole area
 primaryIntent: Show hardscape contractors how to visualize patios, walls, and outdoor structures from job-site photos
 ctaType: self-serve
 relatedSlugs:
