@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createClient } from "@/lib/supabase/client"
+import { getAuthCallbackUrl } from "@/lib/auth/callback-url"
 import { useAuth } from "./AuthContext"
 import { Mail, X } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -110,17 +111,12 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
         (secure ? "; Secure" : "")
     }
 
-    const origin =
-      typeof window !== "undefined"
-        ? window.location.origin
-        : ""
-
     try {
       const supabase = createClient()
       const { error: signInError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${origin}/auth/callback`,
+          redirectTo: getAuthCallbackUrl(),
         },
       })
 
