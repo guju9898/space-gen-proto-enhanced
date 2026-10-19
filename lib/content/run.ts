@@ -105,6 +105,41 @@ export async function ingestStockSources(
   return { ingested, failed, errors }
 }
 
+type Guidance = {
+  boost_keys?: string[] | null
+  avoid_keys?: string[] | null
+  photo_share?: number | null
+  prefer_details?: string[] | null
+  avoid_details?: string[] | null
+  extra_details?: unknown
+  compare_pairs?: number | null
+}
+
+const GUIDANCE_COLUMNS = "boost_keys, avoid_keys, photo_share, prefer_details, avoid_details, extra_details, compare_pairs"
+
+/**
+ * The editor bot appends guidance to content_render_guidance_history (INSERT
+ * only). A hand edit of content_render_guidance (id = 1) still wins when it
+ * is newer than the latest history row.
+ */
+export async function loadGuidance(supabase: SupabaseClient): Promise<Guidance | null> {
+  const [{ data: hist }, { data: row }] = await Promise.all([
+    supabase
+      .from("content_render_guidance_history")
+      .select(`${GUIDANCE_COLUMNS}, created_at`)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase.from("content_render_guidance").select(`${GUIDANCE_COLUMNS}, updated_at`).eq("id", 1).maybeSingle(),
+  ])
+  if (!hist) return (row as Guidance | null) ?? null
+  if (!row) return hist as Guidance
+  const histAt = Date.parse(String((hist as { created_at?: string }).created_at ?? ""))
+  const rowAt = Date.parse(String((row as { updated_at?: string }).updated_at ?? ""))
+  return (rowAt > histAt ? row : hist) as Guidance
+}
+
 export async function ensureTodayPlan(
   supabase: SupabaseClient,
   date: string,
@@ -134,12 +169,7 @@ export async function ensureTodayPlan(
     timesUsed: Number(r.times_used ?? 0),
   }))
 
-  // Editor bot's guidance (optional): concept keys to boost or avoid.
-  const { data: guide } = await supabase
-    .from("content_render_guidance")
-    .select("boost_keys, avoid_keys, photo_share, prefer_details, avoid_details, extra_details, compare_pairs")
-    .eq("id", 1)
-    .maybeSingle()
+  const guide = await loadGuidance(supabase)
 
   const jobs = planJobs({
     date,
@@ -152,7 +182,8 @@ export async function ensureTodayPlan(
     preferDetails: (guide?.prefer_details as string[] | null) ?? [],
     avoidDetails: (guide?.avoid_details as string[] | null) ?? [],
     extraDetails: sanitizeExtraDetails(guide?.extra_details),
-    comparePairs: typeof guide?.compare_pairs === "number" ? guide.compare_pairs : 2,
+    // Compare pairs belong to the morning batch, not to top-ups.
+    comparePairs: existing > 0 ? 0 : typeof guide?.compare_pairs === "number" ? guide.compare_pairs : 2,
   })
 
   const { error } = await supabase.from("content_render_jobs").insert(
@@ -399,6 +430,53 @@ export async function runContentRenders(
     ingested: ingest.ingested,
     ingestFailed: ingest.failed,
     planned: plan.planned,
+    described,
+    rendered: run.rendered,
+    failed: run.failed,
+    stillQueued: run.stillQueued,
+    errors: errors.slice(0, 10),
+  }
+}
+
+/**
+ * "Make more renders now" from /admin/content: retry today's failed renders
+ * and add `extra` new ones on top of whatever today's batch already has.
+ */
+export async function runExtraRenders(
+  supabase: SupabaseClient,
+  extra: number,
+  budgetMs = 200_000
+): Promise<RunSummary> {
+  const started = Date.now()
+  const date = chicagoDate()
+  const errors: string[] = []
+
+  // Give today's failed renders another try (max 3 attempts each).
+  const { data: retried } = await supabase
+    .from("content_render_jobs")
+    .update({ status: "queued", error: null })
+    .eq("batch_date", date)
+    .eq("status", "failed")
+    .lt("attempts", 3)
+    .select("id")
+
+  const { count } = await supabase
+    .from("content_render_jobs")
+    .select("id", { count: "exact", head: true })
+    .eq("batch_date", date)
+  const add = Math.max(0, Math.min(Math.floor(extra), 12))
+  const plan = add > 0 ? await ensureTodayPlan(supabase, date, (count ?? 0) + add) : { planned: 0 }
+  if (plan.error) errors.push(plan.error)
+
+  const run = await runQueuedJobs(supabase, { date, deadlineMs: started + budgetMs })
+  if (run.error) errors.push(run.error)
+  const described = await describePending(supabase, { deadlineMs: started + budgetMs + 30_000 })
+
+  return {
+    date,
+    ingested: 0,
+    ingestFailed: 0,
+    planned: plan.planned + (retried?.length ?? 0),
     described,
     rendered: run.rendered,
     failed: run.failed,
