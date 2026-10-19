@@ -25,7 +25,7 @@ export default async function GalleryPage() {
 
       {/* Gallery Hero */}
       <section className="container mx-auto px-4 py-12 md:py-16">
-        <h1 className="text-4xl md:text-5xl font-bold mb-2 text-white text-center">Explore designs from the Renderspace community</h1>
+        <h1 className="text-4xl md:text-5xl font-bold mb-2 text-white text-center">Before-and-After AI Renderings Made in Renderspace</h1>
         <p className="text-muted-foreground text-center mb-12">Every concept below is a real Renderspace output. Source photos are labeled.</p>
 
         {/* Gallery Grid */}
