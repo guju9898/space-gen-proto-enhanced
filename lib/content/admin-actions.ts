@@ -8,6 +8,7 @@ import {
   describeOne,
   describePending,
   runContentRenders,
+  runExtraRenders,
   type DescribeJob,
   type RunSummary,
 } from "@/lib/content/run"
@@ -85,10 +86,16 @@ export async function setContentSourceStatus(formData: FormData): Promise<void> 
   revalidatePath("/admin/content")
 }
 
-export async function runContentRendersNow(): Promise<{ ok: true; summary: RunSummary } | Fail> {
+/**
+ * "Run renders now". With extra = 0 it finishes today's normal batch (same as
+ * the morning cron). With extra > 0 it also retries today's failed renders and
+ * adds that many new ones, even when the morning batch is already complete.
+ */
+export async function runContentRendersNow(extra = 0): Promise<{ ok: true; summary: RunSummary } | Fail> {
   const auth = await requireHumanPolishAdmin()
   if (!auth.ok) return { ok: false, error: auth.error }
-  const summary = await runContentRenders(auth.supabase, 200_000)
+  const n = Number.isFinite(extra) ? Math.max(0, Math.min(Math.floor(extra), 12)) : 0
+  const summary = n > 0 ? await runExtraRenders(auth.supabase, n, 200_000) : await runContentRenders(auth.supabase, 200_000)
   revalidatePath("/admin/content")
   return { ok: true, summary }
 }
