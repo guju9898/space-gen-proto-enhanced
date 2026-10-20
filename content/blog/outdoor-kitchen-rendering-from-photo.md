@@ -23,6 +23,8 @@ Outdoor kitchens are one of the harder sells in outdoor living — not always be
 
 The obstacle is usually picturing, not pricing.
 
+**Short answer:** Take a phone photo of the patio, upload it to Renderspace, choose an outdoor kitchen direction, and you get a photorealistic concept on that real patio in about 30 seconds. Gas, electrical and code work still go to licensed professionals.
+
 ## Why outdoor kitchens stall at "just a grill"
 
 When clients cannot visualize a full outdoor kitchen, they often shrink scope mid-conversation — not because they rejected the idea, but because "just a basic grill station" is the only version they can assemble mentally.

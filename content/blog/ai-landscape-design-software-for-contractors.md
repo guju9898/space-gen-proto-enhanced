@@ -9,7 +9,7 @@ datePublished: 2026-08-11
 dateModified: 2026-08-11
 author: Renderspace
 featuredImage: /landing/renders/studio-ui.png
-featuredImageAlt: Renderspace studio interface for contractor concept generation
+featuredImageAlt: "Renderspace studio screen with exterior settings and a finished concept of a limestone house with a courtyard pool"
 primaryIntent: Evaluate AI landscape design software honestly for contractor workflows
 ctaType: self-serve
 relatedSlugs:
@@ -21,6 +21,8 @@ relatedSlugs:
 You have probably seen ads for "AI landscape design" software — upload a photo, get a finished yard, close the deal before you leave the driveway. Some of that is directionally true. Some of it is marketing compressing a narrower product into a bigger promise.
 
 You are a contractor, not a hobbyist. You do not have time to test six apps to learn which claims hold up. This article is a straight evaluation framework: what the category is genuinely good at, what it is not, and how to tell the difference before you commit.
+
+**Short answer:** AI landscape design software turns a photo of a real yard into a photorealistic concept in seconds, which makes it useful for showing a client a direction during the estimate. It does not replace site measurements, engineering or permit drawings.
 
 ## What AI landscape software does well
 

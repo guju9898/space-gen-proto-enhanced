@@ -21,6 +21,8 @@ Contractors who need client-ready visuals usually land in one of three workflows
 
 This article compares the paths neutrally — without invented marketplace prices, delivery guarantees, or the idea that every contractor should abandon freelancers overnight.
 
+**Short answer:** If you need a concept during the estimate, a self-serve tool like Renderspace gives you one from a job-site photo in about 30 seconds. If you want people to produce the set for you, a freelancer or Human Polish fits better.
+
 ## Path 1: Freelance rendering handoff
 
 **How it works:** You brief a freelancer with photos and written direction. They produce renders asynchronously. Revisions go back and forth until the output matches what you need — or close enough to use.
