@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site/SiteHeader"
 import { ChevronRight } from "lucide-react"
 import { SiteFooter } from "@/components/site/SiteFooter"
 import { listPublishedRenders } from "@/lib/content/gallery"
+import { GalleryDiscovery } from "@/components/gallery/GalleryDiscovery"
 
 // New renders are published from the admin page; refresh the list hourly.
 export const revalidate = 3600
@@ -113,41 +114,7 @@ export default async function GalleryPage() {
 
       </section>
 
-      {fresh.length > 0 && (
-        <section className="container mx-auto px-4 py-12" aria-labelledby="fresh-concepts">
-          <h2 id="fresh-concepts" className="text-2xl md:text-3xl font-bold mb-2 text-white text-center">
-            Fresh concepts from Renderspace
-          </h2>
-          <p className="text-muted-foreground text-center mb-10 max-w-2xl mx-auto">
-            Pool, patio, outdoor kitchen, landscape and exterior ideas made with Renderspace. Open any design to see the
-            source photo, the materials and how the space would work.
-          </p>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {fresh.map((r) => (
-              <li key={r.id}>
-                <Link href={`/gallery/${r.slug}`} className="group block rounded-xl overflow-hidden border border-[#343434] bg-[#101010]">
-                  <div className="relative aspect-[4/3]">
-                    <Image
-                      src={r.imageUrl}
-                      alt={r.altText}
-                      fill
-                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                      className="object-cover transition-transform group-hover:scale-[1.02]"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-white font-semibold">{r.title}</h3>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {r.before ? (r.before.kind === "own" ? "From a job-site photo" : "From a stock photo") : "Concept from a text brief"}
-                      {r.region ? ` · ${r.region}` : ""}
-                    </p>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <GalleryDiscovery renders={fresh} />
 
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-16">

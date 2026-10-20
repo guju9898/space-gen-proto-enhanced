@@ -55,6 +55,9 @@ import { VariableSelect } from "@/components/ui/VariableSelect"
 import { buildPrompt } from "@/lib/api/generateImage"
 import { cn } from "@/lib/utils"
 import { interiorDefaults } from "@/lib/studio/defaults"
+import { GalleryPresetBanner } from "@/components/gallery/GalleryPresetBanner"
+import { useGalleryPreset } from "@/components/gallery/useGalleryPreset"
+import { trackPresetRenderCompleted } from "@/components/gallery/analytics"
 import { getCreditErrorMessage } from "@/lib/usage/errorMessages"
 import { useAuth } from "@/components/auth/AuthContext"
 import { usePathname, useSearchParams } from "next/navigation"
@@ -127,6 +130,8 @@ export default function InteriorStudioPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const galleryPreset = useGalleryPreset("interior")
 
   useEffect(() => {
     if (!demoMode || typeof sessionStorage === "undefined") return
@@ -301,6 +306,7 @@ export default function InteriorStudioPage() {
       if (generatedImageUrl) {
         setCurrentRender(generatedImageUrl)
         setLatestRenders(prev => [generatedImageUrl, ...prev].slice(0, 4))
+        trackPresetRenderCompleted()
       } else {
         console.error("Failed to generate image: No URL returned from API")
       }
@@ -328,6 +334,12 @@ export default function InteriorStudioPage() {
   const formContent = (
     <FormPanel>
       <div className="space-y-10">
+        <GalleryPresetBanner
+          category="interior"
+          state={galleryPreset}
+          hasPhoto={Boolean(imageState?.previewUrl || imageState?.uploadedUrl)}
+          brief={config.presetBrief ?? ""}
+        />
         {error && (
           <div className="bg-destructive/10 text-destructive px-4 py-2 rounded-md text-sm">
             {error}

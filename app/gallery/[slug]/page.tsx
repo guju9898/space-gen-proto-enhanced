@@ -7,6 +7,8 @@ import { SiteHeader } from "@/components/site/SiteHeader"
 import { SiteFooter } from "@/components/site/SiteFooter"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { getPublishedRender } from "@/lib/content/gallery"
+import { PresetStudioButton } from "@/components/gallery/PresetStudioButton"
+import { presetForPublishedRender } from "@/lib/gallery/presets"
 import { pageMetadata } from "@/lib/seo/metadata"
 import { ORG_ID } from "@/lib/seo/schema"
 import { PLANS, SITE, usd } from "@/lib/seo/facts"
@@ -40,6 +42,18 @@ export default async function GalleryRenderPage({ params }: { params: Params }) 
   const { slug } = await params
   const render = await getPublishedRender(slug)
   if (!render) notFound()
+
+  const preset = presetForPublishedRender({
+    slug: render.slug,
+    title: render.title,
+    description: render.description,
+    region: render.region,
+    tags: render.tags,
+    publishedAt: render.publishedAt,
+    conceptKey: render.conceptKey,
+    renderType: render.renderType,
+    details: render.details,
+  })
 
   const url = `${SITE.url}/gallery/${render.slug}`
   const jsonLd = {
@@ -131,6 +145,11 @@ export default async function GalleryRenderPage({ params }: { params: Params }) 
           </div>
           <aside className="rounded-xl border border-[#343434] bg-[#191f33]/50 p-5">
             <h2 className="text-lg font-semibold text-white mb-2">See this on your own job</h2>
+            {preset && (
+              <div className="mb-4">
+                <PresetStudioButton preset={preset} />
+              </div>
+            )}
             <p className="text-sm text-muted-foreground mb-4">
               Snap a photo of your client&apos;s space and get concepts like this in about 30 seconds, before you quote.
             </p>

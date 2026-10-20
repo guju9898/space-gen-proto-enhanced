@@ -6,6 +6,7 @@ import {
   HOME_EXPERIMENT_MAX_AGE_SEC,
   decideHomeExperiment,
 } from "@/components/conversion/group-1/experiment"
+import { GALLERY_PRESET_COOKIE, isPresetSlug } from "@/lib/gallery/presets"
 
 const CANONICAL_HOST = "www.renderspace.ai"
 const DEMO_MODE_COOKIE = "renderspace_demo_mode"
@@ -49,6 +50,15 @@ export function middleware(request: NextRequest) {
       res.cookies.set(DEMO_MODE_COOKIE, "1", { path: "/", maxAge: 60 * 60 })
     } else {
       res.cookies.delete(DEMO_MODE_COOKIE)
+    }
+    const preset = request.nextUrl.searchParams.get("preset")
+    if (isPresetSlug(preset)) {
+      res.cookies.set(GALLERY_PRESET_COOKIE, preset, {
+        path: "/",
+        maxAge: 60 * 60,
+        sameSite: "lax",
+        secure: request.nextUrl.protocol === "https:",
+      })
     }
   }
 

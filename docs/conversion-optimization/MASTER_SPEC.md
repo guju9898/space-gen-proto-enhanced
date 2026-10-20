@@ -196,6 +196,7 @@ Existing helpers (do not break):
 | `trackContractorDemoEvent` | `components/contractor-demo/analytics.ts` | free-form name; params are strings/numbers/booleans |
 | `trackHumanPolishEvent` | `components/human-polish/analytics.ts` | typed map (`viewed_human_polish`, `initiated_checkout`, `completed_checkout`, …). Sanitizer: `lib/human-polish/analytics-params.ts` |
 | `trackHomepageEvent` | `components/conversion/group-1/analytics.ts` | `homepage_viewed`, `hero_cta_clicked`, `guest_studio_started`, `first_render_completed`. Params: `variant` (`a`\|`b`), optional `destination`, optional `render_type`. |
+| `trackGalleryEvent` | `components/gallery/analytics.ts` | `gallery_viewed`, `gallery_filter_applied`, `preset_opened`, `preset_studio_cta_clicked`, `preset_loaded`, `preset_render_completed`. Params: `preset_id`, `category`, `status`, `filter`, `has_query`, `destination`. Search text is not sent. |
 
 Rules for new events:
 
@@ -214,7 +215,7 @@ Groups 1 and 7 are not given a product surface in the Group 0 brief. They may on
 | Group | Owns (create or extend) | Must not change |
 | --- | --- | --- |
 | **1** | Homepage composition (`app/page.tsx`) and `components/conversion/group-1/**`. Guest Studio entry stays `/studio/exterior?demo=true`. | Stripe, gallery presets, generation APIs, Human Polish logic, contractor-demo pricing, affiliates. Do not change Studio auth. |
-| **2** Gallery presets | Future `lib/gallery/presets.ts` (schema + typed presets) and gallery presentation that reads it. Public gallery today: `app/gallery/page.tsx`, `app/gallery/[slug]/page.tsx`, `lib/content/gallery.ts`. | Content cron `app/api/cron/content-renders`, `lib/content/run.ts`, Stripe |
+| **2** Gallery presets | `lib/gallery/presets.ts` (schema + typed presets) and gallery presentation that reads it. Public gallery: `app/gallery/page.tsx`, `app/gallery/[slug]/page.tsx`, `app/gallery/looks/[slug]/page.tsx`, `lib/content/gallery.ts`. Bot contract: `docs/conversion-optimization/GALLERY_PRESET_BOT.md`. | Content cron `app/api/cron/content-renders`, `lib/content/run.ts`, Stripe |
 | **3** Canonical pricing | Read and, if extending, wrap `lib/seo/facts.ts` + `lib/stripe/plans.ts`. New offer math goes in future `lib/pricing/` without new price IDs. | Env price IDs, `app/api/stripe/checkout/route.ts` price selection, Human Polish cents |
 | **4** Offer state | Future `lib/offers/` eligibility (with Group 3). UI under `components/conversion/group-4/**`. | Do not store a second price. Do not invent scarcity. |
 | **5** Premium availability | Human Polish / assisted sales already exist: `app/human-polish/**`, `app/book-demo/**`, `NEXT_PUBLIC_PREMIUM_BOOKING_URL` (`components/book-demo/BookDemoContent.tsx`). New flags, if any, in future `lib/premium/availability.ts` reading those modules. | Do not rewrite HP checkout, webhooks, or private storage. |

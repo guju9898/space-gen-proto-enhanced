@@ -36,6 +36,8 @@ export interface InteriorConfig {
   symmetryLevel?: number;
   flooring?: string;
   textures?: string;
+  /** Editable note applied from a gallery preset. Omitted when the visitor did not open a preset. */
+  presetBrief?: string;
 }
 
 export interface ExteriorConfig {
@@ -60,6 +62,8 @@ export interface ExteriorConfig {
   symmetryType?: string;
   symmetryLevel?: number;
   landscapingElements?: string;
+  /** Editable note applied from a gallery preset. Omitted when the visitor did not open a preset. */
+  presetBrief?: string;
 }
 
 export interface LandscapeConfig {
@@ -91,6 +95,8 @@ export interface LandscapeConfig {
   wildlifeElements?: string;
   hardscaping?: string;
   waterFeature?: string;
+  /** Editable note applied from a gallery preset. Omitted when the visitor did not open a preset. */
+  presetBrief?: string;
 }
 
 export interface ProductConfig {

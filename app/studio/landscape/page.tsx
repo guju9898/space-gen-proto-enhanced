@@ -28,6 +28,9 @@ import { SegmentedToggle } from "@/components/Studio/SegmentedToggle"
 import { buildGeminiPrompt } from "@/lib/api/buildGeminiPrompt"
 import { cn } from "@/lib/utils"
 import { landscapeDefaults } from "@/lib/studio/defaults"
+import { GalleryPresetBanner } from "@/components/gallery/GalleryPresetBanner"
+import { useGalleryPreset } from "@/components/gallery/useGalleryPreset"
+import { trackPresetRenderCompleted } from "@/components/gallery/analytics"
 import { isString } from "@/lib/types/typeGuards"
 import { getCreditErrorMessage } from "@/lib/usage/errorMessages"
 import { useAuth } from "@/components/auth/AuthContext"
@@ -133,6 +136,8 @@ export default function LandscapeStudioPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const galleryPreset = useGalleryPreset("landscape")
 
   useEffect(() => {
     if (!demoMode || typeof sessionStorage === "undefined") return
@@ -299,6 +304,7 @@ export default function LandscapeStudioPage() {
       if (imageUrl) {
         setCurrentRender(imageUrl)
         setLatestRenders(prev => [imageUrl, ...prev].slice(0, 4))
+        trackPresetRenderCompleted()
       } else {
         console.error('Failed to generate image: No URL returned from API')
       }
@@ -326,6 +332,12 @@ export default function LandscapeStudioPage() {
       const formContent = (
         <FormPanel>
           <div className="space-y-10">
+            <GalleryPresetBanner
+              category="landscape"
+              state={galleryPreset}
+              hasPhoto={Boolean(imageState.previewUrl || imageState.uploadedUrl)}
+              brief={landscape.presetBrief ?? ""}
+            />
             {/* Essential Controls - Always Visible */}
             <FormSection
               title="Project Basics"
@@ -991,7 +1003,8 @@ export default function LandscapeStudioPage() {
       config={landscapeConfig ?? undefined}
       onRemove={handleRemoveTag}
       onClearAll={() => {
-        updateConfig(landscapeDefaults)
+        updateConfig({ ...landscapeDefaults, presetBrief: "" })
+        galleryPreset.clear()
         setCurrentRender(null)
         setLatestRenders([])
       }}

@@ -17,11 +17,13 @@ export type GalleryRender = {
   tags: string[]
   publishedAt: string
   conceptKey: string | null
+  renderType: "interior" | "exterior" | "landscape" | null
+  details: { slot?: string; text?: string; short?: string }[]
   before: { url: string; kind: "own" | "stock"; credit: string | null } | null
 }
 
 const COLUMNS =
-  "id, public_slug, title, alt_text, caption, description, result_url, region, tags, published_at, concept_key, source:content_sources(kind, public_url, credit)"
+  "id, public_slug, title, alt_text, caption, description, result_url, region, tags, published_at, concept_key, render_type, details, source:content_sources(kind, public_url, credit)"
 
 type Row = {
   id: string
@@ -35,7 +37,27 @@ type Row = {
   tags: string[] | null
   published_at: string | null
   concept_key: string | null
+  render_type: string | null
+  details: unknown
   source: { kind: string; public_url: string | null; credit: string | null } | { kind: string; public_url: string | null; credit: string | null }[] | null
+}
+
+function asDetails(value: unknown): GalleryRender["details"] {
+  if (!Array.isArray(value)) return []
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object") return []
+    const row = item as { slot?: unknown; text?: unknown; short?: unknown }
+    return [{
+      slot: typeof row.slot === "string" ? row.slot : undefined,
+      text: typeof row.text === "string" ? row.text : undefined,
+      short: typeof row.short === "string" ? row.short : undefined,
+    }]
+  })
+}
+
+function asRenderType(value: string | null): GalleryRender["renderType"] {
+  if (value === "interior" || value === "exterior" || value === "landscape") return value
+  return null
 }
 
 function toRender(r: Row): GalleryRender | null {
@@ -53,6 +75,8 @@ function toRender(r: Row): GalleryRender | null {
     tags: r.tags ?? [],
     publishedAt: r.published_at ?? new Date().toISOString(),
     conceptKey: r.concept_key,
+    renderType: asRenderType(r.render_type),
+    details: asDetails(r.details),
     before:
       src?.public_url && (src.kind === "own" || src.kind === "stock")
         ? { url: src.public_url, kind: src.kind, credit: src.credit }

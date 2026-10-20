@@ -1,3 +1,5 @@
+import { sanitizePresetBrief } from "@/lib/gallery/preset-brief"
+
 interface GenerateImageOptions {
   prompt: string;
   initImage?: string | File | null;
@@ -137,7 +139,9 @@ export function buildPrompt(config: Record<string, any>): string {
     .join(', ');
 
   const basePrompt = "professional architectural photography, 8k uhd, highly detailed";
-  const fullPrompt = configPrompt ? `${configPrompt}, ${basePrompt}` : basePrompt;
+  const brief = sanitizePresetBrief(config.presetBrief);
+  const direction = brief ? `design direction: ${brief}` : "";
+  const fullPrompt = [configPrompt, direction, basePrompt].filter(Boolean).join(", ");
 
   // Debug: Log final prompt
   console.log('🧠 Final Prompt:', {

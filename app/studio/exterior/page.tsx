@@ -35,6 +35,9 @@ import { SegmentedToggle } from "@/components/Studio/SegmentedToggle"
 import { buildGeminiPrompt } from "@/lib/api/buildGeminiPrompt"
 import { cn } from "@/lib/utils"
 import { exteriorDefaults } from "@/lib/studio/defaults"
+import { GalleryPresetBanner } from "@/components/gallery/GalleryPresetBanner"
+import { useGalleryPreset } from "@/components/gallery/useGalleryPreset"
+import { trackPresetRenderCompleted } from "@/components/gallery/analytics"
 import { getCreditErrorMessage } from "@/lib/usage/errorMessages"
 import { useAuth } from "@/components/auth/AuthContext"
 import { usePathname, useSearchParams } from "next/navigation"
@@ -126,6 +129,8 @@ export default function ExteriorStudioPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const galleryPreset = useGalleryPreset("exterior")
 
   // Persist demo renders to sessionStorage so they survive navigation to onboarding
   useEffect(() => {
@@ -314,6 +319,7 @@ export default function ExteriorStudioPage() {
       if (imageUrl) {
         setCurrentRender(imageUrl)
         setLatestRenders(prev => [imageUrl, ...prev].slice(0, 4))
+        trackPresetRenderCompleted()
         if (demoMode) {
           void import("@/components/conversion/group-1/analytics").then(({ trackFirstDemoRender }) => {
             trackFirstDemoRender()
@@ -346,6 +352,12 @@ export default function ExteriorStudioPage() {
   const formContent = (
     <FormPanel>
       <div className="space-y-10">
+        <GalleryPresetBanner
+          category="exterior"
+          state={galleryPreset}
+          hasPhoto={Boolean(imageState.previewUrl || imageState.uploadedUrl)}
+          brief={exterior.presetBrief ?? ""}
+        />
         <FormSection
           title="Building Settings"
           icon={Building2}
@@ -908,7 +920,8 @@ export default function ExteriorStudioPage() {
       config={exteriorConfig}
       onRemove={handleRemoveTag}
       onClearAll={() => {
-        updateConfig(exteriorDefaults)
+        updateConfig({ ...exteriorDefaults, presetBrief: "" })
+        galleryPreset.clear()
         setCurrentRender(null)
         setLatestRenders([])
       }}

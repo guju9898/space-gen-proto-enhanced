@@ -1,3 +1,5 @@
+import { sanitizePresetBrief } from "@/lib/gallery/preset-brief"
+
 // Helper function to check if a value exists and is not empty
 function hasValue(value: any): boolean {
   if (value === null || value === undefined) return false
@@ -247,6 +249,11 @@ function buildExteriorPrompt(config: Record<string, any>): string {
     }
   }
   
+  const exteriorBrief = sanitizePresetBrief(config.presetBrief)
+  if (exteriorBrief) {
+    clauses.push(`Design direction: ${exteriorBrief}`)
+  }
+
   // Technical suffix
   clauses.push("Professional architectural photography, 8k uhd, highly detailed, balanced composition, defined shadows, natural lighting, visual coherence.")
   
@@ -407,6 +414,11 @@ function buildLandscapePrompt(config: Record<string, any>): string {
     }
   }
   
+  const landscapeBrief = sanitizePresetBrief(config.presetBrief)
+  if (landscapeBrief) {
+    clauses.push(`Design direction: ${landscapeBrief}`)
+  }
+
   // Technical suffix
   clauses.push("Professional landscape photography, 8k uhd, highly detailed, emphasis on usability, emotional ambiance, realism in vegetation layout and shading, visual coherence.")
   
