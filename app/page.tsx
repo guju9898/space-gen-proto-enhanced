@@ -42,7 +42,7 @@ export default async function Home() {
     cookieStore.get(HOME_EXPERIMENT_COOKIE)?.value
   )
   const paidLabel = `Try ${PLANS.starter.credits} Credits for ${usd(PLANS.starter.priceUsd)}`
-  const paidDetail = `${PLANS.starter.credits} credits, ${PLANS.starter.period}, ${usd(PLANS.starter.priceUsd)}`
+  const paidDetail = `${PLANS.starter.credits} credits each week for ${usd(PLANS.starter.priceUsd)}, billed weekly`
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -290,15 +290,15 @@ export default async function Home() {
             First Job Test
           </span>
           <p className="text-sm text-muted-foreground">
-            New here? Try Renderspace on a real job for <span className="font-semibold text-white">$19.99</span>
+            New here? Try Renderspace on a real job for <span className="font-semibold text-white">{usd(PLANS.starter.priceUsd)}</span>
           </p>
-          <p className="text-sm text-muted-foreground mt-1">40 credits • 7 days • perfect for your next estimate</p>
-          <p className="text-xs text-muted-foreground mt-2">Automatically upgrades to Professional if you decide to continue.</p>
+          <p className="text-sm text-muted-foreground mt-1">{PLANS.starter.credits} credits each week. Billed weekly until you cancel.</p>
+          <p className="text-xs text-muted-foreground mt-2">This is a recurring subscription, not a one-time purchase. Cancel in billing settings before the next week.</p>
           <Link
             href="/onboarding?plan=starter"
             className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-4 py-2 rounded-md text-sm font-medium"
           >
-            Try 40 Credits for $19.99
+            Try {PLANS.starter.credits} Credits for {usd(PLANS.starter.priceUsd)}
           </Link>
         </div>
 
@@ -331,7 +331,7 @@ export default async function Home() {
               </div>
             </div>
             <div className="mb-6">
-              <span className="text-3xl font-bold text-white">$99</span>
+              <span className="text-3xl font-bold text-white">{usd(PLANS.professional.priceUsd)}</span>
             </div>
             <ul className="space-y-2 mb-6">
               <li className="text-sm text-muted-foreground">500 generations / credits per month</li>
@@ -356,7 +356,7 @@ export default async function Home() {
               </div>
             </div>
             <div className="mb-6">
-              <span className="text-3xl font-bold text-white">$349</span>
+              <span className="text-3xl font-bold text-white">{usd(PLANS.business.priceUsd)}</span>
             </div>
             <ul className="space-y-2 mb-6">
               <li className="text-sm text-muted-foreground">6,000 generations / credits per month</li>

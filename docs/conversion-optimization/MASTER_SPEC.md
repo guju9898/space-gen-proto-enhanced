@@ -113,10 +113,10 @@ Rules:
 
 | System | Source of truth | Charged by |
 | --- | --- | --- |
-| Self-serve plans | Display: `lib/seo/facts.ts` `PLANS` (`starter` $19.99 / 40 credits / 7 days, `professional` $99 / 500, `business` $349 / 6000). Stripe IDs: `lib/stripe/plans.ts` (`intro`, `professional`, `business`). | `POST /api/stripe/checkout` |
+| Self-serve plans | Display: `lib/seo/facts.ts` `PLANS`, derived from `lib/pricing/catalog.ts` (`starter` $19.99 / 40 credits / week, `professional` $98 / 500 / month, `business` $349 / 6000 / month). Stripe IDs: `lib/stripe/plans.ts`. Annual checkout stays off until `STRIPE_PRICE_PRO_ANNUAL` and `STRIPE_PRICE_BUSINESS_ANNUAL` exist. | `POST /api/stripe/checkout` |
 | Human Polish | Integer cents in `lib/human-polish/config.ts` (`AI_RENDER_PACK_STANDARD_PRICES_CENTS`, `BUILD_READY_STANDARD_PRICES_CENTS`). Labels: `lib/human-polish/types.ts`. | `POST /api/human-polish/checkout` |
 
-Known drift (do not “fix” inside a conversion UI commit): `components/Onboarding/StepThree.tsx` and `StepFour.tsx` show Professional as **$98**, while `PLANS.professional.priceUsd` is **99**. Group 3 owns reconciliation. Until then, new UI must read `PLANS` and must not introduce a third number.
+Professional display is **$98**, the verified monthly Stripe amount. New UI reads `PLANS` or `lib/pricing/catalog.ts`. Do not introduce another Professional price. Annual amounts are not displayed until `GET /api/pricing/offers` returns a verified yearly `amountCents`.
 
 **Modals.** `components/ui/dialog.tsx` (Radix). Login: `components/auth/LoginModal.tsx` (dark `#0a0a0a` / border `#1a1a1a`). Studio checkout success: `components/Studio/CheckoutSuccessDialog.tsx`. Tips: `components/Studio/TipsModal.tsx`.
 
@@ -197,6 +197,7 @@ Existing helpers (do not break):
 | `trackHumanPolishEvent` | `components/human-polish/analytics.ts` | typed map (`viewed_human_polish`, `initiated_checkout`, `completed_checkout`, …). Sanitizer: `lib/human-polish/analytics-params.ts` |
 | `trackHomepageEvent` | `components/conversion/group-1/analytics.ts` | `homepage_viewed`, `hero_cta_clicked`, `guest_studio_started`, `first_render_completed`. Params: `variant` (`a`\|`b`), optional `destination`, optional `render_type`. |
 | `trackGalleryEvent` | `components/gallery/analytics.ts` | `gallery_viewed`, `gallery_filter_applied`, `preset_opened`, `preset_studio_cta_clicked`, `preset_loaded`, `preset_render_completed`. Params: `preset_id`, `category`, `status`, `filter`, `has_query`, `destination`. Search text is not sent. |
+| `trackPricingEvent` | `components/conversion/group-3/analytics.ts` | `billing_interval_selected`, `plan_recommended`, `plan_selected`, `promo_viewed`, `pricing_checkout_started`. Params: `plan`, `interval`, `promotion_id`, `status`. No payment data. |
 
 Rules for new events:
 
@@ -216,7 +217,7 @@ Groups 1 and 7 are not given a product surface in the Group 0 brief. They may on
 | --- | --- | --- |
 | **1** | Homepage composition (`app/page.tsx`) and `components/conversion/group-1/**`. Guest Studio entry stays `/studio/exterior?demo=true`. | Stripe, gallery presets, generation APIs, Human Polish logic, contractor-demo pricing, affiliates. Do not change Studio auth. |
 | **2** Gallery presets | `lib/gallery/presets.ts` (schema + typed presets) and gallery presentation that reads it. Public gallery: `app/gallery/page.tsx`, `app/gallery/[slug]/page.tsx`, `app/gallery/looks/[slug]/page.tsx`, `lib/content/gallery.ts`. Bot contract: `docs/conversion-optimization/GALLERY_PRESET_BOT.md`. | Content cron `app/api/cron/content-renders`, `lib/content/run.ts`, Stripe |
-| **3** Canonical pricing | Read and, if extending, wrap `lib/seo/facts.ts` + `lib/stripe/plans.ts`. New offer math goes in future `lib/pricing/` without new price IDs. | Env price IDs, `app/api/stripe/checkout/route.ts` price selection, Human Polish cents |
+| **3** Canonical pricing | `lib/pricing/**`, `lib/seo/facts.ts` plan rows, `lib/stripe/plans.ts`, pricing UI that reads them. Checkout selects an existing env price by interval. Annual stays disabled until those env vars exist. | Hard-coded Stripe price IDs, Human Polish cents, migrating existing subscribers |
 | **4** Offer state | Future `lib/offers/` eligibility (with Group 3). UI under `components/conversion/group-4/**`. | Do not store a second price. Do not invent scarcity. |
 | **5** Premium availability | Human Polish / assisted sales already exist: `app/human-polish/**`, `app/book-demo/**`, `NEXT_PUBLIC_PREMIUM_BOOKING_URL` (`components/book-demo/BookDemoContent.tsx`). New flags, if any, in future `lib/premium/availability.ts` reading those modules. | Do not rewrite HP checkout, webhooks, or private storage. |
 | **6** Affiliate attribution | Future `lib/affiliates/` that **composes** with first-touch attribution after `feat/ga4-conversion-events` merges (`rs_attrib` cookie, `profiles.signup_*`). Discounts applied only through Group 3. | Do not replace Supabase auth cookies or Stripe customer ids. |

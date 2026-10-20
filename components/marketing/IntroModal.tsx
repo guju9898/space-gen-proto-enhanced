@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { X } from "lucide-react"
+import { CATALOG, introDisclosure, moneyFromCents } from "@/lib/pricing/catalog"
 
 const DISMISS_KEY = "renderspace_intro_modal_dismissed"
 const DISMISS_DAYS = 7
@@ -32,6 +33,20 @@ export function IntroModal() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [checked, setChecked] = useState(false)
+  const [rollsIntoProfessional, setRollsIntoProfessional] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch("/api/pricing/offers")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { rollsIntoProfessional?: boolean } | null) => {
+        if (!cancelled && data) setRollsIntoProfessional(Boolean(data.rollsIntoProfessional))
+      })
+      .catch(() => undefined)
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -125,10 +140,11 @@ export function IntroModal() {
           Test Renderspace on Your Next Estimate
         </h2>
         <p className="mt-3 text-sm text-gray-300">
-          Get 40 credits for 7 days for $19.99. A low-risk way to try Renderspace on a real project.
+          {moneyFromCents(CATALOG.intro.amountCents)} is charged today for {CATALOG.intro.credits} credits this week.
         </p>
         <p className="mt-3 text-xs text-gray-400">
-          Automatically renews into Professional at $99/month unless canceled before renewal.
+          {introDisclosure(rollsIntoProfessional).renewal} {introDisclosure(rollsIntoProfessional).cancellation}{" "}
+          {introDisclosure(rollsIntoProfessional).notOneTime}
         </p>
 
         <div className="mt-6 flex flex-col gap-3">

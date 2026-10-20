@@ -1,5 +1,6 @@
 import { CheckCircle } from "lucide-react"
 import Link from "next/link"
+import { CATALOG, type PlanCode } from "@/lib/pricing/catalog"
 
 interface StepFiveProps {
   selectedPlan: string
@@ -8,7 +9,9 @@ interface StepFiveProps {
 
 export default function StepFive({ selectedPlan, email }: StepFiveProps) {
   // Capitalize first letter of plan name
-  const planName = selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)
+  const planCode: PlanCode =
+    selectedPlan === "intro" || selectedPlan === "business" ? selectedPlan : "professional"
+  const planName = CATALOG[planCode].name
 
   return (
     <div className="text-center">

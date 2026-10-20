@@ -6,7 +6,7 @@ export default function SubscriptionDisclaimer({ className = "" }: SubscriptionD
   return (
     <div className={`text-xs text-gray-400 ${className}`}>
       <p>
-        By confirming your subscription, you allow Space Gen to charge you for future payments in accordance with their
+        By confirming your subscription, you allow Renderspace to charge you for future payments in accordance with their
         terms. You can always cancel your subscription.
       </p>
       <div className="mt-2 p-3 bg-zinc-800 rounded-md border-l-4 border-yellow-500">

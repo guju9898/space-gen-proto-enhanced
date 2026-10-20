@@ -1,9 +1,13 @@
 "use client"
 
+import { useEffect, useState } from "react"
+import { CATALOG, introDisclosure, moneyFromCents } from "@/lib/pricing/catalog"
+import { trackPricingEvent } from "@/components/conversion/group-3/analytics"
+
 interface Plan {
   id: string
   name: string
-  price: number
+  priceLabel: string
   credits: number
   description: string
   cadence: string
@@ -19,23 +23,39 @@ interface StepThreeProps {
 }
 
 export default function StepThree({ selectedPlan, onSelectPlan }: StepThreeProps) {
+  const [rollsIntoProfessional, setRollsIntoProfessional] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch("/api/pricing/offers")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { rollsIntoProfessional?: boolean } | null) => {
+        if (!cancelled && data) setRollsIntoProfessional(Boolean(data.rollsIntoProfessional))
+      })
+      .catch(() => undefined)
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const disclosure = introDisclosure(rollsIntoProfessional)
   const plans: Plan[] = [
     {
       id: "intro",
-      name: "Intro Plan",
-      price: 19.99,
-      credits: 40,
-      description: "credits",
-      cadence: "/ 7 days",
+      name: CATALOG.intro.name,
+      priceLabel: moneyFromCents(CATALOG.intro.amountCents),
+      credits: CATALOG.intro.credits,
+      description: "credits each week",
+      cadence: "/ week",
       badge: "First Job Test",
-      note: "Rolls into Professional unless canceled",
-      cta: "Start Intro Plan",
+      note: disclosure.renewal,
+      cta: "Start weekly",
     },
     {
       id: "professional",
-      name: "Professional",
-      price: 98,
-      credits: 500,
+      name: CATALOG.professional.name,
+      priceLabel: moneyFromCents(CATALOG.professional.amountCents),
+      credits: CATALOG.professional.credits,
       description: "generations / credits per month",
       cadence: "/ month",
       cta: "Subscribe",
@@ -43,9 +63,9 @@ export default function StepThree({ selectedPlan, onSelectPlan }: StepThreeProps
     },
     {
       id: "business",
-      name: "Business",
-      price: 349,
-      credits: 6000,
+      name: CATALOG.business.name,
+      priceLabel: moneyFromCents(CATALOG.business.amountCents),
+      credits: CATALOG.business.credits,
       description: "generations / credits per month",
       cadence: "/ month",
       cta: "Subscribe",
@@ -76,9 +96,11 @@ export default function StepThree({ selectedPlan, onSelectPlan }: StepThreeProps
             }`}
             onClick={() => {
               onSelectPlan(plan.id)
-              if (plan.id === "intro") {
-                // TODO: analytics - intro_plan_selected
-              }
+              trackPricingEvent("plan_selected", {
+                plan: plan.id,
+                interval: plan.id === "intro" ? "week" : "month",
+                status: "onboarding",
+              })
             }}
           >
             {plan.badge && (
@@ -94,16 +116,16 @@ export default function StepThree({ selectedPlan, onSelectPlan }: StepThreeProps
 
             <h3 className="font-bold text-lg mb-1">{plan.name}</h3>
             <p className="text-xs text-gray-400 mb-4">
-              {plan.id === "intro" ? "7-day trial" : "Monthly subscription"}
+              {plan.id === "intro" ? "Weekly subscription" : "Monthly subscription"}
             </p>
 
             <div className="mb-4">
-              <span className="text-2xl font-bold">${plan.price.toFixed(2)}</span>
+              <span className="text-2xl font-bold">{plan.priceLabel}</span>
               <span className="text-sm text-gray-400"> {plan.cadence}</span>
             </div>
 
             <p className="text-sm text-gray-400 mb-2">
-              {plan.credits} {plan.description}
+              {plan.credits.toLocaleString("en-US")} {plan.description}
             </p>
             {plan.note ? (
               <p className="text-xs text-amber-400/90 mb-4">{plan.note}</p>

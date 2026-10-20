@@ -3,7 +3,9 @@ import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { createClient } from "@supabase/supabase-js"
 import Stripe from "stripe"
 import { isObject, isString } from "@/lib/types/typeGuards"
-import { getStripePriceId, type PlanCode } from "@/lib/stripe/plans"
+import { CATALOG } from "@/lib/pricing/catalog"
+import { evaluatePromotion, findCampaign } from "@/lib/pricing/promotions"
+import { introRollsIntoProfessional, resolveCheckoutPrice, type PlanCode } from "@/lib/stripe/plans"
 
 export const runtime = "nodejs"
 
@@ -59,11 +61,17 @@ export async function POST(request: Request) {
 
     const bodyData = body as {
       planId?: unknown
+      interval?: unknown
+      promotionId?: unknown
+      affiliateCode?: unknown
       src?: unknown
       rep?: unknown
     }
 
     planId = isString(bodyData.planId) ? bodyData.planId : undefined
+    const requestedInterval = isString(bodyData.interval) ? bodyData.interval : null
+    const promotionId = isString(bodyData.promotionId) ? bodyData.promotionId : null
+    const hasAffiliate = isString(bodyData.affiliateCode) && bodyData.affiliateCode.trim().length > 0
     const { src, rep } = bodyData
 
     // Validate planId (intro | professional | business)
@@ -97,15 +105,22 @@ export async function POST(request: Request) {
       }
     }
 
-    // Map planId to Stripe price ID (server-side env)
-    const priceId = getStripePriceId(planId)
-    if (!priceId || priceId.trim() === "") {
-      console.error("❌ Stripe price ID missing or invalid for plan:", planId)
+    const resolved = resolveCheckoutPrice(planId, requestedInterval)
+    if (!resolved.ok) {
+      if (resolved.error === "annual_unconfigured") {
+        return NextResponse.json(
+          { error: "Annual billing is not available for this plan." },
+          { status: 409 }
+        )
+      }
+      console.error("Stripe price ID missing for plan:", planId)
       return NextResponse.json(
         { error: "Stripe price ID not configured for this plan" },
         { status: 500 }
       )
     }
+    const priceId = resolved.priceId
+    const billingInterval = resolved.interval
 
     // Validate price ID format (must start with price_)
     if (!priceId.startsWith("price_")) {
@@ -135,26 +150,33 @@ export async function POST(request: Request) {
     const successUrl = `${origin}/studio?billing=success`
     const cancelUrl = `${origin}/onboarding?step=3&billing=cancel`
 
-    // DEBUG LOG (temporary - remove after verification)
-    const isLiveMode = (process.env.STRIPE_SECRET_KEY ?? "").startsWith("sk_live_")
-    console.log("🔍 [STRIPE CHECKOUT DEBUG]")
-    console.log("  planId:", planId)
-    console.log("  priceId:", priceId)
-    console.log("  Stripe mode:", isLiveMode ? "LIVE" : "TEST")
-    console.log("  success_url:", successUrl)
-    console.log("  cancel_url:", cancelUrl)
-    console.log("  userId:", user.id)
-    console.log("  userEmail:", user.email)
-
     const metadata: Record<string, string> = {
       userId: user.id,
       planId,
+      billing_interval: billingInterval,
       ...(src ? { src: isObject(src) ? JSON.stringify(src) : String(src) } : {}),
       ...(rep ? { rep: isObject(rep) ? JSON.stringify(rep) : String(rep) } : {}),
     }
     if (planId === "intro") {
-      metadata.rollover_plan = "professional"
-      metadata.intro_credits = "40"
+      metadata.intro_credits = String(CATALOG.intro.credits)
+      if (introRollsIntoProfessional()) metadata.rollover_plan = "professional"
+    }
+
+    const campaign = findCampaign(promotionId)
+    const couponId = campaign?.stripeCouponEnv ? process.env[campaign.stripeCouponEnv] : undefined
+    const couponConfigured = typeof couponId === "string" && couponId.startsWith("coupon_")
+    const promo = evaluatePromotion({
+      campaignId: promotionId,
+      plan: planId as PlanCode,
+      interval: billingInterval,
+      now: new Date(),
+      redeemedCount: 0,
+      surface: "subscription",
+      hasAffiliate,
+      couponConfigured,
+    })
+    if (promo.eligible && promo.campaignId) {
+      metadata.promotion_id = promo.campaignId
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -165,6 +187,7 @@ export async function POST(request: Request) {
           quantity: 1,
         },
       ],
+      ...(promo.eligible && couponConfigured ? { discounts: [{ coupon: couponId }] } : {}),
       client_reference_id: user.id,
       customer_email: user.email || undefined,
       metadata,

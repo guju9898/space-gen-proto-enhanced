@@ -2,7 +2,8 @@ import { NextResponse } from "next/server"
 import Stripe from "stripe"
 import { createClient } from "@supabase/supabase-js"
 import { upsertLoopsContact, sendLoopsEvent } from "@/lib/loops"
-import { getStripePriceIds } from "@/lib/stripe/plans"
+import { CATALOG } from "@/lib/pricing/catalog"
+import { getStripePriceIds, introRollsIntoProfessional, planCodeForPriceId, shouldRefreshIntroCredits } from "@/lib/stripe/plans"
 
 export const runtime = "nodejs"
 
@@ -21,13 +22,21 @@ function getSupabase() {
   })
 }
 
-/** Map Stripe price ID to plan code */
+/** Map Stripe price ID to plan code, including annual prices when those env vars exist. */
 function priceIdToPlanCode(priceId: string): "intro" | "professional" | "business" | null {
-  const ids = getStripePriceIds()
-  if (priceId === ids.intro) return "intro"
-  if (priceId === ids.professional) return "professional"
-  if (priceId === ids.business) return "business"
-  return null
+  return planCodeForPriceId(priceId)
+}
+
+function linePriceId(line: unknown): string | null {
+  if (!line || typeof line !== "object") return null
+  const row = line as {
+    price?: { id?: string } | string
+    pricing?: { price_details?: { price?: string } }
+  }
+  if (typeof row.price === "string") return row.price
+  if (row.price && typeof row.price.id === "string") return row.price.id
+  const modern = row.pricing?.price_details?.price
+  return typeof modern === "string" ? modern : null
 }
 
 export async function POST(request: Request) {
@@ -137,7 +146,7 @@ export async function POST(request: Request) {
             current_period_start: periodStart,
             current_period_end: periodEnd,
             cancel_at_period_end: false,
-            rollover_to_plan: planId === "intro" ? "professional" : null,
+            rollover_to_plan: planId === "intro" && introRollsIntoProfessional() ? "professional" : null,
             updated_at: new Date().toISOString(),
           },
           { onConflict: "user_id" }
@@ -162,31 +171,36 @@ export async function POST(request: Request) {
         }
 
         if (planId === "intro") {
-          // One-time intro: record claim, set usage, then attach schedule to roll into Pro
           await supabase.from("intro_offer_claims").upsert(
             { user_id: userId, claimed_at: new Date().toISOString() },
             { onConflict: "user_id" }
           )
 
-          const now = new Date()
-          const introPeriodEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString()
-          await supabase.from("user_usage").upsert(
-            {
-              user_id: userId,
-              period_start: periodStart,
-              period_end: introPeriodEnd,
-              plan_code: "intro",
-              credits_allocated: 40,
-              credits_used: 0,
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: "user_id,period_start" }
-          )
+          const { data: existingUsage } = await supabase
+            .from("user_usage")
+            .select("user_id")
+            .eq("user_id", userId)
+            .eq("period_start", periodStart)
+            .maybeSingle()
+          if (!existingUsage) {
+            await supabase.from("user_usage").upsert(
+              {
+                user_id: userId,
+                period_start: periodStart,
+                period_end: periodEnd,
+                plan_code: "intro",
+                credits_allocated: CATALOG.intro.credits,
+                credits_used: 0,
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: "user_id,period_start" }
+            )
+          }
 
           const priceIds = getStripePriceIds()
           const introPriceId = priceIds.intro
           const proPriceId = priceIds.professional
-          if (introPriceId && proPriceId) {
+          if (introRollsIntoProfessional() && introPriceId && proPriceId) {
             try {
               const schedule = await stripe.subscriptionSchedules.create({
                 from_subscription: subscriptionId,
@@ -286,6 +300,43 @@ export async function POST(request: Request) {
             console.error("❌ Error updating profile for payment success:", updateError)
           } else {
             console.log(`✅ Profile updated for user ${profile.id} - payment succeeded`)
+          }
+
+          const introPriceId = getStripePriceIds().intro
+          const line = invoice.lines?.data?.[0]
+          const cyclePriceId = linePriceId(line)
+          if (
+            shouldRefreshIntroCredits({
+              billingReason: invoice.billing_reason,
+              priceId: cyclePriceId,
+              introPriceId,
+            })
+          ) {
+            const period = (line as { period?: { start?: number; end?: number } } | undefined)?.period
+            const cycleStart = period?.start ? new Date(period.start * 1000).toISOString() : null
+            const cycleEnd = period?.end ? new Date(period.end * 1000).toISOString() : null
+            if (cycleStart && cycleEnd) {
+              const { data: existingCycle } = await supabase
+                .from("user_usage")
+                .select("user_id")
+                .eq("user_id", profile.id)
+                .eq("period_start", cycleStart)
+                .maybeSingle()
+              if (!existingCycle) {
+                await supabase.from("user_usage").upsert(
+                  {
+                    user_id: profile.id,
+                    period_start: cycleStart,
+                    period_end: cycleEnd,
+                    plan_code: "intro",
+                    credits_allocated: CATALOG.intro.credits,
+                    credits_used: 0,
+                    updated_at: new Date().toISOString(),
+                  },
+                  { onConflict: "user_id,period_start" }
+                )
+              }
+            }
           }
         }
         break

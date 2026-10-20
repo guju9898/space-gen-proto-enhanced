@@ -3,11 +3,12 @@
 import { useState } from "react"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
+import { CATALOG, dollarsFromCents, moneyFromCents } from "@/lib/pricing/catalog"
 
 const PLAN_PRICES = {
-  starter: 19.99,
-  professional: 99,
-  business: 349,
+  starter: dollarsFromCents(CATALOG.intro.amountCents),
+  professional: dollarsFromCents(CATALOG.professional.amountCents),
+  business: dollarsFromCents(CATALOG.business.amountCents),
 } as const
 
 type PlanKey = keyof typeof PLAN_PRICES
@@ -19,9 +20,9 @@ export interface RoiCalculatorProps {
 }
 
 const PLAN_LABELS: Record<PlanKey, string> = {
-  starter: "Starter (Tripwire): $19.99",
-  professional: "Professional: $99",
-  business: "Business: $349",
+  starter: `${CATALOG.intro.name}: ${moneyFromCents(CATALOG.intro.amountCents)}/week`,
+  professional: `${CATALOG.professional.name}: ${moneyFromCents(CATALOG.professional.amountCents)}/month`,
+  business: `${CATALOG.business.name}: ${moneyFromCents(CATALOG.business.amountCents)}/month`,
 }
 
 export default function RoiCalculator({

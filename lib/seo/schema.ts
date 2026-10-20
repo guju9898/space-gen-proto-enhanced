@@ -63,9 +63,8 @@ export function siteGraphLd() {
 }
 
 function planOffer(plan: Plan) {
-  const description = plan.recurring
-    ? `${count(plan.credits)} credits per month, ${plan.resolution} export`
-    : `${count(plan.credits)} credits valid for ${plan.period}, ${plan.resolution} export`
+  const unit = plan.period === "week" ? "week" : "month"
+  const description = `${count(plan.credits)} credits per ${unit}, ${plan.resolution} export`
   return {
     "@type": "Offer",
     name: plan.name,
@@ -73,16 +72,16 @@ function planOffer(plan: Plan) {
     price: plan.priceUsd,
     priceCurrency: "USD",
     url: `${SITE.url}/pricing`,
-    ...(plan.recurring
-      ? {
-          priceSpecification: {
-            "@type": "UnitPriceSpecification",
-            price: plan.priceUsd,
-            priceCurrency: "USD",
-            referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitCode: "MON" },
-          },
-        }
-      : {}),
+    priceSpecification: {
+      "@type": "UnitPriceSpecification",
+      price: plan.priceUsd,
+      priceCurrency: "USD",
+      referenceQuantity: {
+        "@type": "QuantitativeValue",
+        value: 1,
+        unitCode: plan.period === "week" ? "WEE" : "MON",
+      },
+    },
   }
 }
 

@@ -1,45 +1,53 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { CreditCard, Lock, Loader2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/components/auth/AuthContext"
+import { CATALOG, introDisclosure, moneyFromCents, type PlanCode } from "@/lib/pricing/catalog"
+import { trackPricingEvent } from "@/components/conversion/group-3/analytics"
 
 interface StepFourProps {
   selectedPlan: string
+  billingInterval?: "month" | "year"
 }
 
-const planDetails: Record<
-  string,
-  { name: string; price: number; credits: number; cadence: string; note?: string }
-> = {
-  intro: {
-    name: "Intro Plan",
-    price: 19.99,
-    credits: 40,
-    cadence: "/ 7 days",
-    note: "Rolls into Professional unless canceled.",
-  },
-  professional: {
-    name: "Professional",
-    price: 98,
-    credits: 500,
-    cadence: "/ month",
-  },
-  business: {
-    name: "Business",
-    price: 349,
-    credits: 6000,
-    cadence: "/ month",
-  },
-}
-
-export default function StepFour({ selectedPlan }: StepFourProps) {
+export default function StepFour({ selectedPlan, billingInterval = "month" }: StepFourProps) {
   const { openLoginModal } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [rollsIntoProfessional, setRollsIntoProfessional] = useState(false)
+  const [annualCents, setAnnualCents] = useState<number | null>(null)
 
-  const plan = planDetails[selectedPlan] ?? planDetails.professional
+  const planCode: PlanCode =
+    selectedPlan === "intro" || selectedPlan === "business" ? selectedPlan : "professional"
+  const plan = CATALOG[planCode]
+  const disclosure = introDisclosure(rollsIntoProfessional)
+  const yearly = planCode !== "intro" && billingInterval === "year" && annualCents !== null
+
+  useEffect(() => {
+    let cancelled = false
+    fetch("/api/pricing/offers")
+      .then((response) => (response.ok ? response.json() : null))
+      .then(
+        (
+          data: {
+            rollsIntoProfessional?: boolean
+            annual?: { professional?: { amountCents?: number | null }; business?: { amountCents?: number | null } }
+          } | null
+        ) => {
+          if (cancelled || !data) return
+          setRollsIntoProfessional(Boolean(data.rollsIntoProfessional))
+          const amount =
+            planCode === "business" ? data.annual?.business?.amountCents : data.annual?.professional?.amountCents
+          setAnnualCents(typeof amount === "number" ? amount : null)
+        }
+      )
+      .catch(() => undefined)
+    return () => {
+      cancelled = true
+    }
+  }, [planCode])
 
   const handleCheckout = async () => {
     setIsLoading(true)
@@ -52,16 +60,18 @@ export default function StepFour({ selectedPlan }: StepFourProps) {
 
       if (authError || !user) {
         // Store pending checkout plan for auto-resume after login
-        sessionStorage.setItem("pending_checkout_plan", selectedPlan)
+        sessionStorage.setItem("pending_checkout_plan", planCode)
+        sessionStorage.setItem(
+          "pending_checkout_interval",
+          planCode === "intro" ? "week" : yearly ? "year" : "month"
+        )
         openLoginModal("/onboarding?step=4")
         setIsLoading(false)
         return
       }
 
-      if (selectedPlan === "intro") {
-        // TODO: analytics - intro_checkout_started
-      }
-      // Create checkout session
+      const interval = planCode === "intro" ? "week" : yearly ? "year" : "month"
+      trackPricingEvent("pricing_checkout_started", { plan: planCode, interval })
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
         credentials: "include",
@@ -69,7 +79,8 @@ export default function StepFour({ selectedPlan }: StepFourProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          planId: selectedPlan,
+          planId: planCode,
+          interval: planCode === "intro" ? "week" : yearly ? "year" : "month",
         }),
       })
 
@@ -109,21 +120,30 @@ export default function StepFour({ selectedPlan }: StepFourProps) {
           <h3 className="font-bold text-lg mb-4">{plan.name}</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-400">
-                {selectedPlan === "intro" ? "7-day access" : "Billing"}
-              </span>
+              <span className="text-gray-400">Charged today</span>
               <span className="text-white font-medium">
-                ${plan.price.toFixed(2)} {plan.cadence}
+                {yearly && annualCents !== null
+                  ? `${moneyFromCents(annualCents)} / year`
+                  : `${moneyFromCents(plan.amountCents)} / ${plan.interval}`}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Credits included</span>
               <span className="text-white font-medium">
-                {plan.credits} {selectedPlan === "intro" ? "for 7 days" : "per month"}
+                {plan.credits.toLocaleString("en-US")} {planCode === "intro" ? "each week" : "per month"}
               </span>
             </div>
-            {plan.note && (
-              <p className="text-xs text-amber-400/90 pt-2">{plan.note}</p>
+            <p className="text-xs text-gray-400 pt-2">
+              {planCode === "intro"
+                ? `${disclosure.renewal} ${disclosure.cancellation} ${disclosure.notOneTime}`
+                : yearly
+                  ? "Renews automatically every year until you cancel. This is a recurring subscription, not a one-time purchase."
+                  : "Renews automatically every month until you cancel. This is a recurring subscription, not a one-time purchase."}
+            </p>
+            {billingInterval === "year" && !yearly && planCode !== "intro" && (
+              <p className="text-xs text-amber-400/90 pt-2">
+                Annual billing is not available yet. Checkout uses the monthly price.
+              </p>
             )}
           </div>
         </div>

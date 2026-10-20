@@ -17,6 +17,7 @@ import {
   BUILD_READY_STANDARD_PRICES_CENTS,
 } from "@/lib/human-polish/config"
 import { HUMAN_POLISH_PACKAGE_LABELS } from "@/lib/human-polish/types"
+import { CATALOG, dollarsFromCents, type FactsPlanKey } from "@/lib/pricing/catalog"
 
 /**
  * Official profiles, shown in the site footer and used as Organization sameAs.
@@ -60,52 +61,39 @@ export const UPLOAD_RETENTION_DAYS = 30
 
 export const UPLOAD_LIMITS = { formats: "JPG, PNG or WEBP", maxMb: 10 } as const
 
-export type PlanKey = "starter" | "professional" | "business"
+export type PlanKey = FactsPlanKey
 
 export type Plan = {
   key: PlanKey
   name: string
   priceUsd: number
   credits: number
-  /** "7 days" for the one-time trial; "month" for subscriptions. */
-  period: "7 days" | "month"
-  recurring: boolean
+  /** Stripe billing interval. Intro is a week. Professional and Business are a month. */
+  period: "week" | "month"
+  recurring: true
   resolution: "4K"
   /** Usage rights for renders made on this plan. */
   license: string
 }
 
+function planFromCatalog(key: PlanKey): Plan {
+  const source = key === "starter" ? CATALOG.intro : CATALOG[key]
+  return {
+    key,
+    name: source.name,
+    priceUsd: dollarsFromCents(source.amountCents),
+    credits: source.credits,
+    period: source.interval,
+    recurring: true,
+    resolution: "4K",
+    license: USAGE_RIGHTS,
+  }
+}
+
 export const PLANS: Record<PlanKey, Plan> = {
-  starter: {
-    key: "starter",
-    name: "First Job Test",
-    priceUsd: 19.99,
-    credits: 40,
-    period: "7 days",
-    recurring: false,
-    resolution: "4K",
-    license: USAGE_RIGHTS,
-  },
-  professional: {
-    key: "professional",
-    name: "Professional",
-    priceUsd: 99,
-    credits: 500,
-    period: "month",
-    recurring: true,
-    resolution: "4K",
-    license: USAGE_RIGHTS,
-  },
-  business: {
-    key: "business",
-    name: "Business",
-    priceUsd: 349,
-    credits: 6000,
-    period: "month",
-    recurring: true,
-    resolution: "4K",
-    license: USAGE_RIGHTS,
-  },
+  starter: planFromCatalog("starter"),
+  professional: planFromCatalog("professional"),
+  business: planFromCatalog("business"),
 }
 
 /** "$19.99", "$99", "$1,199" */

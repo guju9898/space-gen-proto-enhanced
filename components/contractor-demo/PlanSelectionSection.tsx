@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { PLANS, usd } from "@/lib/seo/facts"
 
 interface PlanSelectionSectionProps {
   onClickBusiness: () => void
@@ -20,7 +21,7 @@ export function PlanSelectionSection({ onClickBusiness, onClickProfessional }: P
             </span>
             <h3 className="text-xl font-bold text-white">Professional</h3>
             <p className="text-3xl font-bold text-white mt-2">
-              $98<span className="text-sm text-muted-foreground"> / month</span>
+              {usd(PLANS.professional.priceUsd)}<span className="text-sm text-muted-foreground"> / month</span>
             </p>
             <p className="text-sm text-muted-foreground mt-4">
               For owner-operators who want to visualize jobs fast and close more projects without adding design overhead.
@@ -37,7 +38,7 @@ export function PlanSelectionSection({ onClickBusiness, onClickProfessional }: P
           <article className="rounded-xl border border-[#343434] bg-[#191f33]/50 p-6">
             <h3 className="text-xl font-bold text-white">Business</h3>
             <p className="text-3xl font-bold text-white mt-2">
-              $349<span className="text-sm text-muted-foreground"> / month</span>
+              {usd(PLANS.business.priceUsd)}<span className="text-sm text-muted-foreground"> / month</span>
             </p>
             <p className="text-sm text-muted-foreground mt-4">
               For active teams handling high volume across landscaping, patios, pergolas, and outdoor living projects.

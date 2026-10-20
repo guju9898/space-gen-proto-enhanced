@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, User, CreditCard, Coins, LogOut, CheckCircle2, AlertCircle, XCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { CATALOG } from "@/lib/pricing/catalog"
 
 interface ProfileData {
   email: string | undefined
@@ -20,9 +21,9 @@ interface CreditsData {
 }
 
 const planNames: Record<string, string> = {
-  intro: "Intro Trial",
-  professional: "Professional",
-  business: "Business",
+  intro: CATALOG.intro.name,
+  professional: CATALOG.professional.name,
+  business: CATALOG.business.name,
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
@@ -267,7 +268,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <span className="text-sm text-muted-foreground">Billing</span>
-                  <span className="text-sm font-medium">Monthly</span>
+                  <span className="text-sm font-medium">{profile?.current_plan === "intro" ? "Weekly" : "Monthly"}</span>
                 </div>
               </div>
 
@@ -334,7 +335,7 @@ export default function ProfilePage() {
             </span>
           </div>
           <div className="flex items-center justify-between py-2">
-            <span className="text-sm text-muted-foreground">Monthly Allowance</span>
+            <span className="text-sm text-muted-foreground">Credit allowance</span>
             <span className="text-sm font-medium">
               {credits?.monthlyLimit !== null && credits?.monthlyLimit !== undefined
                 ? credits.monthlyLimit.toFixed(0)

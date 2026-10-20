@@ -91,7 +91,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     id: "first-job-test",
     q: "What is the First Job Test?",
-    a: `A ${usd(PLANS.starter.priceUsd)} trial: ${PLANS.starter.credits} credits to use over ${PLANS.starter.period} on a real job. It's non-refundable, and it automatically upgrades to Professional (${usd(PLANS.professional.priceUsd)}/month) if you decide to continue.`,
+    a: `A recurring ${usd(PLANS.starter.priceUsd)} weekly subscription: ${PLANS.starter.credits} credits each week. ${usd(PLANS.starter.priceUsd)} is charged today, then the same amount renews every week until you cancel. It is not a one-time purchase. Cancel in billing settings before the next week.`,
     surfaces: ["faq"],
   },
   {

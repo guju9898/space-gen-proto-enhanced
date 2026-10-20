@@ -8,6 +8,7 @@ import {
 } from "@/lib/blog/site"
 import type { BlogCtaType } from "@/lib/blog/types"
 import { BlogCtaLink } from "./BlogCtaLink"
+import { PLANS, usd } from "@/lib/seo/facts"
 
 export function BlogArticleCta({
   ctaType,
@@ -36,7 +37,7 @@ export function BlogArticleCta({
             category={category}
             className="inline-flex justify-center items-center rounded-md bg-gradient-to-r from-orange-500 to-violet-700 px-4 py-2.5 text-sm font-medium text-white hover:opacity-90"
           >
-            Try the First Job Test — $19.99
+            Try the First Job Test — {usd(PLANS.starter.priceUsd)}/week
           </BlogCtaLink>
           <BlogCtaLink
             href={BLOG_CTA_HUMAN_POLISH}
@@ -109,8 +110,9 @@ export function BlogArticleCta({
     <aside className={shell} aria-label="Try Renderspace">
       <h2 className="text-xl font-semibold text-white mb-3">Try it on a real estimate</h2>
       <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-        The First Job Test is $19.99 — 40 credits for 7 days — so you can run this workflow on an
-        actual job before deciding whether it belongs in how you sell.
+        The First Job Test is {usd(PLANS.starter.priceUsd)} a week for {PLANS.starter.credits} credits.
+        {usd(PLANS.starter.priceUsd)} is charged today, then the same amount renews every week until you cancel.
+        It is a recurring subscription, not a one-time purchase.
       </p>
       <div className="flex flex-col sm:flex-row gap-3">
         <BlogCtaLink

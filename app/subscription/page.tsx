@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, CreditCard, AlertCircle, CheckCircle2, XCircle } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
+import { CATALOG } from "@/lib/pricing/catalog"
 
 interface BillingProfile {
   current_plan: string | null
@@ -14,9 +15,15 @@ interface BillingProfile {
 }
 
 const planNames: Record<string, string> = {
-  intro: "Intro Trial",
-  professional: "Professional",
-  business: "Business",
+  intro: CATALOG.intro.name,
+  professional: CATALOG.professional.name,
+  business: CATALOG.business.name,
+}
+
+const billingLabels: Record<string, string> = {
+  intro: "Weekly",
+  professional: "Monthly",
+  business: "Monthly",
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
@@ -186,7 +193,9 @@ export default function SubscriptionPage() {
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <span className="text-sm text-muted-foreground">Billing</span>
-                  <span className="text-sm font-medium">Monthly</span>
+                  <span className="text-sm font-medium">
+                    {profile?.current_plan ? billingLabels[profile.current_plan] || "Monthly" : "Monthly"}
+                  </span>
                 </div>
               </div>
 

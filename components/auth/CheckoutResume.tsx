@@ -72,6 +72,7 @@ export function CheckoutResume() {
           },
           body: JSON.stringify({
             planId: pendingPlan,
+            interval: sessionStorage.getItem("pending_checkout_interval") || "month",
           }),
         })
 

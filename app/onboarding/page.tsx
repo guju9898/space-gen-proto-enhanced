@@ -17,15 +17,21 @@ type OnboardingPlanId = "intro" | "professional" | "business"
 function normalizePlanFromQuery(raw: string | null | undefined): OnboardingPlanId | null {
   if (raw == null) return null
   const p = raw.trim().toLowerCase()
+  if (p === "starter") return "intro"
   if (p === "intro" || p === "professional" || p === "business") return p
   return null
 }
 
-function buildOnboardingHref(step: number, plan: string | null | undefined) {
+function normalizeInterval(raw: string | null | undefined): "month" | "year" {
+  return raw === "year" ? "year" : "month"
+}
+
+function buildOnboardingHref(step: number, plan: string | null | undefined, interval: "month" | "year") {
   const u = new URLSearchParams()
   u.set("step", String(step))
   const canonical = normalizePlanFromQuery(plan ?? null)
   if (canonical) u.set("plan", canonical)
+  if (interval === "year") u.set("interval", "year")
   return `/onboarding?${u.toString()}`
 }
 
@@ -35,6 +41,7 @@ function OnboardingContent() {
 
   const stepParam = searchParams?.get("step")
   const planParam = searchParams?.get("plan")
+  const intervalParam = normalizeInterval(searchParams?.get("interval"))
   const currentStep = stepParam ? Math.max(1, Math.min(5, parseInt(stepParam, 10) || 1)) : 1
   const totalSteps = 5
 
@@ -60,13 +67,13 @@ function OnboardingContent() {
   // Navigation handlers — keep `plan` in the URL when we have one so refresh / remount does not drop deep-linked selection.
   const handleNext = () => {
     if (currentStep < totalSteps) {
-      router.push(buildOnboardingHref(currentStep + 1, planForUrl()))
+      router.push(buildOnboardingHref(currentStep + 1, planForUrl(), intervalParam))
     }
   }
 
   const handleBack = () => {
     if (currentStep > 1) {
-      router.push(buildOnboardingHref(currentStep - 1, planForUrl()))
+      router.push(buildOnboardingHref(currentStep - 1, planForUrl(), intervalParam))
     }
   }
 
@@ -106,6 +113,7 @@ function OnboardingContent() {
         return (
           <StepFour
             selectedPlan={selectedPlan || "professional"}
+            billingInterval={intervalParam}
           />
         )
       case 5:

@@ -9,7 +9,7 @@ import { isUsableSubscriptionStatus } from "@/lib/usage/subscriptionStatus"
  * 
  * Business plan users are never blocked.
  * Professional plan users are soft-blocked at limit.
- * Intro (trial) plan: 40 credits for 7 days while status is active/trialing
+ * Intro plan: 40 credits for the current Stripe billing period while status is active/trialing
  * (and legacy inactive, which older webhooks incorrectly stored for Stripe trialing).
  */
 
@@ -154,7 +154,7 @@ export async function enforceCredits(userId: string): Promise<CreditEnforcementR
 
     let planId = profile.current_plan
 
-    // Intro (7-day / 40-credit) trial: enforce allowance from user_usage.
+    // Intro weekly allowance: enforce credits from the current user_usage period.
     // Allow active, trialing, and legacy inactive (old webhook mapped trialing → inactive).
     if (planId === "intro") {
       if (
