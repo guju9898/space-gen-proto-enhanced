@@ -3,6 +3,7 @@ import Stripe from "stripe"
 import { createClient } from "@supabase/supabase-js"
 import { upsertLoopsContact, sendLoopsEvent } from "@/lib/loops"
 import { CATALOG } from "@/lib/pricing/catalog"
+import { syncAffiliateStripeEvent } from "@/lib/affiliates/stripe-events"
 import { getStripePriceIds, introRollsIntoProfessional, planCodeForPriceId, shouldRefreshIntroCredits } from "@/lib/stripe/plans"
 
 export const runtime = "nodejs"
@@ -456,6 +457,11 @@ export async function POST(request: Request) {
 
       default:
         console.log(`Unhandled event type: ${event.type}`)
+    }
+
+    const affiliateSync = await syncAffiliateStripeEvent(event, supabase)
+    if (affiliateSync.retry) {
+      return NextResponse.json({ error: "Affiliate ledger update failed" }, { status: 500 })
     }
 
     return NextResponse.json({ received: true })

@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server"
+import { cookies } from "next/headers"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { createClient } from "@supabase/supabase-js"
 import Stripe from "stripe"
 import { isObject, isString } from "@/lib/types/typeGuards"
 import { CATALOG } from "@/lib/pricing/catalog"
 import { evaluatePromotion, findCampaign } from "@/lib/pricing/promotions"
+import { AFFILIATE_COOKIE, readCustomerCouponId } from "@/lib/affiliates/config"
+import { decideReferralDiscount } from "@/lib/affiliates/discount"
+import { resolveCheckoutAffiliate } from "@/lib/affiliates/service"
 import { introRollsIntoProfessional, resolveCheckoutPrice, type PlanCode } from "@/lib/stripe/plans"
 
 export const runtime = "nodejs"
@@ -71,7 +75,6 @@ export async function POST(request: Request) {
     planId = isString(bodyData.planId) ? bodyData.planId : undefined
     const requestedInterval = isString(bodyData.interval) ? bodyData.interval : null
     const promotionId = isString(bodyData.promotionId) ? bodyData.promotionId : null
-    const hasAffiliate = isString(bodyData.affiliateCode) && bodyData.affiliateCode.trim().length > 0
     const { src, rep } = bodyData
 
     // Validate planId (intro | professional | business)
@@ -165,6 +168,20 @@ export async function POST(request: Request) {
     const campaign = findCampaign(promotionId)
     const couponId = campaign?.stripeCouponEnv ? process.env[campaign.stripeCouponEnv] : undefined
     const couponConfigured = typeof couponId === "string" && couponId.startsWith("coupon_")
+    const affiliateService = getSupabaseService()
+    const cookieStore = await cookies()
+    const affiliate = affiliateService
+      ? await resolveCheckoutAffiliate({
+          supabase: affiliateService,
+          userId: user.id,
+          cookieValue: cookieStore.get(AFFILIATE_COOKIE)?.value ?? null,
+        }).catch(() => ({
+          hasAffiliate: false,
+          code: null as string | null,
+          programActive: false,
+          customerDiscountPercent: 0,
+        }))
+      : { hasAffiliate: false, code: null as string | null, programActive: false, customerDiscountPercent: 0 }
     const promo = evaluatePromotion({
       campaignId: promotionId,
       plan: planId as PlanCode,
@@ -172,12 +189,23 @@ export async function POST(request: Request) {
       now: new Date(),
       redeemedCount: 0,
       surface: "subscription",
-      hasAffiliate,
+      hasAffiliate: affiliate.hasAffiliate,
       couponConfigured,
     })
     if (promo.eligible && promo.campaignId) {
       metadata.promotion_id = promo.campaignId
     }
+    const referralCoupon = readCustomerCouponId()
+    const referralDiscount = decideReferralDiscount({
+      programActive: affiliate.programActive,
+      hasAttribution: affiliate.hasAffiliate,
+      selfReferral: false,
+      surface: "subscription",
+      customerDiscountPercent: affiliate.customerDiscountPercent,
+      couponConfigured: Boolean(referralCoupon),
+      promotion: promo,
+    })
+    if (affiliate.code) metadata.affiliate_code = affiliate.code
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -187,7 +215,14 @@ export async function POST(request: Request) {
           quantity: 1,
         },
       ],
-      ...(promo.eligible && couponConfigured ? { discounts: [{ coupon: couponId }] } : {}),
+      ...(promo.eligible && couponConfigured
+        ? { discounts: [{ coupon: couponId }] }
+        : referralDiscount.apply && referralCoupon
+          ? { discounts: [{ coupon: referralCoupon }] }
+          : {}),
+      ...(affiliate.code
+        ? { subscription_data: { metadata: { userId: user.id, affiliate_code: affiliate.code } } }
+        : {}),
       client_reference_id: user.id,
       customer_email: user.email || undefined,
       metadata,

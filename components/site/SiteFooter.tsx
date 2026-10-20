@@ -9,6 +9,7 @@ const FOOTER_LINKS = [
   { href: "/faq", label: "FAQ" },
   { href: "/gallery", label: "Gallery" },
   { href: "/human-polish", label: "Human Polish™" },
+  { href: "/affiliates", label: "Affiliates" },
 ]
 
 function InstagramIcon() {

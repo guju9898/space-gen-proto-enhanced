@@ -5,6 +5,7 @@ import { AuthProvider } from "@/components/auth/AuthContext"
 import { AuthProvider as SessionAuthProvider } from "@/components/auth/AuthProvider"
 import { LoginModalWrapper } from "@/components/auth/LoginModalWrapper"
 import { CheckoutResume } from "@/components/auth/CheckoutResume"
+import { AffiliateRefCapture } from "@/components/conversion/group-6/AffiliateRefCapture"
 import { IntroModal } from "@/components/marketing/IntroModal"
 import { IntroPlanPromo } from "@/components/marketing/IntroPlanPromo"
 import { Inter } from "next/font/google"
@@ -76,6 +77,9 @@ export default function RootLayout({
                 </Suspense>
                 <Suspense fallback={null}>
                   <IntroPlanPromo />
+                </Suspense>
+                <Suspense fallback={null}>
+                  <AffiliateRefCapture />
                 </Suspense>
               </DesignConfigProvider>
             </AuthProvider>

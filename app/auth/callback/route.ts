@@ -3,6 +3,8 @@ import { cookies } from "next/headers"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { upsertLoopsContact, sendLoopsEvent } from "@/lib/loops"
 import { trySafeLocalReturnPath } from "@/lib/auth/safe-return-path"
+import { AFFILIATE_COOKIE } from "@/lib/affiliates/config"
+import { bindReferral, getAffiliateService } from "@/lib/affiliates/service"
 
 /**
  * Redirect destination after successful auth.
@@ -145,6 +147,22 @@ export async function GET(request: Request) {
         })
       } catch (err) {
         console.error("Loops account_created failed", err)
+      }
+    }
+
+    if (authUser?.id) {
+      try {
+        const affiliateService = getAffiliateService()
+        if (affiliateService) {
+          const cookieStore = await cookies()
+          await bindReferral({
+            supabase: affiliateService,
+            userId: authUser.id,
+            cookieValue: cookieStore.get(AFFILIATE_COOKIE)?.value ?? null,
+          })
+        }
+      } catch (err) {
+        console.error("[affiliates] attribution bind failed", err instanceof Error ? err.message.slice(0, 120) : "unknown")
       }
     }
 
