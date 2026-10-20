@@ -198,6 +198,7 @@ Existing helpers (do not break):
 | `trackHomepageEvent` | `components/conversion/group-1/analytics.ts` | `homepage_viewed`, `hero_cta_clicked`, `guest_studio_started`, `first_render_completed`. Params: `variant` (`a`\|`b`), optional `destination`, optional `render_type`. |
 | `trackGalleryEvent` | `components/gallery/analytics.ts` | `gallery_viewed`, `gallery_filter_applied`, `preset_opened`, `preset_studio_cta_clicked`, `preset_loaded`, `preset_render_completed`. Params: `preset_id`, `category`, `status`, `filter`, `has_query`, `destination`. Search text is not sent. |
 | `trackPricingEvent` | `components/conversion/group-3/analytics.ts` | `billing_interval_selected`, `plan_recommended`, `plan_selected`, `promo_viewed`, `pricing_checkout_started`. Params: `plan`, `interval`, `promotion_id`, `status`. No payment data. |
+| `trackLifecycleEvent` | `components/conversion/group-4/analytics.ts` | `lifecycle_offer_eligible`, `lifecycle_offer_viewed`, `lifecycle_offer_clicked`, `lifecycle_offer_dismissed`, `lifecycle_checkout_started`. Params: `offer_id`, `trigger`, `plan`, `status`. No payment data. |
 
 Rules for new events:
 
@@ -218,7 +219,7 @@ Groups 1 and 7 are not given a product surface in the Group 0 brief. They may on
 | **1** | Homepage composition (`app/page.tsx`) and `components/conversion/group-1/**`. Guest Studio entry stays `/studio/exterior?demo=true`. | Stripe, gallery presets, generation APIs, Human Polish logic, contractor-demo pricing, affiliates. Do not change Studio auth. |
 | **2** Gallery presets | `lib/gallery/presets.ts` (schema + typed presets) and gallery presentation that reads it. Public gallery: `app/gallery/page.tsx`, `app/gallery/[slug]/page.tsx`, `app/gallery/looks/[slug]/page.tsx`, `lib/content/gallery.ts`. Bot contract: `docs/conversion-optimization/GALLERY_PRESET_BOT.md`. | Content cron `app/api/cron/content-renders`, `lib/content/run.ts`, Stripe |
 | **3** Canonical pricing | `lib/pricing/**`, `lib/seo/facts.ts` plan rows, `lib/stripe/plans.ts`, pricing UI that reads them. Checkout selects an existing env price by interval. Annual stays disabled until those env vars exist. | Hard-coded Stripe price IDs, Human Polish cents, migrating existing subscribers |
-| **4** Offer state | Future `lib/offers/` eligibility (with Group 3). UI under `components/conversion/group-4/**`. | Do not store a second price. Do not invent scarcity. |
+| **4** Offer state | `lib/offers/**` eligibility and `components/conversion/group-4/**`. Reads Group 3 campaigns. Discounts stay in Checkout. | Do not store a second price. Do not invent scarcity. |
 | **5** Premium availability | Human Polish / assisted sales already exist: `app/human-polish/**`, `app/book-demo/**`, `NEXT_PUBLIC_PREMIUM_BOOKING_URL` (`components/book-demo/BookDemoContent.tsx`). New flags, if any, in future `lib/premium/availability.ts` reading those modules. | Do not rewrite HP checkout, webhooks, or private storage. |
 | **6** Affiliate attribution | Future `lib/affiliates/` that **composes** with first-touch attribution after `feat/ga4-conversion-events` merges (`rs_attrib` cookie, `profiles.signup_*`). Discounts applied only through Group 3. | Do not replace Supabase auth cookies or Stripe customer ids. |
 | **7** | `components/conversion/group-7/**` only, until its brief names a page. | Same forbidden set as Group 1 |

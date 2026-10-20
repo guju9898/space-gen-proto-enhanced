@@ -73,6 +73,9 @@ export function CheckoutResume() {
           body: JSON.stringify({
             planId: pendingPlan,
             interval: sessionStorage.getItem("pending_checkout_interval") || "month",
+            ...(sessionStorage.getItem("pending_checkout_promotion")
+              ? { promotionId: sessionStorage.getItem("pending_checkout_promotion") }
+              : {}),
           }),
         })
 

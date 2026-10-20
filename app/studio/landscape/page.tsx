@@ -22,6 +22,7 @@ import { RealisticSlider } from "@/components/Studio/Variables/RealisticSlider"
 import { StudioPreview } from "@/components/Studio/StudioPreview"
 import { VariableSelect } from "@/components/ui/VariableSelect"
 import { FirstPaidSessionHint } from "@/components/Studio/FirstPaidSessionHint"
+import { LifecycleOffer } from "@/components/conversion/group-4/LifecycleOffer"
 import { ImageOptionGrid } from "@/components/Studio/ImageOptionGrid"
 import { GridPickerDialog } from "@/components/Studio/GridPickerDialog"
 import { SegmentedToggle } from "@/components/Studio/SegmentedToggle"
@@ -946,6 +947,7 @@ export default function LandscapeStudioPage() {
           )}
 
           {!demoMode && <FirstPaidSessionHint className="mt-4" />}
+          <LifecycleOffer busy={isRendering || isUploading} completedRenders={latestRenders.length} />
           <div className="pt-4 border-t border-border">
             <Button 
               className={cn(

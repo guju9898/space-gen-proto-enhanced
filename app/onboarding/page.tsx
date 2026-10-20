@@ -26,12 +26,23 @@ function normalizeInterval(raw: string | null | undefined): "month" | "year" {
   return raw === "year" ? "year" : "month"
 }
 
-function buildOnboardingHref(step: number, plan: string | null | undefined, interval: "month" | "year") {
+function normalizePromotion(raw: string | null | undefined): string | null {
+  if (!raw || !/^[a-z0-9-]{3,40}$/.test(raw)) return null
+  return raw
+}
+
+function buildOnboardingHref(
+  step: number,
+  plan: string | null | undefined,
+  interval: "month" | "year",
+  promotion: string | null
+) {
   const u = new URLSearchParams()
   u.set("step", String(step))
   const canonical = normalizePlanFromQuery(plan ?? null)
   if (canonical) u.set("plan", canonical)
   if (interval === "year") u.set("interval", "year")
+  if (promotion) u.set("promotion", promotion)
   return `/onboarding?${u.toString()}`
 }
 
@@ -42,6 +53,7 @@ function OnboardingContent() {
   const stepParam = searchParams?.get("step")
   const planParam = searchParams?.get("plan")
   const intervalParam = normalizeInterval(searchParams?.get("interval"))
+  const promotionParam = normalizePromotion(searchParams?.get("promotion"))
   const currentStep = stepParam ? Math.max(1, Math.min(5, parseInt(stepParam, 10) || 1)) : 1
   const totalSteps = 5
 
@@ -67,13 +79,13 @@ function OnboardingContent() {
   // Navigation handlers — keep `plan` in the URL when we have one so refresh / remount does not drop deep-linked selection.
   const handleNext = () => {
     if (currentStep < totalSteps) {
-      router.push(buildOnboardingHref(currentStep + 1, planForUrl(), intervalParam))
+      router.push(buildOnboardingHref(currentStep + 1, planForUrl(), intervalParam, promotionParam))
     }
   }
 
   const handleBack = () => {
     if (currentStep > 1) {
-      router.push(buildOnboardingHref(currentStep - 1, planForUrl(), intervalParam))
+      router.push(buildOnboardingHref(currentStep - 1, planForUrl(), intervalParam, promotionParam))
     }
   }
 
@@ -114,6 +126,7 @@ function OnboardingContent() {
           <StepFour
             selectedPlan={selectedPlan || "professional"}
             billingInterval={intervalParam}
+            promotionId={promotionParam}
           />
         )
       case 5:

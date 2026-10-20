@@ -8,6 +8,7 @@ import { Loader2, User, CreditCard, Coins, LogOut, CheckCircle2, AlertCircle, XC
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { CATALOG } from "@/lib/pricing/catalog"
+import { LifecycleOffer } from "@/components/conversion/group-4/LifecycleOffer"
 
 interface ProfileData {
   email: string | undefined
@@ -344,6 +345,8 @@ export default function ProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      <LifecycleOffer busy={false} />
 
       {/* Session */}
       <Card>

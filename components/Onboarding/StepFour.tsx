@@ -10,9 +10,10 @@ import { trackPricingEvent } from "@/components/conversion/group-3/analytics"
 interface StepFourProps {
   selectedPlan: string
   billingInterval?: "month" | "year"
+  promotionId?: string | null
 }
 
-export default function StepFour({ selectedPlan, billingInterval = "month" }: StepFourProps) {
+export default function StepFour({ selectedPlan, billingInterval = "month", promotionId = null }: StepFourProps) {
   const { openLoginModal } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -65,7 +66,8 @@ export default function StepFour({ selectedPlan, billingInterval = "month" }: St
           "pending_checkout_interval",
           planCode === "intro" ? "week" : yearly ? "year" : "month"
         )
-        openLoginModal("/onboarding?step=4")
+        if (promotionId) sessionStorage.setItem("pending_checkout_promotion", promotionId)
+        openLoginModal(promotionId ? `/onboarding?step=4&promotion=${promotionId}` : "/onboarding?step=4")
         setIsLoading(false)
         return
       }
@@ -81,6 +83,7 @@ export default function StepFour({ selectedPlan, billingInterval = "month" }: St
         body: JSON.stringify({
           planId: planCode,
           interval: planCode === "intro" ? "week" : yearly ? "year" : "month",
+          ...(promotionId ? { promotionId } : {}),
         }),
       })
 

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { StudioPreview } from "@/components/Studio/StudioPreview"
 import { ImageUpload } from "@/components/Studio/ImageUpload"
 import { FirstPaidSessionHint } from "@/components/Studio/FirstPaidSessionHint"
+import { LifecycleOffer } from "@/components/conversion/group-4/LifecycleOffer"
 import { isString } from "@/lib/types/typeGuards"
 import { 
   Home, 
@@ -674,6 +675,7 @@ export default function InteriorStudioPage() {
           )}
 
           {!demoMode && <FirstPaidSessionHint className="mt-4" />}
+          <LifecycleOffer busy={isRendering || isUploading} completedRenders={latestRenders.length} />
           <div className="pt-4 border-t border-border">
             <Button 
               className={cn(

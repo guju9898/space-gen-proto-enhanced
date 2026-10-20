@@ -27,6 +27,7 @@ import { RealisticSlider } from "@/components/Studio/Variables/RealisticSlider"
 import { StudioPreview } from "@/components/Studio/StudioPreview"
 import { Button } from "@/components/ui/button"
 import { FirstPaidSessionHint } from "@/components/Studio/FirstPaidSessionHint"
+import { LifecycleOffer } from "@/components/conversion/group-4/LifecycleOffer"
 import { VariableSelect } from "@/components/ui/VariableSelect"
 import { isString } from "@/lib/types/typeGuards"
 import { ImageOptionGrid } from "@/components/Studio/ImageOptionGrid"
@@ -861,6 +862,7 @@ export default function ExteriorStudioPage() {
               <FirstPaidSessionHint className="mt-4" />
             </>
           )}
+          <LifecycleOffer busy={isRendering || isUploading} completedRenders={latestRenders.length} />
           <div className="pt-4 border-t border-border">
             <Button 
               className={cn(
