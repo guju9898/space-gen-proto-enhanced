@@ -30,7 +30,7 @@ export const metadata: Metadata = pageMetadata({
   path: "/",
   title: "Renderspace: AI Renderings From a Job-Site Photo",
   description:
-    "Turn a job-site photo into a photorealistic backyard, patio, exterior or interior concept in about 30 seconds and show clients the result before you quote.",
+    "Renderspace turns a job-site photo into a photorealistic pool, patio, exterior or interior concept in about 30 seconds, so clients see it before you quote.",
   absoluteTitle: true,
 })
 

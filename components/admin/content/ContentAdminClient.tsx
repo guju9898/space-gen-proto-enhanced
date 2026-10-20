@@ -116,33 +116,54 @@ export function SourceUploader() {
   )
 }
 
-export function RunNowButton() {
+export function RunNowButton({ todayCount = 0, target = 18 }: { todayCount?: number; target?: number }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [result, setResult] = useState<string | null>(null)
+  const full = todayCount >= target
+  const [extra, setExtra] = useState(full ? 4 : 0)
 
   return (
     <div className="flex flex-wrap items-center gap-3">
+      <label className="text-sm">
+        <span className="sr-only">How many</span>
+        <select
+          className="h-10 rounded-md border border-[#343434] bg-[#0a0d14] px-3 text-sm"
+          value={extra}
+          disabled={pending}
+          onChange={(e) => setExtra(Number(e.target.value))}
+        >
+          {!full && <option value={0}>Finish today&apos;s batch ({Math.max(target - todayCount, 0)} left)</option>}
+          {[4, 8, 12].map((n) => (
+            <option key={n} value={n}>
+              {n} extra renders
+            </option>
+          ))}
+        </select>
+      </label>
       <Button
         disabled={pending}
         onClick={() =>
           startTransition(async () => {
             setResult(null)
-            const res = await runContentRendersNow()
+            const res = await runContentRendersNow(extra)
             if (!res.ok) {
               setResult(res.error)
             } else {
               const s = res.summary
               setResult(
-                `Rendered ${s.rendered}, failed ${s.failed}, still queued ${s.stillQueued}` +
-                  (s.errors.length ? `. ${s.errors[0]}` : "")
+                s.rendered + s.failed + s.stillQueued === 0
+                  ? "Nothing to render: today's batch is complete. Pick a number of extra renders and run again."
+                  : `Rendered ${s.rendered}, failed ${s.failed}, still queued ${s.stillQueued}` +
+                      (s.stillQueued ? " (run again to finish)" : "") +
+                      (s.errors.length ? `. ${s.errors[0]}` : "")
               )
             }
             router.refresh()
           })
         }
       >
-        {pending ? "Rendering (up to 4 min)…" : "Run today's renders now"}
+        {pending ? "Rendering (up to 4 min)…" : "Run renders now"}
       </Button>
       {result && <p className="text-sm text-muted-foreground">{result}</p>}
     </div>

@@ -9,7 +9,7 @@ datePublished: 2026-08-11
 dateModified: 2026-08-11
 author: Renderspace
 featuredImage: /landing/renders/studio-ui.png
-featuredImageAlt: Renderspace studio used for faster contractor concept prep
+featuredImageAlt: "Renderspace studio screen with exterior settings and a finished concept of a limestone house with a courtyard pool"
 primaryIntent: Understand the workflow cost of last-minute rendering before estimates
 ctaType: human-polish
 relatedSlugs:

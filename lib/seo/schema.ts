@@ -51,7 +51,7 @@ export function websiteLd() {
     "@type": "WebSite",
     "@id": WEBSITE_ID,
     name: SITE.name,
-    alternateName: "renderspace.ai",
+    alternateName: ["renderspace.ai", "Render Space"],
     url: SITE.url,
     publisher: { "@id": ORG_ID },
   }

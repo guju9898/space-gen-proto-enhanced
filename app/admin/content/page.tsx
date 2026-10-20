@@ -9,6 +9,7 @@ import {
 import { requireHumanPolishAdminPage } from "@/lib/human-polish/admin-page-auth"
 import { reviewSource } from "@/lib/content/admin-actions"
 import { DAILY_RENDER_TARGET } from "@/lib/content/run"
+import { chicagoDate } from "@/lib/content/concepts"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -100,6 +101,8 @@ export default async function ContentAdminPage({ searchParams }: { searchParams:
 
   const counts = Object.fromEntries(VIEWS.map((v) => [v.key, jobRows.filter((j) => inView(j, v.key)).length])) as Record<View, number>
   const shown = jobRows.filter((j) => inView(j, view))
+  const today = chicagoDate()
+  const todayCount = ((jobs ?? []) as JobRow[]).filter((j) => j.batch_date === today).length
   const missingSeo = jobRows.filter((j) => j.status === "done" && j.review_status !== "rejected" && !j.description).length
 
   return (
@@ -120,7 +123,7 @@ export default async function ContentAdminPage({ searchParams }: { searchParams:
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <WriteAllSeoButton missing={missingSeo} />
-            <RunNowButton />
+            <RunNowButton todayCount={todayCount} target={DAILY_RENDER_TARGET} />
           </div>
         </div>
 
