@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next"
+import { ACADEMY_LESSONS } from "@/lib/academy/curriculum"
 import { getAllPostMetas } from "@/lib/blog/posts"
 import { absoluteBlogUrl } from "@/lib/blog/site"
 import { listPublishedRenders } from "@/lib/content/gallery"
@@ -15,6 +16,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteBlogUrl("/mockup-method"), lastModified: new Date("2026-08-11") },
     { url: absoluteBlogUrl("/human-polish"), lastModified: new Date("2026-08-11") },
     { url: absoluteBlogUrl("/blog"), lastModified: new Date("2026-08-11") },
+    { url: absoluteBlogUrl("/academy"), lastModified: new Date("2026-10-20") },
+    ...ACADEMY_LESSONS.map((lesson) => ({
+      url: absoluteBlogUrl(`/academy/${lesson.slug}`),
+      lastModified: new Date("2026-10-20"),
+    })),
   ]
 
   const posts = getAllPostMetas().map((post) => ({

@@ -201,6 +201,7 @@ Existing helpers (do not break):
 | `trackLifecycleEvent` | `components/conversion/group-4/analytics.ts` | `lifecycle_offer_eligible`, `lifecycle_offer_viewed`, `lifecycle_offer_clicked`, `lifecycle_offer_dismissed`, `lifecycle_checkout_started`. Params: `offer_id`, `trigger`, `plan`, `status`. No payment data. |
 | `trackPremiumEvent` | `components/conversion/group-5/analytics.ts` | `premium_availability_viewed`, `premium_opening_requested`, `premium_service_inquiry`, `premium_booking_completed`. Params: `service`, `status`, `source`, `city`. No contact details. |
 | `trackAffiliateEvent` | `components/conversion/group-6/analytics.ts` | `affiliate_referral_captured`, `affiliate_dashboard_viewed`, `affiliate_application_submitted`, `affiliate_link_copied`. Param: `status` only. No partner codes, names, or payment ids. |
+| `trackAcademyEvent` | `components/conversion/group-7/analytics.ts` | `academy_entered`, `academy_lesson_viewed`, `academy_studio_cta_clicked`, `academy_preset_selected`. Params: `lesson`, `destination`, `preset`. No completion event, because finishing a lesson is not measured. |
 
 Rules for new events:
 
@@ -224,7 +225,7 @@ Groups 1 and 7 are not given a product surface in the Group 0 brief. They may on
 | **4** Offer state | `lib/offers/**` eligibility and `components/conversion/group-4/**`. Reads Group 3 campaigns. Discounts stay in Checkout. | Do not store a second price. Do not invent scarcity. |
 | **5** Premium availability | `lib/premium/availability.ts`, `app/book-demo/**`, contractor-demo marketing, Human Polish marketing presentation. Capacity comes from server env, or stays unknown. | Do not rewrite HP checkout, webhooks, or private storage. Do not invent slot counts. |
 | **6** Affiliate attribution | `lib/affiliates/**`, `app/affiliates/**`, `app/admin/affiliates/**`, `app/api/affiliates/**`. Click cookie `rs_aff`. Discounts applied only through Group 3 plus `decideReferralDiscount` when a server coupon already exists. | Do not replace Supabase auth cookies or Stripe customer ids. Do not create Stripe coupons. Commissions stay off unless `AFFILIATES_ENABLED=true` and program status is `active`. |
-| **7** | `components/conversion/group-7/**` only, until its brief names a page. | Same forbidden set as Group 1 |
+| **7** Contractor Academy | `app/academy/**`, `lib/academy/**`, `components/conversion/group-7/**`. Studio links use `studioPresetHref` from Group 2. | Studio generation, pricing, subscriptions, affiliate commissions, gallery preset definitions, Human Polish checkout. |
 | **All** | Analytics via existing helpers (§10) | New gtag wrappers, PII params |
 
 Shared contracts (do not implement in Group 0):
