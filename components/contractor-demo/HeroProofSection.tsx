@@ -5,6 +5,7 @@ import { getContractorDemoSliderCategories } from "./contractorDemoSliderData"
 
 interface HeroProofSectionProps {
   cityLabel: string | null
+  premiumHref: string
   onClickPremium: () => void
   onClickDemo: () => void
 }
@@ -30,7 +31,7 @@ function CopyBlock({
   )
 }
 
-export function HeroProofSection({ cityLabel, onClickPremium, onClickDemo }: HeroProofSectionProps) {
+export function HeroProofSection({ cityLabel, premiumHref, onClickPremium, onClickDemo }: HeroProofSectionProps) {
   const { categories, categoryOrder } = getContractorDemoSliderCategories()
 
   const beforeBody = "This is the yard that lost you the job."
@@ -49,11 +50,11 @@ export function HeroProofSection({ cityLabel, onClickPremium, onClickDemo }: Her
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
           <Link
-            href="/book-demo"
+            href={premiumHref}
             onClick={onClickPremium}
             className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-6 py-3 rounded-md font-medium w-full sm:w-auto justify-center"
           >
-            Install My Revenue System
+            Build My Visual Sales System
             <ChevronRight className="w-4 h-4" />
           </Link>
           <Link
@@ -64,6 +65,9 @@ export function HeroProofSection({ cityLabel, onClickPremium, onClickDemo }: Her
             Try It Free On A Real Yard &rarr;
           </Link>
         </div>
+        {cityLabel ? (
+          <p className="mt-4 text-sm text-muted-foreground">{cityLabel} contractor demo</p>
+        ) : null}
         <p className="mt-2 text-xs text-muted-foreground text-center">
           No account required. No credit card.
         </p>

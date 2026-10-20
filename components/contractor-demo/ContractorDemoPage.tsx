@@ -18,6 +18,8 @@ import { PlanSelectionSection } from "./PlanSelectionSection"
 import { FinalCTASection } from "./FinalCTASection"
 import { trackContractorDemoEvent } from "./analytics"
 import { CITY_LABELS } from "@/lib/contractor-demo/cities"
+import { premiumBookingHref } from "@/lib/premium/booking"
+import { PremiumOnboardingAvailability } from "@/components/conversion/group-5/PremiumOnboardingAvailability"
 
 
 interface ContractorDemoPageProps {
@@ -54,6 +56,7 @@ export function ContractorDemoPage({ citySlug }: ContractorDemoPageProps) {
     trackContractorDemoEvent("clicked_professional_cta", { city: cityLabel ?? "generic" })
   const handleDemoClick = () => trackContractorDemoEvent("clicked_try_demo", { city: cityLabel ?? "generic" })
   const handleMailerViewed = () => trackContractorDemoEvent("viewed_mailer_section", { city: cityLabel ?? "generic" })
+  const premiumHref = premiumBookingHref({ citySlug })
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -74,7 +77,7 @@ export function ContractorDemoPage({ citySlug }: ContractorDemoPageProps) {
               Human Polish™
             </Link>
             <Link
-              href="/book-demo"
+              href={premiumHref}
               onClick={handlePremiumClick}
               className="text-sm bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 text-white px-4 py-2 rounded-md"
             >
@@ -85,20 +88,26 @@ export function ContractorDemoPage({ citySlug }: ContractorDemoPageProps) {
       </header>
 
       <main>
-        <HeroProofSection cityLabel={cityLabel} onClickPremium={handlePremiumClick} onClickDemo={handleDemoClick} />
+        <HeroProofSection cityLabel={cityLabel} premiumHref={premiumHref} onClickPremium={handlePremiumClick} onClickDemo={handleDemoClick} />
         <PainSection cityLabel={cityLabel} />
         <ReframeSection />
         <ContractorDemoVideoSection />
         <ProofStackSection />
         <SocialProofSubstituteSection />
         <DemoCTASection onClickDemo={handleDemoClick} />
-        <PremiumCTASection cityLabel={cityLabel} onClickPremium={handlePremiumClick} />
+        <PremiumCTASection cityLabel={cityLabel} premiumHref={premiumHref} onClickPremium={handlePremiumClick} />
+        <PremiumOnboardingAvailability service="premium_onboarding" href={premiumHref} />
         <ContractorDemoRoiSection />
         <MailerPreviewSection onViewed={handleMailerViewed} />
-        <OfferSection onClickPremium={handlePremiumClick} />
+        <PremiumOnboardingAvailability
+          service="mailer"
+          href={premiumBookingHref({ citySlug, source: "mailer" })}
+        />
+        <OfferSection premiumHref={premiumHref} onClickPremium={handlePremiumClick} />
         <PlanSelectionSection onClickBusiness={handleBusinessClick} onClickProfessional={handleProfessionalClick} />
         <FinalCTASection
           cityLabel={cityLabel}
+          premiumHref={premiumHref}
           onClickPremium={handlePremiumClick}
           onClickBusiness={handleBusinessClick}
           onClickProfessional={handleProfessionalClick}

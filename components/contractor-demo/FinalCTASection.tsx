@@ -2,6 +2,7 @@ import Link from "next/link"
 
 interface FinalCTASectionProps {
   cityLabel: string | null
+  premiumHref: string
   onClickPremium: () => void
   onClickBusiness: () => void
   onClickProfessional: () => void
@@ -10,6 +11,7 @@ interface FinalCTASectionProps {
 
 export function FinalCTASection({
   cityLabel,
+  premiumHref,
   onClickPremium,
   onClickBusiness,
   onClickProfessional,
@@ -26,7 +28,7 @@ export function FinalCTASection({
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Link
-            href="/book-demo"
+            href={premiumHref}
             onClick={onClickPremium}
             className="inline-flex items-center justify-center bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-5 py-3 rounded-md font-medium"
           >

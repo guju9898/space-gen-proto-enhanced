@@ -1,10 +1,11 @@
 import Link from "next/link"
 
 interface OfferSectionProps {
+  premiumHref: string
   onClickPremium: () => void
 }
 
-export function OfferSection({ onClickPremium }: OfferSectionProps) {
+export function OfferSection({ premiumHref, onClickPremium }: OfferSectionProps) {
   return (
     <section className="container mx-auto px-4 py-14">
       <div className="max-w-6xl mx-auto rounded-xl border border-[#343434] bg-[#191f33]/50 p-8">
@@ -43,7 +44,7 @@ export function OfferSection({ onClickPremium }: OfferSectionProps) {
               <li>• Funnel-focused implementation and messaging guidance</li>
             </ul>
             <Link
-              href="/book-demo"
+              href={premiumHref}
               onClick={onClickPremium}
               className="mt-6 inline-flex w-full items-center justify-center bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-5 py-3 rounded-md font-medium"
             >

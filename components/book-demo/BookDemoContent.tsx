@@ -5,6 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { ChevronRight } from "lucide-react"
+import { trackPremiumEvent } from "@/components/conversion/group-5/analytics"
 
 const REVENUE_OPTIONS = [
   { value: "", label: "Select range (optional)" },
@@ -80,6 +81,10 @@ export function BookDemoContent() {
       }
       setPhase("success")
       setStatus("idle")
+      trackPremiumEvent("premium_booking_completed", {
+        source: sourceParam || "book-demo",
+        city: cityParam || "generic",
+      })
     } catch {
       setStatus("error")
       setErrorMessage("Network error. Please try again.")

@@ -18,6 +18,7 @@ import { BuildReadyPricingSection } from "./BuildReadyPricingSection"
 import { HoaSupportSection } from "./HoaSupportSection"
 import { ScopeExpectationsSection } from "./ScopeExpectationsSection"
 import { TurnaroundCapacitySection } from "./TurnaroundCapacitySection"
+import { PremiumOnboardingAvailability } from "@/components/conversion/group-5/PremiumOnboardingAvailability"
 import { GuaranteeSection } from "./GuaranteeSection"
 import { FinalCtaSection } from "./FinalCtaSection"
 import { AssistedSalesSection } from "./AssistedSalesSection"
@@ -112,6 +113,7 @@ export function HumanPolishPage() {
         <HoaSupportSection />
         <ScopeExpectationsSection />
         <TurnaroundCapacitySection />
+        <PremiumOnboardingAvailability service="human_polish" title="Human Polish Availability" />
         <GuaranteeSection />
         <FinalCtaSection onSelectPack={handleSelectPack} onSelectBuildReady={handleSelectBuildReady} />
         <AssistedSalesSection onRequestCall={handleRequestCall} onClickWhatsapp={handleClickWhatsapp} />
