@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { cookies, headers } from "next/headers"
 import { pageMetadata } from "@/lib/seo/metadata"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { softwareApplicationLd } from "@/lib/seo/schema"
@@ -7,7 +8,6 @@ import Image from "next/image"
 import Link from "next/link"
 import { SiteHeader } from "@/components/site/SiteHeader"
 import { Suspense } from "react"
-import { ChevronRight } from "lucide-react"
 import { LoginRedirectHandler } from "@/components/auth/LoginRedirectHandler"
 import { RedirectIfAuthenticated } from "@/components/auth/RedirectIfAuthenticated"
 import ComparisonTable from "@/components/ComparisonTable"
@@ -15,6 +15,16 @@ import { RenderspaceBeforeAfterSlider } from "@/components/RenderspaceBeforeAfte
 import RoiCalculator from "@/components/RoiCalculator"
 import { HomepageFAQ } from "@/components/HomepageFAQ"
 import { SiteFooter } from "@/components/site/SiteFooter"
+import {
+  HOME_EXPERIMENT_COOKIE,
+  HOME_EXPERIMENT_HEADER,
+  resolveHomeVariant,
+} from "@/components/conversion/group-1/experiment"
+import {
+  HomeClosingCta,
+  HomeExperimentBeacon,
+  HomeHeroActions,
+} from "@/components/conversion/group-1/HomeExperimentAnalytics"
 
 export const metadata: Metadata = pageMetadata({
   path: "/",
@@ -24,7 +34,16 @@ export const metadata: Metadata = pageMetadata({
   absoluteTitle: true,
 })
 
-export default function Home() {
+export default async function Home() {
+  const headerStore = await headers()
+  const cookieStore = await cookies()
+  const variant = resolveHomeVariant(
+    headerStore.get(HOME_EXPERIMENT_HEADER),
+    cookieStore.get(HOME_EXPERIMENT_COOKIE)?.value
+  )
+  const paidLabel = `Try ${PLANS.starter.credits} Credits for ${usd(PLANS.starter.priceUsd)}`
+  const paidDetail = `${PLANS.starter.credits} credits, ${PLANS.starter.period}, ${usd(PLANS.starter.priceUsd)}`
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <JsonLd data={softwareApplicationLd()} />
@@ -35,37 +54,39 @@ export default function Home() {
         <LoginRedirectHandler />
       </Suspense>
       <SiteHeader active="home" />
+      <HomeExperimentBeacon variant={variant} />
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16 md:py-24 text-center">
+      <section className="container mx-auto px-4 py-12 md:py-20 text-center">
         <p className="text-sm font-medium text-primary mb-4">
           For pool builders, landscape and outdoor-living contractors, remodelers and designers
         </p>
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
-          Show Clients the Finished Project Before You Quote
-          <span className="block mt-2 text-2xl md:text-3xl font-semibold text-white/90">
-            AI renderings from a job-site photo in about {PROOF.secondsPerConcept.typical} seconds
-          </span>
-        </h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-          Renderspace turns a photo of your client&apos;s yard, home or room into a photorealistic concept: a new
-          pool, patio, outdoor kitchen, facade or interior. Show it on the spot and lock in the direction before
-          anyone prices the job.
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Link
-            href="/onboarding?plan=starter"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-6 py-3 rounded-md font-medium"
-          >
-            Try {PLANS.starter.credits} Credits for {usd(PLANS.starter.priceUsd)} <ChevronRight className="w-4 h-4" />
-          </Link>
-          <Link
-            href="/gallery"
-            className="inline-flex items-center border border-white/30 hover:bg-white/10 transition-all text-white px-6 py-3 rounded-md font-medium"
-          >
-            See Real Examples
-          </Link>
-        </div>
+        {variant === "b" ? (
+          <>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white text-balance">
+              Show the Finished Job. Before You Quote It.
+            </h1>
+            <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
+              Turn a real job-site photo into a photorealistic concept, customize the design details, and use the
+              result to explain the project you are proposing.
+            </p>
+          </>
+        ) : (
+          <>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white text-balance">
+              Show Clients the Finished Project Before You Quote
+              <span className="block mt-2 text-2xl md:text-3xl font-semibold text-white/90">
+                AI renderings from a job-site photo in about {PROOF.secondsPerConcept.typical} seconds
+              </span>
+            </h1>
+            <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
+              Renderspace turns a photo of your client&apos;s yard, home or room into a photorealistic concept: a new
+              pool, patio, outdoor kitchen, facade or interior. Show it on the spot and lock in the direction before
+              anyone prices the job.
+            </p>
+          </>
+        )}
+        <HomeHeroActions variant={variant} paidLabel={paidLabel} />
         <ul className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
           <li>
             <span className="font-semibold text-white">{PROOF.rendersGenerated}+</span> renders generated
@@ -77,32 +98,33 @@ export default function Home() {
         </ul>
 
         {/* Featured Renders */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-16 max-w-4xl mx-auto">
-          <div className="rounded-lg overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12 max-w-6xl mx-auto">
+          <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-[#191f33]">
             <Image
               src="/landing/renders/exterior-hero-01.jpg"
               alt="AI rendering of a limestone home with a lap pool and stone pool deck, generated in Renderspace"
-              width={400}
-              height={300}
-              className="w-full h-full object-cover"
+              fill
+              priority
+              sizes="(min-width: 768px) 33vw, 100vw"
+              className="object-cover"
             />
           </div>
-          <div className="rounded-lg overflow-hidden">
+          <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-[#191f33]">
             <Image
               src="/landing/renders/landscape-hero-01.jpg"
               alt="AI landscape rendering of a modern home with a curving flagstone path and native planting"
-              width={400}
-              height={300}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(min-width: 768px) 33vw, 100vw"
+              className="object-cover"
             />
           </div>
-          <div className="rounded-lg overflow-hidden">
+          <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-[#191f33]">
             <Image
               src="/landing/renders/interior-hero-01.jpg"
               alt="AI interior rendering of a bright open-plan living room and kitchen"
-              width={400}
-              height={300}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(min-width: 768px) 33vw, 100vw"
+              className="object-cover"
             />
           </div>
         </div>
@@ -112,14 +134,12 @@ export default function Home() {
       {/* Space Gen Section */}
       <section className="container mx-auto px-4 py-16 text-center">
         <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white">One photo in, a client-ready concept out</h2>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-          Drag the slider to compare real before-and-after results for a backyard, a home exterior and an interior.
-          Each one was generated from a single photo.
+        <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
+          Drag the slider. Each pair was generated from a single photo.
         </p>
 
-        {/* Featured Before / After Slider */}
         <div className="mb-8">
-          <RenderspaceBeforeAfterSlider />
+          <RenderspaceBeforeAfterSlider className="max-w-6xl" />
         </div>
       </section>
 
@@ -430,17 +450,7 @@ export default function Home() {
       <section className="container mx-auto px-4 py-16">
         <div className="bg-gradient-to-r from-[#9747ff]/20 to-[#8608fd]/20 rounded-xl p-8 flex flex-col md:flex-row items-center gap-8">
           <div className="md:w-1/2">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white">Try it on your next estimate</h2>
-            <p className="text-muted-foreground mb-6">
-              {PLANS.starter.credits} credits, {PLANS.starter.period}, {usd(PLANS.starter.priceUsd)}. Take a photo at your
-              next walkthrough and show the client what their project could look like before you leave.
-            </p>
-            <Link
-              href="/onboarding?plan=starter"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-6 py-3 rounded-md font-medium"
-            >
-              Start the First Job Test <ChevronRight className="w-4 h-4" />
-            </Link>
+            <HomeClosingCta variant={variant} paidDetail={paidDetail} />
           </div>
           <div className="md:w-1/2">
             <Image

@@ -314,6 +314,11 @@ export default function ExteriorStudioPage() {
       if (imageUrl) {
         setCurrentRender(imageUrl)
         setLatestRenders(prev => [imageUrl, ...prev].slice(0, 4))
+        if (demoMode) {
+          void import("@/components/conversion/group-1/analytics").then(({ trackFirstDemoRender }) => {
+            trackFirstDemoRender()
+          })
+        }
       } else {
         console.error('Failed to generate image: No URL returned from API')
       }

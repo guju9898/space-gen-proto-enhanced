@@ -195,6 +195,7 @@ Existing helpers (do not break):
 | `trackBlogEvent` | `components/blog/analytics.ts` | `blog_post_viewed`, `blog_cta_clicked` |
 | `trackContractorDemoEvent` | `components/contractor-demo/analytics.ts` | free-form name; params are strings/numbers/booleans |
 | `trackHumanPolishEvent` | `components/human-polish/analytics.ts` | typed map (`viewed_human_polish`, `initiated_checkout`, `completed_checkout`, …). Sanitizer: `lib/human-polish/analytics-params.ts` |
+| `trackHomepageEvent` | `components/conversion/group-1/analytics.ts` | `homepage_viewed`, `hero_cta_clicked`, `guest_studio_started`, `first_render_completed`. Params: `variant` (`a`\|`b`), optional `destination`, optional `render_type`. |
 
 Rules for new events:
 
@@ -212,7 +213,7 @@ Groups 1 and 7 are not given a product surface in the Group 0 brief. They may on
 
 | Group | Owns (create or extend) | Must not change |
 | --- | --- | --- |
-| **1** | `components/conversion/group-1/**` only, until its own brief names a page. May import shared components. | `app/studio/**`, `app/api/**`, `lib/stripe/**`, `lib/usage/**`, auth |
+| **1** | Homepage composition (`app/page.tsx`) and `components/conversion/group-1/**`. Guest Studio entry stays `/studio/exterior?demo=true`. | Stripe, gallery presets, generation APIs, Human Polish logic, contractor-demo pricing, affiliates. Do not change Studio auth. |
 | **2** Gallery presets | Future `lib/gallery/presets.ts` (schema + typed presets) and gallery presentation that reads it. Public gallery today: `app/gallery/page.tsx`, `app/gallery/[slug]/page.tsx`, `lib/content/gallery.ts`. | Content cron `app/api/cron/content-renders`, `lib/content/run.ts`, Stripe |
 | **3** Canonical pricing | Read and, if extending, wrap `lib/seo/facts.ts` + `lib/stripe/plans.ts`. New offer math goes in future `lib/pricing/` without new price IDs. | Env price IDs, `app/api/stripe/checkout/route.ts` price selection, Human Polish cents |
 | **4** Offer state | Future `lib/offers/` eligibility (with Group 3). UI under `components/conversion/group-4/**`. | Do not store a second price. Do not invent scarcity. |

@@ -3,6 +3,8 @@
 import Image from "next/image"
 import { useEffect, useMemo, useRef, useState } from "react"
 
+import { cn } from "@/lib/utils"
+
 type DefaultCategoryKey = "landscape" | "exterior" | "interior"
 
 export type BeforeAfterCategoryItem = {
@@ -36,11 +38,14 @@ export interface RenderspaceBeforeAfterSliderProps {
   categories?: Record<string, BeforeAfterCategoryItem>
   /** Tab order; should list every key in `categories` when using custom categories. */
   categoryOrder?: string[]
+  /** Optional width override. Defaults to max-w-[900px]. */
+  className?: string
 }
 
 export function RenderspaceBeforeAfterSlider({
   categories: categoriesProp,
   categoryOrder: categoryOrderProp,
+  className,
 }: RenderspaceBeforeAfterSliderProps = {}) {
   const categoryConfig: Record<string, BeforeAfterCategoryItem> = (categoriesProp ??
     DEFAULT_CATEGORY_CONFIG) as Record<string, BeforeAfterCategoryItem>
@@ -179,7 +184,7 @@ export function RenderspaceBeforeAfterSlider({
   const sliderPercentage = sliderPosition * 100
 
   return (
-    <div className="flex flex-col items-center gap-6 max-w-[900px] mx-auto w-full">
+    <div className={cn("flex flex-col items-center gap-6 max-w-[900px] mx-auto w-full", className)}>
       <div
         ref={sliderRef}
         className="relative w-full overflow-hidden rounded-xl border border-white/10 bg-[#191f33] shadow-lg select-none cursor-col-resize"
