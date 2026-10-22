@@ -58,7 +58,7 @@ Spending days and hundreds of dollars on every lead rarely makes sense when:
 
 At that stage, speed beats detail. Rapidly generating photorealistic renderings helps contractors win bids faster, because homeowners commit sooner when they see their own space finished before the quote.
 
-![A covered patio with a gable roof, cedar ceiling, and stone fireplace, next to a house with light blue siding and a large lawn.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-17/covered-patio-porcelain-tile-floor-orlando-photo-to-concept-17-4e7358.png)
+![Concept: covered gable patio with a cedar ceiling and stone fireplace beside a light blue sided house and lawn](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-17/covered-patio-porcelain-tile-floor-orlando-photo-to-concept-17-4e7358.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/covered-patio-porcelain-tile-floor-orlando-photo-to-concept-17-4e7358)
 

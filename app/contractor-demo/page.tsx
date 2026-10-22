@@ -4,9 +4,9 @@ import { ContractorDemoPage } from "@/components/contractor-demo/ContractorDemoP
 
 export const metadata: Metadata = pageMetadata({
   path: "/contractor-demo",
-  title: "Contractor Demo: Close More Outdoor Jobs",
+  title: "Contractor Demo: Show the Job Before You Quote",
   description:
-    "For landscaping and outdoor living contractors: show homeowners before-and-after visuals that close jobs faster, or install our done-for-you premium system.",
+    "For landscaping and outdoor living contractors: turn a photo of the client's yard into a photorealistic concept in about 30 seconds and show it on site.",
 })
 
 export default function ContractorDemoRoute() {

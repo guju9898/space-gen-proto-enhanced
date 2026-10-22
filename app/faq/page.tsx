@@ -11,9 +11,9 @@ const faqs = faqFor("faq")
 
 export const metadata: Metadata = pageMetadata({
   path: "/faq",
-  title: "FAQ: Credits, Licensing, Exports and Billing",
+  title: "FAQ: AI Renderings, Credits and Licensing",
   description:
-    "Answers about Renderspace credits, 4K exports, commercial licensing, data privacy, supported uploads and canceling. What the tool is for and what it is not.",
+    "How Renderspace works: AI renderings from a job-site photo in about 30 seconds, credits, 4K exports, use in proposals and ads, and canceling.",
 })
 
 export default function FAQPage() {
@@ -35,7 +35,7 @@ export default function FAQPage() {
           ))}
         </div>
         <p className="text-center mt-12 text-muted-foreground">
-          Still have questions? <Link href="/pricing" className="text-primary hover:underline inline-flex items-center gap-1">View pricing <ChevronRight className="w-4 h-4" /></Link>
+          Building a proposal? Read <Link href="/blog/visual-proposals-for-homeowners" className="text-primary hover:underline">how to make a visual proposal for homeowners</Link>, or <Link href="/pricing" className="text-primary hover:underline inline-flex items-center gap-1">view pricing <ChevronRight className="w-4 h-4" /></Link>.
         </p>
       </section>
       <SiteFooter className="mt-16" />
