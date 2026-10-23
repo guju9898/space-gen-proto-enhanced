@@ -15,6 +15,7 @@ ctaType: self-serve
 relatedSlugs:
   - ai-landscape-design-software-for-contractors
   - ai-rendering-vs-traditional-rendering-services
+  - visual-proposals-for-homeowners
 ---
 
 Nobody has ever fully committed to a new siding color from a paint chip alone.
@@ -35,7 +36,7 @@ That reaction — understanding and responding to the concept — is what moves 
 
 Take a photo of the actual house: the real siding, roofline, garage door, and context on the street. Upload it, select exterior, and adjust the direction — siding color and material, trim, entry treatment, whatever is on the table. In seconds or minutes you can explore one direction, then a second color, then a trim variation.
 
-Each version costs a generation, not a separate design fee eating margin before the job is signed. You can show two siding options side by side in the same meeting instead of scheduling a follow-up because the client "needs to think about it" without ever having seen the finished look.
+Each version costs a generation, not a separate design fee eating margin before the job is signed. You can show two siding options side by side in the same meeting instead of scheduling a follow-up because the client "needs to think about it" without ever having seen the finished look. To see how that looks on real properties, browse the [before-and-after exterior concepts in the gallery](/gallery).
 
 For a broader view of what self-serve AI is built for — and what it is not — see [AI Landscape Design Software for Contractors](/blog/ai-landscape-design-software-for-contractors).
 

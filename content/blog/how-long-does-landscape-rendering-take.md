@@ -43,7 +43,7 @@ Freelance marketplaces are often quicker to hire, but timelines vary widely by a
 
 With Renderspace, a render typically comes back in about 30 seconds, usually between 20 and 40. You take a phone photo of the yard, choose the direction, and get a photorealistic concept on the client's real property. Settings carry over, so the next change takes about the same time, and you can change one thing at a time.
 
-![A white ranch-style home with a dark roof and black shutters, illuminated by warm uplighting and a path light.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-17/landscape-lighting-dusk-moonlighting-atlanta-photo-to-concept-05-0fb9b6.png)
+![Dusk concept: white ranch-style home with a dark roof and black shutters, lit by warm uplighting and a path light](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-17/landscape-lighting-dusk-moonlighting-atlanta-photo-to-concept-05-0fb9b6.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/landscape-lighting-dusk-moonlighting-atlanta-photo-to-concept-05-0fb9b6)
 

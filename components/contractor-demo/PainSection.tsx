@@ -10,7 +10,7 @@ export function PainSection({ cityLabel: _cityLabel }: PainSectionProps) {
     <section className="container mx-auto px-4 py-14">
       <div className="max-w-6xl mx-auto rounded-xl border border-[#343434] border-l-4 border-l-orange-500 bg-[#191f33]/60 p-10 md:p-12">
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-10 md:mb-12 leading-tight">
-          Here&apos;s What Actually Happening When They Say &quot;Let Me Think About It.&quot;
+          Here&apos;s What&apos;s Actually Happening When They Say &quot;Let Me Think About It.&quot;
         </h2>
         <p className={punch}>They&apos;re not thinking about price.</p>
         <p className={punch}>They&apos;re not comparing you to another contractor.</p>

@@ -82,10 +82,6 @@ For a side-by-side look at AI-assisted and traditional production models, read [
 
 ## What this looks like when it works
 
-Angel R., a project manager at Texas Backyard Kings, described the shift this way:
-
-> "I've been able to double last years deal flow by showing customers concepts for their project on site rather than the back and forth with our in house design team. We've saved hours of rework and on track to add 50% revenue"
-
 That is the practical case for outsourced visualization: less back-and-forth, faster alignment in the sales conversation, and concepts clients can react to while enthusiasm is still high — without carrying a design salary through slow months.
 
 ## When it is worth making the switch
