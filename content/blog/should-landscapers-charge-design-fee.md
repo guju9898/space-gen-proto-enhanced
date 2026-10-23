@@ -8,7 +8,7 @@ category: Workflow
 datePublished: 2026-10-23
 dateModified: 2026-10-23
 author: KeSean Fallon
-featuredImage: /landing/renders/renderspace-exterior-02.png
+featuredImage: /landing/renders/renderspace-exterior-02.webp
 featuredImageAlt: "Concept of a single-story brick home with a curving gravel path, a new lawn and mixed shrub borders"
 primaryIntent: "Decide whether to charge a landscape design fee"
 ctaType: self-serve
