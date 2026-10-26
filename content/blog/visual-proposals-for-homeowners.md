@@ -16,6 +16,7 @@ relatedSlugs:
   - show-landscape-clients-design-before-construction
   - outdoor-kitchen-rendering-from-photo
   - hardscape-visualization-job-site-photo
+  - ai-landscape-design-software-for-contractors
 ---
 
 A visual proposal for homeowners is a quote that shows them a picture of the finished project on their own property, next to the scope and the price. Contractors build one by taking a photo on the site visit, generating a photorealistic concept from it, and placing that image at the front of the proposal so the number reads as "this is what you get."
@@ -56,7 +57,7 @@ You have three realistic options.
 
 **AI rendering from a job-site photo.** You take a phone photo on the visit and get a photorealistic concept in about 30 seconds, typically 20 to 40. Settings carry over, so you can change one thing at a time while the homeowner watches. This is the fastest way to get an image into a proposal the same day.
 
-Many contractors use more than one: a quick AI concept to win the job, then full design or plans once the client says yes.
+Many contractors use more than one: a quick AI concept to win the job, then full design or plans once the client says yes. For what to check before you pick a tool, see [AI landscape design software for contractors](/blog/ai-landscape-design-software-for-contractors).
 
 ## How do you build a visual proposal step by step?
 

@@ -8,6 +8,8 @@ type ProofItem = {
   title: string
   beforeSrc: string
   afterSrc: string
+  beforeAlt: string
+  afterAlt: string
 }
 
 const PROOF_ITEMS: ProofItem[] = [
@@ -15,11 +17,15 @@ const PROOF_ITEMS: ProofItem[] = [
     title: "Backyard overhaul concept",
     beforeSrc: "/images/before-landscape.webp",
     afterSrc: "/images/after-landscape.webp",
+    beforeAlt: "Before: plain lawn behind a single-story brick home with wood privacy fences",
+    afterAlt: "After: concept of the same backyard with a pool, covered patio, lounge chairs and tulip planters",
   },
   {
     title: "Patio and outdoor living concept",
     beforeSrc: contractorDemoSliderData.patio.before,
     afterSrc: contractorDemoSliderData.patio.after,
+    beforeAlt: "Before: grass backyard behind a brick home with a patio swing and grill",
+    afterAlt: "After: evening concept with a cedar pergola, string lights, outdoor dining, gravel beds and a cornhole court",
   },
 ]
 
@@ -30,9 +36,9 @@ function MiniBeforeAfter({ item }: { item: ProofItem }) {
     <div className="rounded-xl border border-[#343434] bg-[#191f33]/50 p-4">
       <h3 className="text-white font-semibold mb-3">{item.title}</h3>
       <div className="relative aspect-[16/10] rounded-lg overflow-hidden">
-        <Image src={item.afterSrc} alt={`${item.title} after`} fill className="object-cover" />
+        <Image src={item.afterSrc} alt={item.afterAlt} fill className="object-cover" />
         <div className="absolute inset-0 overflow-hidden" style={{ width: `${position}%` }}>
-          <Image src={item.beforeSrc} alt={`${item.title} before`} fill className="object-cover" />
+          <Image src={item.beforeSrc} alt={item.beforeAlt} fill className="object-cover" />
         </div>
         <div
           className="absolute inset-y-0 w-1 bg-white/70"
