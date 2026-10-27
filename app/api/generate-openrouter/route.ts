@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { generateImageFromOpenRouter } from "@/lib/api/generateImageFromOpenRouter"
+import { renderCreditCost } from "@/lib/usage/creditCost"
 import { enforceCredits, consumeCredit, consumeDemoCredit, consumeIntroCredit, recordRenderEvent } from "@/lib/usage/enforceCredits"
+import { settleRenderCharge } from "@/lib/usage/settleRenderCharge"
 import { isString, isObject } from "@/lib/types/typeGuards"
 import {
   getDemoSupabase,
@@ -125,9 +127,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // Calculate credit cost: base 1.0 + 0.5 if reference image is present
     const hasReferenceImage = isString(image) && image.trim() !== ""
-    const creditCost = hasReferenceImage ? 1.5 : 1.0
+    const creditCost = renderCreditCost({ hasReferenceImage, renderType: isString(renderType) ? renderType : undefined })
 
     if (!isString(prompt) || !isString(renderType)) {
       return NextResponse.json(
@@ -165,41 +166,26 @@ export async function POST(request: Request) {
       )
     }
 
-    // Record render event for idempotency (only consumes if first time)
-    const isFirstTime = await recordRenderEvent(
-      user.id,
-      creditCheck.periodStart,
+    const settled = await settleRenderCharge({
+      imageUrl,
+      userId: user.id,
+      planId: creditCheck.planId,
       renderId,
-      creditCost
-    )
-
-    let finalCreditsRemaining = creditCheck.creditsRemaining
-
-    if (isFirstTime) {
-      // Only consume credits if this is the first time we've seen this render_id
-      if (creditCheck.planId === "demo") {
-        await consumeDemoCredit(user.id, creditCost)
-      } else if (creditCheck.planId === "intro") {
-        await consumeIntroCredit(user.id, creditCost)
-      } else {
-        await consumeCredit(user.id, creditCheck.periodStart, creditCost)
-      }
-
-      // Recalculate credits remaining after consumption
-      if (creditCheck.creditsRemaining !== null && creditCheck.planId !== "business") {
-        finalCreditsRemaining = Math.max(0, (creditCheck.creditsRemaining || 0) - creditCost)
-      }
-    } else {
-      console.log(`⚠️ Render ${renderId} already processed - skipping credit consumption`)
-    }
+      amount: creditCost,
+      creditsRemaining: creditCheck.creditsRemaining,
+      nearLimit: creditCheck.nearLimit,
+      recordEvent: () => recordRenderEvent(user.id, creditCheck.periodStart, renderId, creditCost),
+      consume: async () => {
+        if (creditCheck.planId === "demo") await consumeDemoCredit(user.id, creditCost)
+        else if (creditCheck.planId === "intro") await consumeIntroCredit(user.id, creditCost)
+        else await consumeCredit(user.id, creditCheck.periodStart, creditCost)
+      },
+    })
 
     return NextResponse.json({
-      imageUrl,
+      imageUrl: settled.imageUrl,
       timestamp: new Date().toISOString(),
-      usage: {
-        nearLimit: creditCheck.nearLimit,
-        creditsRemaining: finalCreditsRemaining,
-      },
+      usage: settled.usage,
     })
   } catch (error) {
     console.error("OpenRouter generation error:", error)

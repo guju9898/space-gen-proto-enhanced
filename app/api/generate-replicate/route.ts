@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
 import Replicate from "replicate"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
+import { renderCreditCost } from "@/lib/usage/creditCost"
 import { enforceCredits, consumeCredit, consumeDemoCredit, consumeIntroCredit, recordRenderEvent } from "@/lib/usage/enforceCredits"
+import { settleRenderCharge } from "@/lib/usage/settleRenderCharge"
 import { isString, isObject } from "@/lib/types/typeGuards"
 import {
   getDemoSupabase,
@@ -203,8 +205,7 @@ export async function POST(req: Request) {
       )
     }
 
-    // Interior always costs 1.0 credit (reference image is required but doesn't add cost)
-    const creditCost = 1.0
+    const creditCost = renderCreditCost({ hasReferenceImage: true, renderType: "interior" })
 
     // Calculate guidance_scale from realism (0-100 -> 0-10, default 7)
     const guidance_scale = typeof realism === "number" ? realism / 10 : 7
@@ -269,40 +270,25 @@ export async function POST(req: Request) {
       )
     }
 
-    // Record render event for idempotency (only consumes if first time)
-    const isFirstTime = await recordRenderEvent(
-      user.id,
-      creditCheck.periodStart,
+    const settled = await settleRenderCharge({
+      imageUrl: generatedImageUrl,
+      userId: user.id,
+      planId: creditCheck.planId,
       renderId,
-      creditCost
-    )
-
-    let finalCreditsRemaining = creditCheck.creditsRemaining
-
-    if (isFirstTime) {
-      // Only consume credits if this is the first time we've seen this render_id
-      if (creditCheck.planId === "demo") {
-        await consumeDemoCredit(user.id, creditCost)
-      } else if (creditCheck.planId === "intro") {
-        await consumeIntroCredit(user.id, creditCost)
-      } else {
-        await consumeCredit(user.id, creditCheck.periodStart, creditCost)
-      }
-
-      // Recalculate credits remaining after consumption
-      if (creditCheck.creditsRemaining !== null && creditCheck.planId !== "business") {
-        finalCreditsRemaining = Math.max(0, (creditCheck.creditsRemaining || 0) - creditCost)
-      }
-    } else {
-      console.log(`⚠️ Render ${renderId} already processed - skipping credit consumption`)
-    }
+      amount: creditCost,
+      creditsRemaining: creditCheck.creditsRemaining,
+      nearLimit: creditCheck.nearLimit,
+      recordEvent: () => recordRenderEvent(user.id, creditCheck.periodStart, renderId, creditCost),
+      consume: async () => {
+        if (creditCheck.planId === "demo") await consumeDemoCredit(user.id, creditCost)
+        else if (creditCheck.planId === "intro") await consumeIntroCredit(user.id, creditCost)
+        else await consumeCredit(user.id, creditCheck.periodStart, creditCost)
+      },
+    })
 
     return NextResponse.json({
-      imageUrl: generatedImageUrl,
-      usage: {
-        nearLimit: creditCheck.nearLimit,
-        creditsRemaining: finalCreditsRemaining,
-      },
+      imageUrl: settled.imageUrl,
+      usage: settled.usage,
     })
   } catch (err: any) {
     console.error("❌ Replicate Interior Error:", err)

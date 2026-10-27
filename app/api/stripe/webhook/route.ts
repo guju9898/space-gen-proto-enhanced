@@ -2,9 +2,12 @@ import { NextResponse } from "next/server"
 import Stripe from "stripe"
 import { createClient } from "@supabase/supabase-js"
 import { upsertLoopsContact, sendLoopsEvent } from "@/lib/loops"
-import { CATALOG } from "@/lib/pricing/catalog"
 import { syncAffiliateStripeEvent } from "@/lib/affiliates/stripe-events"
 import { getStripePriceIds, introRollsIntoProfessional, planCodeForPriceId, shouldRefreshIntroCredits } from "@/lib/stripe/plans"
+import { readSubscriptionPeriod } from "@/lib/stripe/subscriptionPeriod"
+import { CATALOG } from "@/lib/pricing/catalog"
+import { logCreditError } from "@/lib/usage/creditErrors"
+import { grantIntroUsage, type IntroGrantDb } from "@/lib/usage/introGrant"
 
 export const runtime = "nodejs"
 
@@ -26,6 +29,11 @@ function getSupabase() {
 /** Map Stripe price ID to plan code, including annual prices when those env vars exist. */
 function priceIdToPlanCode(priceId: string): "intro" | "professional" | "business" | null {
   return planCodeForPriceId(priceId)
+}
+
+function noteWriteError(scope: string, userId: string, error: { message?: string } | null) {
+  if (!error) return
+  console.error(`❌ ${scope} failed for user ${userId}: ${error.message ?? "unknown error"}`)
 }
 
 function linePriceId(line: unknown): string | null {
@@ -82,6 +90,8 @@ export async function POST(request: Request) {
       webhookSecret
     )
 
+    let introGrantFailed = false
+
     // Handle event types
     switch (event.type) {
       case "checkout.session.completed": {
@@ -113,17 +123,9 @@ export async function POST(request: Request) {
           break
         }
 
-        const stripeSub = sub as Stripe.Subscription & {
-          current_period_start?: number
-          current_period_end?: number
-        }
-
-        const periodStart = stripeSub.current_period_start
-          ? new Date(stripeSub.current_period_start * 1000).toISOString()
-          : new Date().toISOString()
-        const periodEnd = stripeSub.current_period_end
-          ? new Date(stripeSub.current_period_end * 1000).toISOString()
-          : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        const period = readSubscriptionPeriod(sub)
+        const periodStart = period?.startIso ?? new Date().toISOString()
+        const periodEnd = period?.endIso ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
         // Prefer the live Stripe subscription status so trials stay usable.
         const profileStatus =
@@ -136,7 +138,7 @@ export async function POST(request: Request) {
                 : "active"
 
         // Upsert subscriptions table
-        await supabase.from("subscriptions").upsert(
+        const { error: subscriptionError } = await supabase.from("subscriptions").upsert(
           {
             user_id: userId,
             stripe_customer_id: customerId,
@@ -152,6 +154,7 @@ export async function POST(request: Request) {
           },
           { onConflict: "user_id" }
         )
+        noteWriteError("subscriptions upsert", userId, subscriptionError)
 
         // Update profiles (existing behavior)
         const { error: updateError } = await supabase
@@ -164,38 +167,27 @@ export async function POST(request: Request) {
             past_due_since: null,
           })
           .eq("id", userId)
-
-        if (updateError) {
-          console.error("❌ Error updating profile after checkout:", updateError)
-        } else {
-          console.log(`✅ Profile updated for user ${userId} with plan ${planId}`)
-        }
+        noteWriteError("profile update", userId, updateError)
+        if (!updateError) console.log(`✅ Profile updated for user ${userId} with plan ${planId}`)
 
         if (planId === "intro") {
-          await supabase.from("intro_offer_claims").upsert(
+          const { error: claimError } = await supabase.from("intro_offer_claims").upsert(
             { user_id: userId, claimed_at: new Date().toISOString() },
             { onConflict: "user_id" }
           )
+          noteWriteError("intro offer claim", userId, claimError)
 
-          const { data: existingUsage } = await supabase
-            .from("user_usage")
-            .select("user_id")
-            .eq("user_id", userId)
-            .eq("period_start", periodStart)
-            .maybeSingle()
-          if (!existingUsage) {
-            await supabase.from("user_usage").upsert(
-              {
-                user_id: userId,
-                period_start: periodStart,
-                period_end: periodEnd,
-                plan_code: "intro",
-                credits_allocated: CATALOG.intro.credits,
-                credits_used: 0,
-                updated_at: new Date().toISOString(),
-              },
-              { onConflict: "user_id,period_start" }
-            )
+          const grant = await grantIntroUsage(supabase as unknown as IntroGrantDb, { userId, periodStart, periodEnd })
+          if (!grant.ok) {
+            console.error("[credits] webhook_grant", userId, "intro", null, CATALOG.intro.credits, grant.error)
+            await logCreditError({
+              user_id: userId,
+              plan_id: "intro",
+              amount: CATALOG.intro.credits,
+              stage: "webhook_grant",
+              message: grant.error,
+            })
+            introGrantFailed = true
           }
 
           const priceIds = getStripePriceIds()
@@ -216,10 +208,15 @@ export async function POST(request: Request) {
                   { items: [{ price: proPriceId, quantity: 1 }] },
                 ],
               })
-              await supabase
+              const { error: scheduleWriteError } = await supabase
                 .from("subscriptions")
                 .update({ stripe_schedule_id: schedule.id, updated_at: new Date().toISOString() })
                 .eq("user_id", userId)
+              if (scheduleWriteError) {
+                console.error(
+                  `❌ Intro rollover schedule id was not saved for user ${userId}: ${scheduleWriteError.message}`
+                )
+              }
             } catch (scheduleErr) {
               console.error("❌ Failed to create intro→pro schedule:", scheduleErr)
             }
@@ -297,11 +294,8 @@ export async function POST(request: Request) {
             })
             .eq("id", profile.id)
 
-          if (updateError) {
-            console.error("❌ Error updating profile for payment success:", updateError)
-          } else {
-            console.log(`✅ Profile updated for user ${profile.id} - payment succeeded`)
-          }
+          noteWriteError("profile update after payment", profile.id, updateError)
+          if (!updateError) console.log(`✅ Profile updated for user ${profile.id} - payment succeeded`)
 
           const introPriceId = getStripePriceIds().intro
           const line = invoice.lines?.data?.[0]
@@ -317,25 +311,21 @@ export async function POST(request: Request) {
             const cycleStart = period?.start ? new Date(period.start * 1000).toISOString() : null
             const cycleEnd = period?.end ? new Date(period.end * 1000).toISOString() : null
             if (cycleStart && cycleEnd) {
-              const { data: existingCycle } = await supabase
-                .from("user_usage")
-                .select("user_id")
-                .eq("user_id", profile.id)
-                .eq("period_start", cycleStart)
-                .maybeSingle()
-              if (!existingCycle) {
-                await supabase.from("user_usage").upsert(
-                  {
-                    user_id: profile.id,
-                    period_start: cycleStart,
-                    period_end: cycleEnd,
-                    plan_code: "intro",
-                    credits_allocated: CATALOG.intro.credits,
-                    credits_used: 0,
-                    updated_at: new Date().toISOString(),
-                  },
-                  { onConflict: "user_id,period_start" }
-                )
+              const grant = await grantIntroUsage(supabase as unknown as IntroGrantDb, {
+                userId: profile.id,
+                periodStart: cycleStart,
+                periodEnd: cycleEnd,
+              })
+              if (!grant.ok) {
+                console.error("[credits] webhook_grant", profile.id, "intro", null, CATALOG.intro.credits, grant.error)
+                await logCreditError({
+                  user_id: profile.id,
+                  plan_id: "intro",
+                  amount: CATALOG.intro.credits,
+                  stage: "webhook_grant",
+                  message: grant.error,
+                })
+                introGrantFailed = true
               }
             }
           }
@@ -371,7 +361,7 @@ export async function POST(request: Request) {
           ? new Date(stripeSub.current_period_end * 1000).toISOString()
           : null
         // Preserve Stripe `trialing` so intro/trial customers keep generation access.
-        // Mapping trialing → inactive was blocking the 40-credit / 7-day intro allowance.
+        // Mapping trialing → inactive was blocking the 40-credit weekly intro allowance.
         const status =
           subscription.status === "active"
             ? "active"
@@ -457,6 +447,10 @@ export async function POST(request: Request) {
 
       default:
         console.log(`Unhandled event type: ${event.type}`)
+    }
+
+    if (introGrantFailed) {
+      return NextResponse.json({ error: "Failed to grant intro credits" }, { status: 500 })
     }
 
     const affiliateSync = await syncAffiliateStripeEvent(event, supabase)

@@ -39,7 +39,9 @@ import { exteriorDefaults } from "@/lib/studio/defaults"
 import { GalleryPresetBanner } from "@/components/gallery/GalleryPresetBanner"
 import { useGalleryPreset } from "@/components/gallery/useGalleryPreset"
 import { trackPresetRenderCompleted } from "@/components/gallery/analytics"
+import { RENDER_CREDIT_COST } from "@/lib/usage/creditCost"
 import { getCreditErrorMessage } from "@/lib/usage/errorMessages"
+import { StudioCreditBadge } from "@/components/Studio/StudioCreditBadge"
 import { useAuth } from "@/components/auth/AuthContext"
 import { usePathname, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
@@ -836,7 +838,10 @@ export default function ExteriorStudioPage() {
           
           {error && (
             <div className="bg-destructive/10 text-destructive px-4 py-2 rounded-md text-sm">
-              {error}
+              <p>{error}</p>
+              {(error.includes("credit") || error.includes("plan") || error.includes("First Job Test")) && (
+                <a href="/pricing" className="mt-1 inline-block font-medium underline">Upgrade your plan</a>
+              )}
             </div>
           )}
 
@@ -847,13 +852,9 @@ export default function ExteriorStudioPage() {
           ) : (
             <>
               <div className="pt-4 space-y-2">
-                {creditsRemaining !== null && (
-                  <div className="text-sm text-muted-foreground">
-                    Credits remaining: <span className="font-medium text-foreground">{creditsRemaining}</span>
-                  </div>
-                )}
+                <StudioCreditBadge remainingOverride={creditsRemaining} />
                 <div className="text-xs text-muted-foreground">
-                  This render uses {imageState.uploadedUrl || (isString(exteriorConfig.image) && exteriorConfig.image.startsWith("http")) ? "1.5" : "1.0"} credits
+                  This render uses {RENDER_CREDIT_COST} credit
                 </div>
                 <div className="text-xs text-muted-foreground italic">
                   Credits are only deducted after a successful render appears.

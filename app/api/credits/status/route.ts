@@ -33,6 +33,8 @@ export async function GET(request: Request) {
     return NextResponse.json({
       creditsRemaining: creditCheck.creditsRemaining,
       monthlyLimit: creditCheck.monthlyLimit,
+      planId: creditCheck.planId,
+      reason: creditCheck.reason ?? null,
     })
   } catch (error) {
     console.error("❌ Error fetching credit status:", error)

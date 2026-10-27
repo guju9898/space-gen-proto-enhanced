@@ -1,4 +1,9 @@
-import { createClient } from "@supabase/supabase-js"
+import { createClient, type SupabaseClient } from "@supabase/supabase-js"
+import Stripe from "stripe"
+import { CATALOG } from "@/lib/pricing/catalog"
+import { periodIsLive, readSubscriptionPeriod } from "@/lib/stripe/subscriptionPeriod"
+import { logCreditError } from "@/lib/usage/creditErrors"
+import { introUsageGrant } from "@/lib/usage/introGrant"
 import { isUsableSubscriptionStatus } from "@/lib/usage/subscriptionStatus"
 
 /**
@@ -13,7 +18,7 @@ import { isUsableSubscriptionStatus } from "@/lib/usage/subscriptionStatus"
  * (and legacy inactive, which older webhooks incorrectly stored for Stripe trialing).
  */
 
-export type DenialReason = "no_plan" | "past_due" | "credits_exhausted" | "subscription_inactive"
+export type DenialReason = "no_plan" | "past_due" | "credits_exhausted" | "subscription_inactive" | "intro_period_ended"
 
 export interface CreditEnforcementResult {
   allow: boolean
@@ -27,33 +32,147 @@ export interface CreditEnforcementResult {
 
 export { isUsableSubscriptionStatus } from "@/lib/usage/subscriptionStatus"
 
-export async function enforceCredits(userId: string): Promise<CreditEnforcementResult> {
+type UsageDb = SupabaseClient
+
+type StripeSubscriptionSnapshot = {
+  status: string
+  current_period_start?: number | null
+  current_period_end?: number | null
+  items?: {
+    data?: Array<{
+      current_period_start?: number | null
+      current_period_end?: number | null
+    }>
+  } | null
+}
+
+export type EnforceCreditsOptions = {
+  db?: UsageDb
+  now?: Date
+  loadSubscription?: (subscriptionId: string) => Promise<StripeSubscriptionSnapshot | null>
+}
+
+function usageDb(): UsageDb | null {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!supabaseUrl || !supabaseServiceRoleKey) return null
+  return createClient(supabaseUrl, supabaseServiceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
+}
 
-  if (!supabaseUrl || !supabaseServiceRoleKey) {
+type IntroUsageRow = {
+  period_start: string
+  credits_allocated: number | string | null
+  credits_used: number | string | null
+  period_end: string
+}
+
+function asNumber(value: number | string | null | undefined): number {
+  if (typeof value === "number") return value
+  return parseFloat(String(value ?? 0))
+}
+
+async function loadLiveIntroUsage(db: UsageDb, userId: string, nowIso: string): Promise<IntroUsageRow | null> {
+  const { data } = await db
+    .from("user_usage")
+    .select("period_start, credits_allocated, credits_used, period_end")
+    .eq("user_id", userId)
+    .eq("plan_code", "intro")
+    .gt("period_end", nowIso)
+    .limit(1)
+  return (data?.[0] as IntroUsageRow | undefined) ?? null
+}
+
+/**
+ * Buyers who paid before plan_id was written have no user_usage row.
+ * Recreate the 40-credit window from the live Stripe subscription period.
+ */
+async function healIntroUsage(
+  db: UsageDb,
+  userId: string,
+  now: Date,
+  loadSubscription: EnforceCreditsOptions["loadSubscription"]
+): Promise<"granted" | "period_ended" | "unavailable"> {
+  const { data: profile, error: profileError } = await db
+    .from("profiles")
+    .select("stripe_subscription_id")
+    .eq("id", userId)
+    .maybeSingle()
+  if (profileError || !profile?.stripe_subscription_id) {
+    console.error(`Intro self-heal skipped for user ${userId}: no Stripe subscription on the profile`)
+    return "unavailable"
+  }
+
+  const subscriptionId = profile.stripe_subscription_id as string
+  let snapshot: StripeSubscriptionSnapshot | null = null
+  if (loadSubscription) {
+    snapshot = await loadSubscription(subscriptionId)
+  } else {
+    const key = process.env.STRIPE_SECRET_KEY
+    if (!key) {
+      console.error(`Intro self-heal skipped for user ${userId}: Stripe is not configured`)
+      return "unavailable"
+    }
+    try {
+      const stripe = new Stripe(key)
+      snapshot = await stripe.subscriptions.retrieve(subscriptionId)
+    } catch (error) {
+      console.error(`Intro self-heal could not read the Stripe subscription for user ${userId}`, error)
+      return "unavailable"
+    }
+  }
+
+  if (!snapshot || (snapshot.status !== "active" && snapshot.status !== "trialing")) {
+    console.error(`Intro self-heal skipped for user ${userId}: subscription is not active`)
+    return "unavailable"
+  }
+
+  const period = readSubscriptionPeriod(snapshot)
+  if (!period || !periodIsLive(period.endIso, now.getTime())) {
+    console.error(`Intro self-heal found an ended billing window for user ${userId}`)
+    return "period_ended"
+  }
+
+  const grant = introUsageGrant({
+    userId,
+    periodStart: period.startIso,
+    periodEnd: period.endIso,
+    now,
+  })
+  const { error } = await db.from("user_usage").insert(grant)
+  if (error && error.code !== "23505") {
+    console.error(`Intro self-heal failed to write credits for user ${userId}: ${error.message}`)
+    return "unavailable"
+  }
+
+  console.log(
+    `Self-healed intro credits for user ${userId}: ${CATALOG.intro.credits} credits, period ends ${period.endIso}`
+  )
+  return "granted"
+}
+
+export async function enforceCredits(
+  userId: string,
+  options: EnforceCreditsOptions = {}
+): Promise<CreditEnforcementResult> {
+  const supabase = options.db ?? usageDb()
+  const now = options.now ?? new Date()
+
+  if (!supabase) {
     console.error("❌ Supabase configuration missing for credit enforcement")
     // Fail closed - deny if Supabase is misconfigured
     return {
       allow: false,
       nearLimit: false,
       creditsRemaining: 0,
-      periodStart: new Date().toISOString().slice(0, 7), // YYYY-MM format
+      periodStart: now.toISOString().slice(0, 7), // YYYY-MM format
       planId: null,
       monthlyLimit: null,
       reason: "no_plan",
     }
   }
 
-  const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  })
-
-  // Get current period start (first day of current month in UTC)
-  const now = new Date()
   const periodStart = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-01T00:00:00.000Z`
 
   // Demo access: allow render if user has valid demo_access row (before paid subscription check)
@@ -192,17 +311,24 @@ export async function enforceCredits(userId: string): Promise<CreditEnforcementR
       }
     }
 
-    // Intro plan: credits from user_usage (plan_code=intro, period_end > now)
+      // Intro plan: credits from user_usage (plan_code=intro, period_end > now)
     if (planId === "intro") {
-      const { data: introUsageRows } = await supabase
-        .from("user_usage")
-        .select("period_start, credits_allocated, credits_used, period_end")
-        .eq("user_id", userId)
-        .eq("plan_code", "intro")
-        .gt("period_end", nowIso)
-        .limit(1)
-
-      const introRow = introUsageRows?.[0]
+      let introRow = await loadLiveIntroUsage(supabase, userId, nowIso)
+      if (!introRow && isUsableSubscriptionStatus(subscriptionStatus)) {
+        const healed = await healIntroUsage(supabase, userId, now, options.loadSubscription)
+        if (healed === "period_ended") {
+          return {
+            allow: false,
+            nearLimit: false,
+            creditsRemaining: 0,
+            periodStart,
+            planId: "intro",
+            monthlyLimit: CATALOG.intro.credits,
+            reason: "intro_period_ended",
+          }
+        }
+        if (healed === "granted") introRow = await loadLiveIntroUsage(supabase, userId, nowIso)
+      }
       if (!introRow) {
         return {
           allow: false,
@@ -210,19 +336,13 @@ export async function enforceCredits(userId: string): Promise<CreditEnforcementR
           creditsRemaining: 0,
           periodStart,
           planId: "intro",
-          monthlyLimit: null,
+          monthlyLimit: CATALOG.intro.credits,
           reason: "credits_exhausted",
         }
       }
 
-      const allocated =
-        typeof introRow.credits_allocated === "number"
-          ? introRow.credits_allocated
-          : parseFloat(String(introRow.credits_allocated ?? 0))
-      const used =
-        typeof introRow.credits_used === "number"
-          ? introRow.credits_used
-          : parseFloat(String(introRow.credits_used ?? 0))
+      const allocated = asNumber(introRow.credits_allocated)
+      const used = asNumber(introRow.credits_used)
       const creditsRemaining = Math.max(0, allocated - used)
       const nearLimit = creditsRemaining <= allocated * 0.1
       const introPeriodStart =
@@ -282,12 +402,13 @@ export async function enforceCredits(userId: string): Promise<CreditEnforcementR
     const monthlyLimit = plan.monthly_credits
 
     // Get current month's usage from user_usage table
-    const { data: usage, error: usageError } = await supabase
+    const { data: usage } = await supabase
       .from("user_usage")
       .select("credits_used")
       .eq("user_id", userId)
-      .eq("period_start", periodStart)
-      .single()
+      .eq("plan_code", planId)
+      .eq("period_start", periodStart.slice(0, 10))
+      .maybeSingle()
 
     // Parse credits_used as number (handles both integer and decimal)
     const creditsUsed = usage?.credits_used 
@@ -331,56 +452,38 @@ export async function enforceCredits(userId: string): Promise<CreditEnforcementR
  * Call only when creditCheck.planId === 'intro'.
  */
 export async function consumeIntroCredit(userId: string, amount: number): Promise<void> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!supabaseUrl || !supabaseServiceRoleKey) {
+  const supabase = usageDb()
+  if (!supabase) {
     console.error("❌ Supabase configuration missing for intro credit consumption")
     throw new Error("Intro credit consumption not configured")
   }
 
-  const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
-
   const nowIso = new Date().toISOString()
-  const { data: row } = await supabase
-    .from("user_usage")
-    .select("period_start, credits_allocated, credits_used")
-    .eq("user_id", userId)
-    .eq("plan_code", "intro")
-    .gt("period_end", nowIso)
-    .limit(1)
-    .single()
-
+  const row = await loadLiveIntroUsage(supabase, userId, nowIso)
   if (!row) {
     throw new Error("Intro credits exhausted or period ended")
   }
 
-  const used =
-    typeof row.credits_used === "number" ? row.credits_used : parseFloat(String(row.credits_used ?? 0))
-  const allocated =
-    typeof row.credits_allocated === "number"
-      ? row.credits_allocated
-      : parseFloat(String(row.credits_allocated ?? 0))
-  const newUsed = used + amount
-  if (newUsed > allocated) {
-    throw new Error("Intro credits exhausted")
-  }
-
-  const periodStart =
-    typeof row.period_start === "string" ? row.period_start : new Date(row.period_start).toISOString()
-  const { error } = await supabase
-    .from("user_usage")
-    .update({ credits_used: newUsed, updated_at: new Date().toISOString() })
-    .eq("user_id", userId)
-    .eq("period_start", periodStart)
+  const periodStart = String(row.period_start).slice(0, 10)
+  const { data, error } = await supabase.rpc("consume_user_credits", {
+    p_user_id: userId,
+    p_period_start: periodStart,
+    p_plan_code: "intro",
+    p_amount: amount,
+    p_credits_allocated: null,
+    p_uncapped: false,
+  })
 
   if (error) {
-    console.error("❌ Error consuming intro credit:", error)
+    console.error(`❌ Error consuming intro credit for user ${userId}: ${error.message}`)
     throw new Error("Intro credit consumption failed")
   }
-  console.log(`✅ Intro credit consumed for user ${userId}, amount: ${amount}, total used: ${newUsed}`)
+  const rows = Array.isArray(data) ? data : data ? [data] : []
+  if (rows.length === 0) {
+    throw new Error("Intro credits exhausted")
+  }
+  const total = asNumber((rows[0] as { credits_used?: number | string }).credits_used)
+  console.log(`✅ Intro credit consumed for user ${userId}, amount: ${amount}, total used: ${total}`)
 }
 
 /**
@@ -422,22 +525,27 @@ export async function consumeDemoCredit(userId: string, amount: number): Promise
   console.log(`✅ Demo credit consumed for user ${userId}, amount: ${amount}, total used: ${(updated as { credits_used: number }).credits_used}`)
 }
 
+export type RenderEventWrite = "inserted" | "duplicate" | "failed"
+
 /**
- * Record a render event for idempotency check
- * Returns true if event was successfully inserted (first time), false if duplicate
+ * Record a render id so a retry does not charge twice.
+ * Returns "duplicate" when this render was already stored.
+ * Returns "failed" when the insert cannot be stored. The caller still charges that request
+ * so a bookkeeping failure is not a free render. Once this insert works, the unique
+ * (user_id, render_id) index makes the retry a duplicate instead of a second charge.
  */
 export async function recordRenderEvent(
   userId: string,
   periodStart: string,
   renderId: string,
   cost: number
-): Promise<boolean> {
+): Promise<RenderEventWrite> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!supabaseUrl || !supabaseServiceRoleKey) {
-    console.error("❌ Supabase configuration missing for render event recording")
-    return false
+    console.error("[credits] render_event_failed", userId, null, renderId, cost, "Supabase is not configured")
+    return "failed"
   }
 
   const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
@@ -453,94 +561,105 @@ export async function recordRenderEvent(
       .from("user_render_events")
       .insert({
         user_id: userId,
-        period_start: periodStart,
         render_id: renderId,
+        period_start: periodStart,
         cost: cost,
+        credits_used: cost,
       })
 
     if (insertError) {
-      // Check if it's a duplicate key error (unique constraint violation)
       if (insertError.code === "23505" || insertError.message.includes("duplicate") || insertError.message.includes("unique")) {
         console.log(`⚠️ Render event ${renderId} already exists - skipping credit consumption (idempotency)`)
-        return false // Duplicate detected
+        return "duplicate"
       }
-      console.error("❌ Error recording render event:", insertError)
-      return false
+      const message = insertError.message || "render event insert failed"
+      console.error("[credits] render_event_failed", userId, null, renderId, cost, message)
+      await logCreditError({
+        user_id: userId,
+        render_id: renderId,
+        amount: cost,
+        stage: "render_event",
+        message,
+      })
+      return "failed"
     }
 
     console.log(`✅ Render event recorded: ${renderId}, cost: ${cost}`)
-    return true // Successfully inserted (first time)
+    return "inserted"
   } catch (error) {
-    console.error("❌ Unexpected error recording render event:", error)
-    return false
+    const message = error instanceof Error ? error.message : "render event insert failed"
+    console.error("[credits] render_event_failed", userId, null, renderId, cost, message)
+    await logCreditError({
+      user_id: userId,
+      render_id: renderId,
+      amount: cost,
+      stage: "render_event",
+      message,
+    })
+    return "failed"
   }
 }
 
 /**
- * Consume credits after successful generation
- * Upserts into user_usage table, adding amount to existing credits_used
- * Supports fractional credits (e.g., 1.0, 1.5)
+ * Record professional or business usage after a successful render.
+ * plan_id is the profile's current plan. The increment is atomic and accepts fractional costs.
  */
 export async function consumeCredit(
   userId: string,
   periodStart: string,
   amount: number
 ): Promise<void> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!supabaseUrl || !supabaseServiceRoleKey) {
+  const supabase = usageDb()
+  if (!supabase) {
     console.error("❌ Supabase configuration missing for credit consumption")
-    return
+    throw new Error("Credit consumption not configured")
   }
 
-  const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("current_plan")
+    .eq("id", userId)
+    .single()
+  const planCode = profile?.current_plan
+  if (profileError || !planCode) {
+    console.error(`❌ Credit consumption failed for user ${userId}: no current plan`)
+    throw new Error("Credit consumption failed")
+  }
+
+  let allocated: number | null = null
+  const uncapped = planCode === "business"
+  if (!uncapped) {
+    const { data: plan, error: planError } = await supabase
+      .from("plans")
+      .select("monthly_credits")
+      .eq("id", planCode)
+      .single()
+    if (planError || plan?.monthly_credits == null) {
+      console.error(`❌ Credit consumption failed for user ${userId}: plan ${planCode} has no allowance`)
+      throw new Error("Credit consumption failed")
+    }
+    allocated = Number(plan.monthly_credits)
+  }
+
+  const { data, error } = await supabase.rpc("consume_user_credits", {
+    p_user_id: userId,
+    p_period_start: periodStart.slice(0, 10),
+    p_plan_code: planCode,
+    p_amount: amount,
+    p_credits_allocated: allocated,
+    p_uncapped: uncapped,
   })
 
-  try {
-    // Get current usage
-    const { data: existing } = await supabase
-      .from("user_usage")
-      .select("credits_used")
-      .eq("user_id", userId)
-      .eq("period_start", periodStart)
-      .single()
-
-    // Parse existing credits_used as number (handles both integer and decimal)
-    const existingCredits = existing?.credits_used 
-      ? (typeof existing.credits_used === "string" 
-          ? parseFloat(existing.credits_used) 
-          : Number(existing.credits_used))
-      : 0
-
-    const newCreditsUsed = existingCredits + amount
-
-    // Upsert: insert or update credits_used
-    const { error: upsertError } = await supabase
-      .from("user_usage")
-      .upsert(
-        {
-          user_id: userId,
-          period_start: periodStart,
-          credits_used: newCreditsUsed,
-          updated_at: new Date().toISOString(),
-        },
-        {
-          onConflict: "user_id,period_start",
-        }
-      )
-
-    if (upsertError) {
-      console.error("❌ Error consuming credit:", upsertError)
-    } else {
-      console.log(`✅ Credit consumed for user ${userId}, period ${periodStart}, amount: ${amount}, total: ${newCreditsUsed}`)
-    }
-  } catch (error) {
-    console.error("❌ Unexpected error consuming credit:", error)
+  if (error) {
+    console.error(`❌ Error consuming credit for user ${userId}: ${error.message}`)
+    throw new Error("Credit consumption failed")
   }
+  const rows = Array.isArray(data) ? data : data ? [data] : []
+  if (rows.length === 0) {
+    console.error(`❌ Credit consumption rejected for user ${userId}: allowance exceeded`)
+    throw new Error("Credits exhausted")
+  }
+  const total = asNumber((rows[0] as { credits_used?: number | string }).credits_used)
+  console.log(`✅ Credit consumed for user ${userId}, plan ${planCode}, amount: ${amount}, total: ${total}`)
 }
 

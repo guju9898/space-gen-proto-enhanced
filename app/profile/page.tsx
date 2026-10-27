@@ -8,6 +8,7 @@ import { Loader2, User, CreditCard, Coins, LogOut, CheckCircle2, AlertCircle, XC
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { CATALOG } from "@/lib/pricing/catalog"
+import { getCreditErrorMessage } from "@/lib/usage/errorMessages"
 import { LifecycleOffer } from "@/components/conversion/group-4/LifecycleOffer"
 
 interface ProfileData {
@@ -19,6 +20,8 @@ interface ProfileData {
 interface CreditsData {
   creditsRemaining: number | null
   monthlyLimit: number | null
+  planId?: string | null
+  reason?: string | null
 }
 
 const planNames: Record<string, string> = {
@@ -108,6 +111,8 @@ export default function ProfilePage() {
           setCredits({
             creditsRemaining: creditsData.creditsRemaining,
             monthlyLimit: creditsData.monthlyLimit,
+            planId: creditsData.planId,
+            reason: creditsData.reason,
           })
         } else {
           console.error("Error fetching credits:", await creditsResponse.json())
@@ -323,16 +328,25 @@ export default function ProfilePage() {
             Credits & Usage
           </CardTitle>
           <CardDescription>
-            Your monthly credit allocation
+            {profile?.current_plan === "intro"
+              ? "Your First Job Test credits for this 7-day window"
+              : "Your credit allocation"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {(credits?.reason === "intro_period_ended" || credits?.reason === "credits_exhausted") && (
+            <p className="text-sm text-destructive">
+              {getCreditErrorMessage(credits.reason)}{" "}
+              <a href="/pricing" className="font-medium underline">Upgrade your plan</a>
+            </p>
+          )}
           <div className="flex items-center justify-between py-2 border-b border-border">
             <span className="text-sm text-muted-foreground">Credits Remaining</span>
             <span className="text-sm font-medium">
               {credits?.creditsRemaining !== null && credits?.creditsRemaining !== undefined
                 ? credits.creditsRemaining.toFixed(1)
                 : "Unlimited"}
+              {credits?.planId === "intro" && credits.monthlyLimit != null ? ` of ${credits.monthlyLimit.toFixed(0)}` : ""}
             </span>
           </div>
           <div className="flex items-center justify-between py-2">
