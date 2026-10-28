@@ -8,9 +8,21 @@ interface MailerPreviewSectionProps {
 }
 
 const MAILERS = [
-  { src: "/images/mailers/mailer-backyard.png", title: "Backyard Transformation Mailer" },
-  { src: "/images/mailers/mailer-frontyard.png", title: "Front Yard Upgrade Mailer" },
-  { src: "/images/mailers/mailer-outdoor.png", title: "Outdoor Living Concept Mailer" },
+  {
+    src: "/images/mailers/mailer-backyard.png",
+    title: "Backyard Transformation Mailer",
+    alt: "Backyard mailer: before photo of a plain lawn beside an evening concept with a stone fountain and lit planting beds",
+  },
+  {
+    src: "/images/mailers/mailer-frontyard.png",
+    title: "Front Yard Upgrade Mailer",
+    alt: "Front yard mailer: before photo of a new home beside a concept with a tiered fountain, flower beds and flowering trees",
+  },
+  {
+    src: "/images/mailers/mailer-outdoor.png",
+    title: "Outdoor Living Concept Mailer",
+    alt: "Outdoor living mailer: before photo of a lawn beside a concept with a sport court, pergola and stone paving",
+  },
 ]
 
 export function MailerPreviewSection({ onViewed }: MailerPreviewSectionProps) {
@@ -54,7 +66,7 @@ export function MailerPreviewSection({ onViewed }: MailerPreviewSectionProps) {
               <div className="relative aspect-[3/2] w-full rounded-lg overflow-hidden">
                 <Image
                   src={mailer.src}
-                  alt={mailer.title}
+                  alt={mailer.alt}
                   fill
                   className="object-cover object-center"
                   sizes="(min-width: 768px) 33vw, 100vw"
