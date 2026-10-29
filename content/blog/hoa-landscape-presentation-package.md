@@ -1,12 +1,12 @@
 ---
 slug: hoa-landscape-presentation-package
 title: "HOA Landscape Presentation Packages: What to Include for Design Review"
-seoTitle: HOA Landscape Presentation Package for Design Review | Human Polish
-description: What to include in an HOA landscape presentation package for design review — and how visualization can support submissions without replacing permits or association decisions.
+seoTitle: HOA Landscape Presentation Package Checklist | Renderspace
+description: "What to include in an HOA landscape presentation package for design review, with a pre-submission checklist and what visualization can't replace."
 excerpt: A practical checklist for HOA and design-review submissions, with clear scope on what presentation packages include — and what approval authority remains with the association.
 category: Human Polish
 datePublished: 2026-08-11
-dateModified: 2026-08-11
+dateModified: 2026-10-29
 author: Renderspace
 featuredImage: /images/contractor-demo/front-yard-after-fountain-plum-tree.png
 featuredImageAlt: Front yard concept with a tiered fountain, flowering plum trees, paver walk and seating at a white farmhouse
@@ -69,7 +69,7 @@ Use approved framing: "designed to support HOA and design-review submissions" or
 
 ## Fast concepts vs formal presentation packages
 
-Self-serve AI concepts — generated in seconds or minutes from a job-site photo — are valuable for early client alignment and selling the direction. They are typically not sufficient alone for a formal design-review packet, where committees expect measured context, material clarity, and views tied to the property information you provide.
+Self-serve AI concepts — generated in about 30 seconds from a job-site photo — are valuable for early client alignment and selling the direction. They are typically not sufficient alone for a formal design-review packet, where committees expect measured context, material clarity, and views tied to the property information you provide.
 
 For a comparison of when self-serve, Human Polish, and traditional production fit different stages, see [AI Rendering vs. Traditional Rendering Services for Contractors](/blog/ai-rendering-vs-traditional-rendering-services). For the broader case of outsourcing visualization instead of building it in-house, see [Outsourced Visualization for Landscape Contractors](/blog/outsourced-visualization-for-landscape-contractors).
 

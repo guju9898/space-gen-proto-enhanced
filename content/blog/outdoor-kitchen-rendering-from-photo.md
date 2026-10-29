@@ -2,11 +2,11 @@
 slug: outdoor-kitchen-rendering-from-photo
 title: "Outdoor Kitchen Rendering: From Job-Site Photo to Client Presentation"
 seoTitle: Outdoor Kitchen Rendering for Contractors | Renderspace
-description: How contractors turn a job-site photo into an outdoor kitchen concept for client presentations — in minutes, not days — while gas, electrical, and code work stay with the right professionals.
+description: "Turn a job-site photo into an outdoor kitchen concept in about 30 seconds to show clients, while gas, electrical and code work stay with licensed pros."
 excerpt: Outdoor kitchens are hard to describe and easy to downscope when clients cannot picture them. Photo-to-concept visualization on-site keeps the full vision on the table.
 category: Use case
 datePublished: 2026-08-11
-dateModified: 2026-08-11
+dateModified: 2026-10-29
 author: Renderspace
 featuredImage: /images/mailers/mailer-outdoor.png
 featuredImageAlt: "Before and after: plain backyard lawn redesigned with a sport court and shaded pergola beside a modern house"
@@ -39,7 +39,7 @@ The workflow mirrors other hardscape visualization jobs, with outdoor-kitchen-sp
 
 1. **Photograph the footprint** — side yard, patio extension, or existing slab you are building from.
 2. **Upload and set direction** — grill island, counter run, pergola or shade structure, seating adjacency.
-3. **Generate concepts in seconds** — first passes typically within about a minute; high-resolution output [in minutes](/faq).
+3. **Generate a concept in about 30 seconds** — typically 20 to 40, with [4K export](/faq).
 4. **Iterate on-site** — counter material, layout mirror, with or without overhead structure — while the client reacts in real space.
 
 Because the render uses their property, not a catalog scene, the conversation shifts from abstract features to concrete preferences: "Can we move the sink to this side?" instead of "I'm not sure I need all that."
@@ -72,6 +72,20 @@ Large outdoor living builds — full kitchens with multiple zones, projects head
 **Build-Ready Essentials 2D ($599, 3–5 business days)** and **Essentials 3D ($899, 5–10 business days)** support presentation packages scoped and reviewed before payment. They are visualization and presentation support — not architecture, engineering, permits, or stamped plans.
 
 For an honest overview of where AI tools fit in the contractor stack, read [AI Landscape Design Software for Contractors: What It Does Well—and What It Doesn't](/blog/ai-landscape-design-software-for-contractors).
+
+## Frequently asked questions
+
+### Can AI render an outdoor kitchen from a photo of my client's patio?
+
+Yes. Upload a phone photo of the patio or yard, choose an outdoor kitchen direction, and Renderspace returns a photorealistic concept on that real space in about 30 seconds.
+
+### Can I change the countertop or layout without starting over?
+
+Yes. Settings carry over, so you can change one thing at a time, such as the counter material or whether a pergola covers the cooking zone.
+
+### Does an outdoor kitchen rendering replace gas or electrical plans?
+
+No. It is a concept for client presentation. Gas, electrical, structural and code work stay with licensed professionals.
 
 ## Try it on the next outdoor kitchen walk-through
 

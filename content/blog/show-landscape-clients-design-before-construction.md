@@ -1,12 +1,12 @@
 ---
 slug: show-landscape-clients-design-before-construction
 title: How Landscape Contractors Show Clients a Design Before Construction
-seoTitle: How Landscape Contractors Show Clients a Design Before Construction | Renderspace
-description: How landscape contractors use job-site photo visualization to show clients a real design direction before construction — while the homeowner is still standing in the yard.
-excerpt: Standing in a backyard describing a patio with your hands is a hard sell. Showing the same idea on their actual property, in minutes, changes the conversation.
+seoTitle: Show a Landscape Design Before Construction | Renderspace
+description: "How landscape contractors show clients a design on their own yard before construction: a photo, a concept in about 30 seconds, and what it doesn't replace."
+excerpt: Standing in a backyard describing a patio with your hands is a hard sell. Showing the same idea on their actual property, in about 30 seconds, changes the conversation.
 category: Visualization
 datePublished: 2026-08-11
-dateModified: 2026-08-11
+dateModified: 2026-10-29
 author: Renderspace
 featuredImage: /images/before-landscape.webp
 featuredImageAlt: "Before: plain backyard lawn behind a single-story brick home, the job-site photo used for a landscape concept"
@@ -16,6 +16,7 @@ relatedSlugs:
   - ai-landscape-design-software-for-contractors
   - hardscape-visualization-job-site-photo
   - visual-proposals-for-homeowners
+  - ai-rendering-vs-traditional-rendering-services
 ---
 
 It's 4:15 on a Tuesday and you're standing in somebody's backyard.
@@ -63,7 +64,7 @@ For a deeper look at what AI landscape tools handle well — and where they stop
 
 ## Where this fits in your process
 
-Use on-site visualization at the estimate or walk-through, when direction is still open. Use detailed design, engineering, and permitting the way you always have, with the professionals who do that work. To turn the concept into the front page of your quote, see [how to build a visual proposal for homeowners](/blog/visual-proposals-for-homeowners).
+Use on-site visualization at the estimate or walk-through, when direction is still open. Use detailed design, engineering, and permitting the way you always have, with the professionals who do that work. If you are weighing a quick concept against a full rendering studio, see [AI rendering vs traditional rendering services](/blog/ai-rendering-vs-traditional-rendering-services). To turn the concept into the front page of your quote, see [how to build a visual proposal for homeowners](/blog/visual-proposals-for-homeowners).
 
 If you want to test the workflow on a real job before changing how you sell, the [First Job Test](/onboarding?plan=starter) is **$19.99** for **40 credits** over **7 days** — enough to run this sequence on live estimates. Ongoing self-serve plans include [Professional at $99/month (500 credits)](/pricing) and [Business at $349/month (6000 credits)](/pricing) when you are ready to scale volume.
 

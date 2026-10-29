@@ -15,7 +15,7 @@ export const metadata: Metadata = pageMetadata({
   path: "/gallery",
   title: "Before-and-After AI Rendering Gallery",
   description:
-    "Real Renderspace outputs: before-and-after concepts for pools, patios, outdoor kitchens, landscapes, house exteriors and interiors, made from photos in about 30 seconds.",
+    "Before-and-after AI renderings of pools, patios, outdoor kitchens, landscapes, exteriors and interiors, each made from a real photo in about 30 seconds.",
 })
 
 export default async function GalleryPage() {
@@ -123,7 +123,7 @@ export default async function GalleryPage() {
             <h2 className="text-2xl md:text-3xl font-bold mb-2 text-primary">Ready to transform your space?</h2>
             <h3 className="text-2xl md:text-3xl font-bold mb-4 text-white">Start your own design journey today</h3>
             <p className="text-muted-foreground mb-6">
-              See how Renderspace helps you visualize and create client-ready concepts in minutes.
+              See how Renderspace turns a photo of your client&apos;s property into a client-ready concept in about 30 seconds.
             </p>
             <Link
               href="/onboarding"
