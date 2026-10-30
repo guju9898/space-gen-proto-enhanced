@@ -11,9 +11,9 @@ const faqs = faqFor("faq")
 
 export const metadata: Metadata = pageMetadata({
   path: "/faq",
-  title: "FAQ: AI Renderings, Credits and Licensing",
+  title: "AI Rendering FAQ: Speed, Credits and Licensing",
   description:
-    "How Renderspace works: AI renderings from a job-site photo in about 30 seconds, credits, 4K exports, use in proposals and ads, and canceling.",
+    "How fast an AI rendering from a job-site photo is (about 30 seconds), how credits work, 4K export, using renders in proposals and ads, and canceling.",
 })
 
 export default function FAQPage() {
