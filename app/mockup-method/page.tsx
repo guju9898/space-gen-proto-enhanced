@@ -14,7 +14,7 @@ export const metadata: Metadata = pageMetadata({
   path: "/mockup-method",
   title: "The Mockup Method: Win Jobs Before You Build",
   description:
-    "The Mockup Method: show a prospect a photorealistic concept of their own property before you pitch, so the sale starts with a picture, not a price.",
+    "Generate a photorealistic mockup of a prospect's own property in about 30 seconds and show it before you pitch, so the sale starts with a picture.",
 })
 
 export default function MockupMethodPage() {
