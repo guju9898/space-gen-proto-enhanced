@@ -177,16 +177,13 @@ export async function POST(request: Request) {
           )
           noteWriteError("intro offer claim", userId, claimError)
 
-          const grant = await grantIntroUsage(supabase as unknown as IntroGrantDb, { userId, periodStart, periodEnd })
+          const grant = await grantIntroUsage(
+            supabase as unknown as IntroGrantDb,
+            { userId, periodStart, periodEnd },
+            { stage: "webhook_grant", logError: logCreditError }
+          )
           if (!grant.ok) {
             console.error("[credits] webhook_grant", userId, "intro", null, CATALOG.intro.credits, grant.error)
-            await logCreditError({
-              user_id: userId,
-              plan_id: "intro",
-              amount: CATALOG.intro.credits,
-              stage: "webhook_grant",
-              message: grant.error,
-            })
             introGrantFailed = true
           }
 
@@ -311,20 +308,17 @@ export async function POST(request: Request) {
             const cycleStart = period?.start ? new Date(period.start * 1000).toISOString() : null
             const cycleEnd = period?.end ? new Date(period.end * 1000).toISOString() : null
             if (cycleStart && cycleEnd) {
-              const grant = await grantIntroUsage(supabase as unknown as IntroGrantDb, {
-                userId: profile.id,
-                periodStart: cycleStart,
-                periodEnd: cycleEnd,
-              })
+              const grant = await grantIntroUsage(
+                supabase as unknown as IntroGrantDb,
+                {
+                  userId: profile.id,
+                  periodStart: cycleStart,
+                  periodEnd: cycleEnd,
+                },
+                { stage: "webhook_grant", logError: logCreditError }
+              )
               if (!grant.ok) {
                 console.error("[credits] webhook_grant", profile.id, "intro", null, CATALOG.intro.credits, grant.error)
-                await logCreditError({
-                  user_id: profile.id,
-                  plan_id: "intro",
-                  amount: CATALOG.intro.credits,
-                  stage: "webhook_grant",
-                  message: grant.error,
-                })
                 introGrantFailed = true
               }
             }

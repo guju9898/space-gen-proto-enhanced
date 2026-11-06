@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 
-export type CreditErrorStage = "consume" | "render_event" | "webhook_grant"
+export type CreditErrorStage = "consume" | "render_event" | "grant" | "webhook_grant"
 
 export type CreditErrorRow = {
   user_id?: string | null

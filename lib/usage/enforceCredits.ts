@@ -140,9 +140,17 @@ async function healIntroUsage(
     periodEnd: period.endIso,
     now,
   })
+  // Insert uses the composite PK (user_id, period_start, plan_code). Never onConflict user_id alone.
   const { error } = await db.from("user_usage").insert(grant)
   if (error && error.code !== "23505") {
     console.error(`Intro self-heal failed to write credits for user ${userId}: ${error.message}`)
+    await logCreditError({
+      user_id: userId,
+      plan_id: "intro",
+      amount: CATALOG.intro.credits,
+      stage: "grant",
+      message: error.message,
+    })
     return "unavailable"
   }
 
