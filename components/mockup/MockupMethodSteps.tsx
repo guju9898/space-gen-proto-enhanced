@@ -2,7 +2,7 @@ import { Upload, Sparkles, Presentation, Trophy } from "lucide-react"
 
 const STEPS = [
   { icon: Upload, title: "Upload project photo", description: "Drop a job site or reference photo." },
-  { icon: Sparkles, title: "Generate concept render", description: "AI creates a photorealistic concept in seconds." },
+  { icon: Sparkles, title: "Generate concept render", description: "AI creates a photorealistic concept in about 30 seconds." },
   { icon: Presentation, title: "Show client instantly", description: "Share the vision before leaving the site." },
   { icon: Trophy, title: "Win the project", description: "Close on confidence, not guesswork." },
 ]

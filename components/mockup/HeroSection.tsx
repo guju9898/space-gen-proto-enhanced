@@ -8,7 +8,7 @@ export function HeroSection() {
         Win Projects Before Construction Starts
       </h1>
       <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-        Show your client the finished design in seconds — before the first shovel hits the ground.
+        Show your client the finished design in about 30 seconds — before the first shovel hits the ground.
       </p>
       <Link
         href="/contractor-demo"
