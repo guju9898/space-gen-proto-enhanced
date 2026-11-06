@@ -15,6 +15,7 @@ import { RenderspaceBeforeAfterSlider } from "@/components/RenderspaceBeforeAfte
 import RoiCalculator from "@/components/RoiCalculator"
 import { HomepageFAQ } from "@/components/HomepageFAQ"
 import { SiteFooter } from "@/components/site/SiteFooter"
+import { LazyAutoplayVideo } from "@/components/site/LazyAutoplayVideo"
 import {
   HOME_EXPERIMENT_COOKIE,
   HOME_EXPERIMENT_HEADER,
@@ -221,18 +222,14 @@ export default async function Home() {
           Generate client-ready design concepts from real photos in seconds.
         </p>
         <div className="max-w-[900px] mx-auto rounded-xl overflow-hidden border border-white/10 shadow-lg">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            controls
-            className="w-full h-auto"
+          <LazyAutoplayVideo
             src="/videos/renderspace-demo.mp4"
+            poster="/videos/renderspace-demo-poster.webp"
+            width={1280}
+            height={702}
+            className="w-full h-auto"
             title="Renderspace product demo"
-          >
-            Your browser does not support the video tag.
-          </video>
+          />
         </div>
       </section>
 

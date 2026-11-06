@@ -40,12 +40,19 @@ export interface RenderspaceBeforeAfterSliderProps {
   categoryOrder?: string[]
   /** Optional width override. Defaults to max-w-[900px]. */
   className?: string
+  /**
+   * Set true only when the slider is the first thing on screen (e.g. the contractor-demo hero), so its first
+   * image pair is preloaded as the LCP candidate. Below the fold it must stay false, or the preload competes
+   * with the real hero image for mobile bandwidth.
+   */
+  priority?: boolean
 }
 
 export function RenderspaceBeforeAfterSlider({
   categories: categoriesProp,
   categoryOrder: categoryOrderProp,
   className,
+  priority = false,
 }: RenderspaceBeforeAfterSliderProps = {}) {
   const categoryConfig: Record<string, BeforeAfterCategoryItem> = (categoriesProp ??
     DEFAULT_CATEGORY_CONFIG) as Record<string, BeforeAfterCategoryItem>
@@ -209,8 +216,7 @@ export function RenderspaceBeforeAfterSlider({
             fill
             sizes="(min-width: 1280px) 900px, (min-width: 768px) 80vw, 100vw"
             className="object-cover"
-            priority={activeCategory === categoryOrder[0]}
-            unoptimized
+            priority={priority && activeCategory === categoryOrder[0]}
           />
 
           <div
@@ -226,8 +232,7 @@ export function RenderspaceBeforeAfterSlider({
               fill
               sizes="(min-width: 1280px) 900px, (min-width: 768px) 80vw, 100vw"
               className="object-cover"
-              priority={activeCategory === categoryOrder[0]}
-              unoptimized
+              priority={priority && activeCategory === categoryOrder[0]}
             />
           </div>
 
