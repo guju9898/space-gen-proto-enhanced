@@ -11,7 +11,7 @@ import { GALLERY_PRESET_COOKIE, isPresetSlug } from "@/lib/gallery/presets"
 const CANONICAL_HOST = "www.renderspace.ai"
 const DEMO_MODE_COOKIE = "renderspace_demo_mode"
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const host = request.nextUrl.hostname
   if (host === "renderspace.ai") {
     const path = request.nextUrl.pathname + request.nextUrl.search
