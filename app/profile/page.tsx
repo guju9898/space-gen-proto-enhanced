@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import { CATALOG } from "@/lib/pricing/catalog"
 import { getCreditErrorMessage } from "@/lib/usage/errorMessages"
 import { LifecycleOffer } from "@/components/conversion/group-4/LifecycleOffer"
+import { ProfileApiKeys } from "@/components/profile/ProfileApiKeys"
 
 interface ProfileData {
   email: string | undefined
@@ -359,6 +360,14 @@ export default function ProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      <ProfileApiKeys
+        eligible={
+          Boolean(profile?.current_plan) &&
+          ["professional", "business"].includes(profile?.current_plan || "") &&
+          (profile?.subscription_status === "active" || profile?.subscription_status === "trialing")
+        }
+      />
 
       <LifecycleOffer busy={false} />
 

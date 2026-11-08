@@ -5,7 +5,7 @@ info:
   summary: Turn a job-site photo into a photorealistic design concept.
   description: |
     Public REST API for Renderspace. Authenticate with an API key created from a
-    Professional or Business account. Each successful render charges 1 credit.
+    Professional or Business account. Each successful API render charges 2 credits.
   contact:
     name: Renderspace
     url: https://www.renderspace.ai/developers

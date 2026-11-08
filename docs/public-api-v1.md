@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented on branch `feat/public-api-v1`.
+Live on `enhanced-studio-ui`. API renders cost **2 credits** each (`API_RENDER_CREDIT_COST`).
 
 ## Env vars
 

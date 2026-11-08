@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
+import { API_RENDER_CREDIT_COST } from "@/lib/usage/creditCost"
 import { enforceCredits, type CreditEnforcementResult } from "@/lib/usage/enforceCredits"
 import { isUsableSubscriptionStatus } from "@/lib/usage/subscriptionStatus"
 
@@ -48,6 +49,19 @@ export async function assertApiPlanAccess(
       ok: false,
       code: "payment_required",
       message: credits.reason === "credits_exhausted" ? "Credits exhausted for this billing period." : "Credits unavailable for this account.",
+      credits,
+    }
+  }
+
+  // Business is uncapped (null remaining). Professional needs enough for an API render.
+  if (
+    credits.creditsRemaining != null &&
+    credits.creditsRemaining < API_RENDER_CREDIT_COST
+  ) {
+    return {
+      ok: false,
+      code: "payment_required",
+      message: `API renders cost ${API_RENDER_CREDIT_COST} credits each. Not enough credits remaining.`,
       credits,
     }
   }

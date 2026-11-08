@@ -7,6 +7,7 @@ import {
   hashApiKey,
   looksLikeApiKey,
 } from "@/lib/api/v1/keys"
+import { API_RENDER_CREDIT_COST } from "@/lib/usage/creditCost"
 
 describe("public API keys", () => {
   it("generates rs_live_ keys that hash stably", () => {
@@ -23,5 +24,9 @@ describe("public API keys", () => {
     assert.equal(API_ELIGIBLE_PLANS.has("business"), true)
     assert.equal(API_ELIGIBLE_PLANS.has("intro"), false)
     assert.equal(API_ELIGIBLE_PLANS.has("demo"), false)
+  })
+
+  it("prices API renders at 2 credits", () => {
+    assert.equal(API_RENDER_CREDIT_COST, 2)
   })
 })

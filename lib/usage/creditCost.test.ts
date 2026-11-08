@@ -1,7 +1,7 @@
 // Run: pnpm exec tsx --test lib/usage/creditCost.test.ts lib/usage/introCredits.test.ts
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
-import { renderCreditCost } from "@/lib/usage/creditCost"
+import { API_RENDER_CREDIT_COST, apiRenderCreditCost, renderCreditCost } from "@/lib/usage/creditCost"
 import { introUsageGrant } from "@/lib/usage/introGrant"
 import { settleRenderCharge } from "@/lib/usage/settleRenderCharge"
 
@@ -11,6 +11,13 @@ describe("renderCreditCost", () => {
     assert.equal(renderCreditCost({ hasReferenceImage: false, renderType: "landscape" }), 1)
     assert.equal(renderCreditCost({ hasReferenceImage: true, renderType: "exterior" }), 1)
     assert.equal(renderCreditCost({ hasReferenceImage: true, renderType: "interior" }), 1)
+  })
+})
+
+describe("apiRenderCreditCost", () => {
+  it("charges 2 credits for public API renders", () => {
+    assert.equal(API_RENDER_CREDIT_COST, 2)
+    assert.equal(apiRenderCreditCost(), 2)
   })
 })
 

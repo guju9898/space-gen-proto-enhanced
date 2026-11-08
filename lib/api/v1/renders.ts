@@ -2,7 +2,7 @@ import { randomUUID } from "crypto"
 import type { SupabaseClient } from "@supabase/supabase-js"
 import { runPublicApiGeneration } from "@/lib/api/v1/generate"
 import { buildPublicApiPrompt, type RenderOptions, type SpaceType } from "@/lib/api/v1/prompt"
-import { RENDER_CREDIT_COST } from "@/lib/usage/creditCost"
+import { API_RENDER_CREDIT_COST } from "@/lib/usage/creditCost"
 import { consumeCredit } from "@/lib/usage/enforceCredits"
 import { settleRenderCharge } from "@/lib/usage/settleRenderCharge"
 import { recordRenderEvent } from "@/lib/usage/enforceCredits"
@@ -145,17 +145,18 @@ export async function createAndRunRender(input: {
       realism: input.realism,
     })
 
+    const amount = API_RENDER_CREDIT_COST
     await settleRenderCharge({
       imageUrl: result.imageUrl,
       userId: input.userId,
       planId: input.planId,
       renderId: id,
-      amount: RENDER_CREDIT_COST,
+      amount,
       creditsRemaining: input.creditsRemaining,
       nearLimit: false,
       recordEvent: () =>
-        recordRenderEvent(input.userId, input.periodStart, id, RENDER_CREDIT_COST),
-      consume: () => consumeCredit(input.userId, input.periodStart, RENDER_CREDIT_COST),
+        recordRenderEvent(input.userId, input.periodStart, id, amount),
+      consume: () => consumeCredit(input.userId, input.periodStart, amount),
     })
 
     const { data: completed, error: updateError } = await input.db
@@ -164,7 +165,7 @@ export async function createAndRunRender(input: {
         status: "completed",
         result_image_url: result.imageUrl,
         result_storage_path: result.storagePath,
-        credits_charged: RENDER_CREDIT_COST,
+        credits_charged: amount,
         completed_at: new Date().toISOString(),
       })
       .eq("id", id)
