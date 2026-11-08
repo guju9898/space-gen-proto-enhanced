@@ -1,0 +1,309 @@
+openapi: 3.1.0
+info:
+  title: Renderspace API
+  version: 1.0.0
+  summary: Turn a job-site photo into a photorealistic design concept.
+  description: |
+    Public REST API for Renderspace. Authenticate with an API key created from a
+    Professional or Business account. Each successful render charges 1 credit.
+  contact:
+    name: Renderspace
+    url: https://www.renderspace.ai/developers
+  license:
+    name: Proprietary
+servers:
+  - url: https://www.renderspace.ai/api/v1
+    description: Production
+security:
+  - bearerAuth: []
+tags:
+  - name: Renders
+  - name: Credits
+  - name: Keys
+paths:
+  /credits:
+    get:
+      tags: [Credits]
+      summary: Get remaining credits
+      operationId: getCredits
+      responses:
+        "200":
+          description: Credit balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Credits"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /renders:
+    get:
+      tags: [Renders]
+      summary: List recent renders
+      operationId: listRenders
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Render list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Render"
+    post:
+      tags: [Renders]
+      summary: Create a render (synchronous)
+      operationId: createRender
+      description: |
+        Accepts JSON with `image_url` or multipart form with an `image` file.
+        Provide `instruction` (natural language), structured `options`, and/or `prompt`.
+        Natural language is structured on the server into Studio-like options before generation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRenderJson"
+            examples:
+              landscape:
+                value:
+                  space_type: landscape
+                  image_url: https://example.com/yard.jpg
+                  instruction: Modern backyard with a linear pool, warm evening lighting, and tropical planting.
+          multipart/form-data:
+            schema:
+              type: object
+              required: [space_type, image]
+              properties:
+                space_type:
+                  type: string
+                  enum: [landscape, exterior, interior]
+                image:
+                  type: string
+                  format: binary
+                instruction:
+                  type: string
+                options:
+                  type: string
+                  description: JSON string of options
+                prompt:
+                  type: string
+                idempotency_key:
+                  type: string
+      responses:
+        "201":
+          description: Completed render
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Render"
+        "402":
+          $ref: "#/components/responses/PaymentRequired"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /renders/{id}:
+    get:
+      tags: [Renders]
+      summary: Get a render by id
+      operationId: getRender
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Render
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Render"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /keys:
+    get:
+      tags: [Keys]
+      summary: List API keys (session cookie auth)
+      security: []
+      operationId: listKeys
+      description: Requires a signed-in Professional or Business browser session.
+      responses:
+        "200":
+          description: Keys (prefixes only)
+    post:
+      tags: [Keys]
+      summary: Create API key (session cookie auth)
+      security: []
+      operationId: createKey
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        "201":
+          description: Key created — plaintext returned once
+    delete:
+      tags: [Keys]
+      summary: Revoke API key (session cookie auth)
+      security: []
+      operationId: revokeKey
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Revoked
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: rs_live_
+      description: API key from POST /api/v1/keys while signed in.
+  schemas:
+    Credits:
+      type: object
+      properties:
+        plan_id:
+          type: string
+          enum: [professional, business]
+        credits_remaining:
+          type: [number, "null"]
+        monthly_limit:
+          type: [number, "null"]
+        period_start:
+          type: string
+        near_limit:
+          type: boolean
+    CreateRenderJson:
+      type: object
+      required: [space_type, image_url]
+      properties:
+        space_type:
+          type: string
+          enum: [landscape, exterior, interior]
+        image_url:
+          type: string
+          format: uri
+        instruction:
+          type: string
+          description: Natural language design brief
+        options:
+          type: object
+          additionalProperties: true
+        prompt:
+          type: string
+          description: Optional full prompt override
+        realism:
+          type: number
+          minimum: 0
+          maximum: 100
+        idempotency_key:
+          type: string
+    Render:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [queued, running, completed, failed]
+        space_type:
+          type: string
+          enum: [landscape, exterior, interior]
+        image_url:
+          type: [string, "null"]
+        source_image_url:
+          type: [string, "null"]
+        instruction:
+          type: [string, "null"]
+        options:
+          type: object
+        credits:
+          type: object
+          properties:
+            charged:
+              type: [number, "null"]
+        error:
+          type: [string, "null"]
+        created_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: [string, "null"]
+          format: date-time
+    ApiError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details: {}
+  responses:
+    Unauthorized:
+      description: Missing or invalid API key
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    Forbidden:
+      description: Plan is not Professional or Business
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    PaymentRequired:
+      description: Credits exhausted or subscription inactive
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    RateLimited:
+      description: Too many requests
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    ValidationError:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
