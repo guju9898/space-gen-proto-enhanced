@@ -1,6 +1,16 @@
 import { PLANS, usd } from "@/lib/seo/facts"
 
-export type NavKey = "home" | "gallery" | "pricing" | "faq" | "demo" | "academy" | "mockup-method" | "human-polish" | "blog"
+export type NavKey =
+  | "home"
+  | "gallery"
+  | "pricing"
+  | "faq"
+  | "demo"
+  | "academy"
+  | "mockup-method"
+  | "human-polish"
+  | "blog"
+  | "developers"
 
 export type NavLink = { key: NavKey; href: string; label: string }
 
@@ -15,6 +25,7 @@ export const NAV_LINKS: NavLink[] = [
   { key: "mockup-method", href: "/mockup-method", label: "Mockup Method" },
   { key: "human-polish", href: "/human-polish", label: "Human Polish™" },
   { key: "blog", href: "/blog", label: "Blog" },
+  { key: "developers", href: "/developers", label: "Developers" },
 ]
 
 export type HeaderCta = { href: string; label: string }

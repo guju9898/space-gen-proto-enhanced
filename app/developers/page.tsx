@@ -3,6 +3,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { SiteFooter } from "@/components/site/SiteFooter"
 import { SiteHeader } from "@/components/site/SiteHeader"
+import { USAGE_RIGHTS } from "@/lib/seo/facts"
 import { API_RENDER_CREDIT_COST } from "@/lib/usage/creditCost"
 
 export const metadata: Metadata = {
@@ -24,7 +25,7 @@ const curlExample = `curl -X POST https://www.renderspace.ai/api/v1/renders \\
 export default function DevelopersPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader />
+      <SiteHeader active="developers" />
       <main>
         <section className="border-b border-[#2a2a2a]">
           <div className="container mx-auto px-4 py-14 md:py-20 grid gap-10 lg:grid-cols-2 lg:gap-14 items-center">
@@ -168,6 +169,19 @@ export default function DevelopersPage() {
               <a href="/openapi/v1.yaml" className="underline hover:text-white">
                 /openapi/v1.yaml
               </a>
+            </p>
+          </div>
+        </section>
+
+        <section className="border-t border-[#2a2a2a]">
+          <div className="container mx-auto px-4 py-14 md:py-16 max-w-3xl">
+            <h2 className="text-2xl font-semibold text-white mb-3">Terms &amp; commercial use</h2>
+            <p className="text-muted-foreground mb-4">
+              API access requires an active Professional or Business plan. Each successful API
+              render costs {API_RENDER_CREDIT_COST} credits.
+            </p>
+            <p className="text-muted-foreground">
+              API renders inherit your paid-plan commercial license. {USAGE_RIGHTS}
             </p>
           </div>
         </section>

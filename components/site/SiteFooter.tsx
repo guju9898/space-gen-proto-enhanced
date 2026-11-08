@@ -10,6 +10,7 @@ const FOOTER_LINKS = [
   { href: "/gallery", label: "Gallery" },
   { href: "/human-polish", label: "Human Polish™" },
   { href: "/academy", label: "Academy" },
+  { href: "/developers", label: "Developers" },
   { href: "/affiliates", label: "Affiliates" },
 ]
 

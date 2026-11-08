@@ -53,9 +53,11 @@ export async function POST(request: Request) {
       },
       { status: 201 }
     )
-  } catch (error) {
-    console.error("[api/v1/keys] create failed", error)
-    return apiError("internal_error", "Could not create API key.")
+  } catch {
+    return apiError("internal_error", "Could not create API key.", undefined, undefined, {
+      route: "/api/v1/keys",
+      userId: auth.userId,
+    })
   }
 }
 
@@ -71,8 +73,10 @@ export async function DELETE(request: Request) {
     const revoked = await revokeApiKeyForUser(auth.db, auth.userId, id)
     if (!revoked) return apiError("not_found", "API key not found or already revoked.")
     return apiJson({ revoked: true, id })
-  } catch (error) {
-    console.error("[api/v1/keys] revoke failed", error)
-    return apiError("internal_error", "Could not revoke API key.")
+  } catch {
+    return apiError("internal_error", "Could not revoke API key.", undefined, undefined, {
+      route: "/api/v1/keys",
+      userId: auth.userId,
+    })
   }
 }

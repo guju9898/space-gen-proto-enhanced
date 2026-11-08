@@ -30,7 +30,12 @@ export async function requireApiKeyAuth(request: Request): Promise<
 > {
   const db = serviceDb()
   if (!db) {
-    return { ok: false, response: apiError("configuration_error", "API is not configured.") }
+    return {
+      ok: false,
+      response: apiError("configuration_error", "API is not configured.", undefined, undefined, {
+        route: "/api/v1",
+      }),
+    }
   }
 
   const token = extractBearerToken(request)
@@ -51,7 +56,13 @@ export async function requireApiKeyAuth(request: Request): Promise<
   if (rl.configurationError) {
     return {
       ok: false,
-      response: apiError("configuration_error", "Rate limiting is not configured.", undefined, headers),
+      response: apiError(
+        "configuration_error",
+        "Rate limiting is not configured.",
+        undefined,
+        headers,
+        { route: "/api/v1", userId: apiKey.user_id }
+      ),
     }
   }
   if (!rl.ok) {
@@ -93,14 +104,19 @@ export async function requireApiKeyAuth(request: Request): Promise<
   }
 }
 
-/** Cookie session + Professional/Business for dashboard key create/list/revoke. */
+/** Cookie session + Professional/Business for dashboard key/usage management. */
 export async function requireSessionApiManager(): Promise<
   | { ok: true; db: SupabaseClient; userId: string; access: Extract<ApiAccessResult, { ok: true }> }
   | { ok: false; response: Response }
 > {
   const db = serviceDb()
   if (!db) {
-    return { ok: false, response: apiError("configuration_error", "API is not configured.") }
+    return {
+      ok: false,
+      response: apiError("configuration_error", "API is not configured.", undefined, undefined, {
+        route: "/api/v1/keys",
+      }),
+    }
   }
   const supabase = await createSupabaseServerClient()
   const {

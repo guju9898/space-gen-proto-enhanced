@@ -11,6 +11,7 @@ import { CATALOG } from "@/lib/pricing/catalog"
 import { getCreditErrorMessage } from "@/lib/usage/errorMessages"
 import { LifecycleOffer } from "@/components/conversion/group-4/LifecycleOffer"
 import { ProfileApiKeys } from "@/components/profile/ProfileApiKeys"
+import { ProfileApiUsage } from "@/components/profile/ProfileApiUsage"
 
 interface ProfileData {
   email: string | undefined
@@ -201,6 +202,11 @@ export default function ProfilePage() {
                        (profile.subscription_status === "active" ||
                          profile.subscription_status === "trialing")
 
+  const apiEligible =
+    Boolean(profile?.current_plan) &&
+    ["professional", "business"].includes(profile?.current_plan || "") &&
+    (profile?.subscription_status === "active" || profile?.subscription_status === "trialing")
+
   return (
     <div className="container mx-auto px-6 py-12 max-w-2xl space-y-6">
       <div className="mb-8">
@@ -361,13 +367,9 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      <ProfileApiKeys
-        eligible={
-          Boolean(profile?.current_plan) &&
-          ["professional", "business"].includes(profile?.current_plan || "") &&
-          (profile?.subscription_status === "active" || profile?.subscription_status === "trialing")
-        }
-      />
+      <ProfileApiKeys eligible={apiEligible} />
+
+      <ProfileApiUsage eligible={apiEligible} />
 
       <LifecycleOffer busy={false} />
 

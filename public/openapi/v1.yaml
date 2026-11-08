@@ -5,7 +5,27 @@ info:
   summary: Turn a job-site photo into a photorealistic design concept.
   description: |
     Public REST API for Renderspace. Authenticate with an API key created from a
-    Professional or Business account. Each successful API render charges 2 credits.
+    Professional or Business account.
+
+    **Credits:** Each successful `POST /renders` charges **2 credits**
+    (`API_RENDER_CREDIT_COST`). Failed validation or auth errors do not charge.
+    Check balance with `GET /credits`. Responses may include `X-Credits-Remaining`.
+
+    **Webhooks:** Register HTTPS completion endpoints via session-auth `POST /webhooks`
+    (Pro/Business). After each API render reaches `completed` or `failed`, Renderspace
+    fire-and-forget POSTs a signed JSON body (`X-Renderspace-Signature: sha256=…`).
+    `POST /renders` remains synchronous for clients; webhook delivery never blocks or
+    fails the render HTTP response. Async create mode is not in this phase.
+
+    **CORS:** Bearer-key routes (`/credits`, `/renders`) support browser CORS.
+    Set `PUBLIC_API_CORS_ORIGINS` to a comma-separated allowlist, or leave unset
+    for `Access-Control-Allow-Origin: *` (no credentials). Cookie session routes
+    (`/keys`, `/webhooks`, `/usage`) remain same-origin.
+
+    **Rate limits:** 60 requests/minute per API key. Responses include
+    `X-RateLimit-Limit` and `X-RateLimit-Remaining`.
+
+    Keep this file identical to `public/openapi/v1.yaml` (served at `/openapi/v1.yaml`).
   contact:
     name: Renderspace
     url: https://www.renderspace.ai/developers
@@ -16,16 +36,19 @@ servers:
     description: Production
 security:
   - bearerAuth: []
+  - apiKeyHeader: []
 tags:
   - name: Renders
   - name: Credits
   - name: Keys
+  - name: Webhooks
 paths:
   /credits:
     get:
       tags: [Credits]
       summary: Get remaining credits
       operationId: getCredits
+      description: Returns the caller's plan and credit balance. Does not consume credits.
       responses:
         "200":
           description: Credit balance
@@ -64,6 +87,12 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Render"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
     post:
       tags: [Renders]
       summary: Create a render (synchronous)
@@ -72,6 +101,14 @@ paths:
         Accepts JSON with `image_url` or multipart form with an `image` file.
         Provide `instruction` (natural language), structured `options`, and/or `prompt`.
         Natural language is structured on the server into Studio-like options before generation.
+
+        Successful creates charge **2 credits**. The response is the completed render
+        (status `completed`) with `image_url`, or `failed` with an error (HTTP 500).
+        Optional `idempotency_key` returns the prior row if the same key was used before.
+
+        The HTTP response remains the primary delivery channel (synchronous). Active
+        webhooks also receive a fire-and-forget signed POST; delivery failure does not
+        change this response.
       requestBody:
         required: true
         content:
@@ -102,19 +139,35 @@ paths:
                   description: JSON string of options
                 prompt:
                   type: string
+                realism:
+                  type: number
+                  minimum: 0
+                  maximum: 100
                 idempotency_key:
                   type: string
       responses:
         "201":
-          description: Completed render
+          description: Completed render (2 credits charged on success)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Render"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "402":
           $ref: "#/components/responses/PaymentRequired"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "422":
           $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          description: Render job failed after accept
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Render"
   /renders/{id}:
     get:
       tags: [Renders]
@@ -134,23 +187,43 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Render"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
   /keys:
     get:
       tags: [Keys]
       summary: List API keys (session cookie auth)
       security: []
       operationId: listKeys
-      description: Requires a signed-in Professional or Business browser session.
+      description: Requires a signed-in Professional or Business browser session. Not for Bearer API keys.
       responses:
         "200":
           description: Keys (prefixes only)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ApiKeyMeta"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
     post:
       tags: [Keys]
       summary: Create API key (session cookie auth)
       security: []
       operationId: createKey
+      description: Requires a signed-in Professional or Business browser session. Plaintext key returned once.
       requestBody:
         content:
           application/json:
@@ -162,6 +235,14 @@ paths:
       responses:
         "201":
           description: Key created — plaintext returned once
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKeyCreated"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
     delete:
       tags: [Keys]
       summary: Revoke API key (session cookie auth)
@@ -177,13 +258,122 @@ paths:
       responses:
         "200":
           description: Revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  revoked:
+                    type: boolean
+                  id:
+                    type: string
+                    format: uuid
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /webhooks:
+    get:
+      tags: [Webhooks]
+      summary: List completion webhooks (session cookie auth)
+      security: []
+      operationId: listWebhooks
+      description: Requires a signed-in Professional or Business browser session.
+      responses:
+        "200":
+          description: Webhook endpoints
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Webhook"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      tags: [Webhooks]
+      summary: Register completion webhook (session cookie auth)
+      security: []
+      operationId: createWebhook
+      description: |
+        HTTPS URLs only. Private, localhost, and cloud-metadata hosts are rejected.
+        The signing secret (`whsec_…`) is returned once. Verify deliveries with
+        `X-Renderspace-Signature: sha256=<hex>` (HMAC-SHA256 of the raw body).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  example: https://example.com/hooks/renderspace
+      responses:
+        "201":
+          description: Webhook created — signing secret returned once
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookCreated"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    delete:
+      tags: [Webhooks]
+      summary: Delete webhook (session cookie auth)
+      security: []
+      operationId: deleteWebhook
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+                  id:
+                    type: string
+                    format: uuid
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: rs_live_
-      description: API key from POST /api/v1/keys while signed in.
+      description: API key from Profile → API Keys (or POST /api/v1/keys while signed in).
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: Same value as the Bearer token (`rs_live_…`). Alternative to Authorization.
   schemas:
     Credits:
       type: object
@@ -238,12 +428,92 @@ components:
           enum: [landscape, exterior, interior]
         image_url:
           type: [string, "null"]
+          description: Result image URL when status is completed
         source_image_url:
           type: [string, "null"]
         instruction:
           type: [string, "null"]
         options:
           type: object
+        credits:
+          type: object
+          properties:
+            charged:
+              type: [number, "null"]
+              description: Credits charged for this render (2 on success)
+        error:
+          type: [string, "null"]
+        created_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: [string, "null"]
+          format: date-time
+    ApiKeyMeta:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        key_prefix:
+          type: string
+        last_used_at:
+          type: [string, "null"]
+          format: date-time
+        revoked_at:
+          type: [string, "null"]
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+    ApiKeyCreated:
+      allOf:
+        - $ref: "#/components/schemas/ApiKeyMeta"
+        - type: object
+          properties:
+            api_key:
+              type: string
+              description: Full plaintext key — store immediately; not shown again
+            warning:
+              type: string
+    Webhook:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+        active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+    WebhookCreated:
+      allOf:
+        - $ref: "#/components/schemas/Webhook"
+        - type: object
+          properties:
+            secret:
+              type: string
+              description: Signing secret (`whsec_…`) — store immediately; not shown again
+            warning:
+              type: string
+    WebhookPayload:
+      type: object
+      description: JSON body POSTed to registered webhook URLs after a render finishes.
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [completed, failed]
+        image_url:
+          type: [string, "null"]
         credits:
           type: object
           properties:
@@ -284,13 +554,13 @@ components:
           schema:
             $ref: "#/components/schemas/ApiError"
     PaymentRequired:
-      description: Credits exhausted or subscription inactive
+      description: Credits exhausted or subscription inactive (API renders cost 2 credits each)
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/ApiError"
     RateLimited:
-      description: Too many requests
+      description: Too many requests (60/min per key)
       content:
         application/json:
           schema:

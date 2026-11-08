@@ -1,7 +1,9 @@
 import { randomUUID } from "crypto"
 import { uploadBase64ToSupabase } from "@/lib/api/uploadBase64ToSupabase"
 import { requireApiKeyAuth } from "@/lib/api/v1/auth"
+import { corsPreflight, withCors } from "@/lib/api/v1/cors"
 import { apiError, apiJson } from "@/lib/api/v1/errors"
+import { logPublicApi5xx } from "@/lib/api/v1/observability"
 import type { SpaceType } from "@/lib/api/v1/prompt"
 import { createAndRunRender, listRendersForUser, toPublicRender } from "@/lib/api/v1/renders"
 
@@ -32,21 +34,28 @@ class ValidationError extends Error {
   }
 }
 
+export async function OPTIONS(request: Request) {
+  return corsPreflight(request, ["GET", "POST", "OPTIONS"])
+}
+
 /** GET /api/v1/renders */
 export async function GET(request: Request) {
   const auth = await requireApiKeyAuth(request)
-  if (!auth.ok) return auth.response
+  if (!auth.ok) return withCors(request, auth.response)
 
   const url = new URL(request.url)
   const limit = Number(url.searchParams.get("limit") || "20")
   const rows = await listRendersForUser(auth.ctx.db, auth.ctx.userId, Number.isFinite(limit) ? limit : 20)
-  return apiJson({ data: rows.map(toPublicRender) }, { headers: auth.ctx.rateLimitHeaders })
+  return withCors(
+    request,
+    apiJson({ data: rows.map(toPublicRender) }, { headers: auth.ctx.rateLimitHeaders })
+  )
 }
 
 /** POST /api/v1/renders — synchronous generation */
 export async function POST(request: Request) {
   const auth = await requireApiKeyAuth(request)
-  if (!auth.ok) return auth.response
+  if (!auth.ok) return withCors(request, auth.response)
 
   const contentType = request.headers.get("content-type") || ""
   let body: Record<string, unknown> = {}
@@ -68,38 +77,58 @@ export async function POST(request: Request) {
       }
       const file = form.get("image")
       if (!(file instanceof File)) {
-        return apiError("validation_error", "multipart field `image` is required.")
+        return withCors(
+          request,
+          apiError("validation_error", "multipart field `image` is required.")
+        )
       }
       imageUrl = await uploadReferenceFile(file)
     } else {
       body = (await request.json()) as Record<string, unknown>
       const url = typeof body.image_url === "string" ? body.image_url.trim() : ""
       if (!url.startsWith("http://") && !url.startsWith("https://")) {
-        return apiError("validation_error", "Provide image_url (https) or multipart image.")
+        return withCors(
+          request,
+          apiError("validation_error", "Provide image_url (https) or multipart image.")
+        )
       }
       imageUrl = url
     }
   } catch (error) {
     if (error instanceof ValidationError) {
-      return apiError("validation_error", error.message)
+      return withCors(request, apiError("validation_error", error.message))
     }
     if (error instanceof SyntaxError) {
-      return apiError("validation_error", "Invalid JSON in request body or options field.")
+      return withCors(
+        request,
+        apiError("validation_error", "Invalid JSON in request body or options field.")
+      )
     }
-    console.error("[api/v1/renders] parse failed", error)
-    return apiError("internal_error", "Could not read request.")
+    return withCors(
+      request,
+      apiError("internal_error", "Could not read request.", undefined, undefined, {
+        route: "/api/v1/renders",
+        userId: auth.ctx.userId,
+      })
+    )
   }
 
   const spaceType = typeof body.space_type === "string" ? body.space_type.trim() : ""
   if (!SPACE_TYPES.has(spaceType)) {
-    return apiError("validation_error", "space_type must be landscape, exterior, or interior.")
+    return withCors(
+      request,
+      apiError("validation_error", "space_type must be landscape, exterior, or interior.")
+    )
   }
 
   const instruction = typeof body.instruction === "string" ? body.instruction : null
   const promptOverride = typeof body.prompt === "string" ? body.prompt : null
   const hasOptions = body.options && typeof body.options === "object"
   if (!instruction?.trim() && !promptOverride?.trim() && !hasOptions) {
-    return apiError("validation_error", "Provide instruction (natural language), options, or prompt.")
+    return withCors(
+      request,
+      apiError("validation_error", "Provide instruction (natural language), options, or prompt.")
+    )
   }
 
   const realismRaw = body.realism
@@ -128,12 +157,30 @@ export async function POST(request: Request) {
     })
 
     if (row.status === "failed") {
-      return apiJson(toPublicRender(row), { status: 500, headers: auth.ctx.rateLimitHeaders })
+      logPublicApi5xx({
+        route: "/api/v1/renders",
+        status: 500,
+        code: "internal_error",
+        userId: auth.ctx.userId,
+        message: "render completed with failed status",
+      })
+      return withCors(
+        request,
+        apiJson(toPublicRender(row), { status: 500, headers: auth.ctx.rateLimitHeaders })
+      )
     }
 
-    return apiJson(toPublicRender(row), { status: 201, headers: auth.ctx.rateLimitHeaders })
-  } catch (error) {
-    console.error("[api/v1/renders] create failed", error)
-    return apiError("internal_error", "Render failed.")
+    return withCors(
+      request,
+      apiJson(toPublicRender(row), { status: 201, headers: auth.ctx.rateLimitHeaders })
+    )
+  } catch {
+    return withCors(
+      request,
+      apiError("internal_error", "Render failed.", undefined, undefined, {
+        route: "/api/v1/renders",
+        userId: auth.ctx.userId,
+      })
+    )
   }
 }

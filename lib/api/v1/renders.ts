@@ -2,6 +2,7 @@ import { randomUUID } from "crypto"
 import type { SupabaseClient } from "@supabase/supabase-js"
 import { runPublicApiGeneration } from "@/lib/api/v1/generate"
 import { buildPublicApiPrompt, type RenderOptions, type SpaceType } from "@/lib/api/v1/prompt"
+import { notifyRenderWebhooks } from "@/lib/api/v1/webhooks"
 import { API_RENDER_CREDIT_COST } from "@/lib/usage/creditCost"
 import { consumeCredit } from "@/lib/usage/enforceCredits"
 import { settleRenderCharge } from "@/lib/usage/settleRenderCharge"
@@ -41,6 +42,18 @@ export function toPublicRender(row: ApiRenderRow) {
     error: row.error_message,
     created_at: row.created_at,
     completed_at: row.completed_at,
+  }
+}
+
+/** Cookie-session profile projection — status, space, credits, time, link/id only. */
+export function toUsageItem(row: ApiRenderRow) {
+  return {
+    id: row.id,
+    status: row.status,
+    space_type: row.space_type,
+    credits_charged: row.credits_charged,
+    created_at: row.created_at,
+    image_url: row.result_image_url,
   }
 }
 
@@ -175,7 +188,9 @@ export async function createAndRunRender(input: {
     if (updateError || !completed) {
       throw new Error(updateError?.message || "Could not finalize render")
     }
-    return completed as ApiRenderRow
+    const completedRow = completed as ApiRenderRow
+    notifyRenderWebhooks(input.userId, completedRow)
+    return completedRow
   } catch (error) {
     const message = error instanceof Error ? error.message : "Generation failed"
     const { data: failed } = await input.db
@@ -188,7 +203,11 @@ export async function createAndRunRender(input: {
       .eq("id", id)
       .select("*")
       .single()
-    if (failed) return failed as ApiRenderRow
+    if (failed) {
+      const failedRow = failed as ApiRenderRow
+      notifyRenderWebhooks(input.userId, failedRow)
+      return failedRow
+    }
     throw error
   }
 }

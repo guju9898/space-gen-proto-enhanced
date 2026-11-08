@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { logPublicApi5xx } from "@/lib/api/v1/observability"
 
 export type ApiErrorCode =
   | "unauthorized"
@@ -35,11 +36,22 @@ export function apiError(
   code: ApiErrorCode,
   message: string,
   details?: unknown,
-  headers?: HeadersInit
+  headers?: HeadersInit,
+  meta?: { route?: string; userId?: string | null }
 ): NextResponse<ApiErrorBody> {
+  const status = STATUS[code]
+  if (status >= 500) {
+    logPublicApi5xx({
+      route: meta?.route ?? "/api/v1",
+      status,
+      code,
+      userId: meta?.userId,
+      message,
+    })
+  }
   return NextResponse.json(
     { error: { code, message, ...(details !== undefined ? { details } : {}) } },
-    { status: STATUS[code], headers }
+    { status, headers }
   )
 }
 
