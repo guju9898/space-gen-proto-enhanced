@@ -20,7 +20,8 @@ Bearer-key routes (`/credits`, `/renders`, `/renders/{id}`) answer `OPTIONS` and
 - **Allowlist:** `PUBLIC_API_CORS_ORIGINS=https://app.example.com,https://sandbox.example.com` reflects a matching `Origin`.
 - **Default:** unset or `*` → `Access-Control-Allow-Origin: *` (fine for `Authorization: Bearer`; credentials are never enabled).
 - **Allowed request headers:** `Authorization`, `Content-Type`, `X-API-Key`.
-- **Exposed:** `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-Credits-Remaining`.
+- **Exposed:** `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, `Retry-After`, `X-Credits-Remaining`.
+- **Production today:** `PUBLIC_API_CORS_ORIGINS` is not set, so Bearer routes answer with `*`. That is safe because auth is a Bearer header, never a cookie; set the allowlist only if you want to restrict which sites can call the API from a browser.
 
 ## Migration
 
@@ -46,11 +47,43 @@ curl -X POST https://www.renderspace.ai/api/v1/webhooks \
   -d '{"url":"https://example.com/hooks/renderspace"}'
 ```
 
-Verify with `X-Renderspace-Signature: sha256=<hex>` — HMAC-SHA256 of the raw JSON body using the `whsec_…` secret returned once at creation (AES-GCM encrypted at rest with `API_KEY_PEPPER`). Delivery failures are logged and do not fail the render response. HTTPS only; localhost / private / metadata hosts are rejected.
+Each delivery carries:
+
+| Header | Value |
+| --- | --- |
+| `X-Renderspace-Event` | `render.completed` or `render.failed` (also in the body as `event`) |
+| `X-Renderspace-Timestamp` | Unix seconds when the delivery was signed |
+| `X-Renderspace-Signature` | `sha256=<hex>` = HMAC-SHA256 of `<timestamp>.<raw body>` with the `whsec_…` secret |
+
+The secret is returned once at creation and stored AES-GCM encrypted with a key derived from `API_KEY_PEPPER`.
+
+Verify (Node):
+
+```js
+import { createHmac, timingSafeEqual } from "node:crypto"
+
+function verify(rawBody, headers, secret) {
+  const ts = headers["x-renderspace-timestamp"]
+  if (!ts || Math.abs(Date.now() / 1000 - Number(ts)) > 300) return false // replay window
+  const expected = "sha256=" + createHmac("sha256", secret).update(`${ts}.${rawBody}`).digest("hex")
+  const got = headers["x-renderspace-signature"] || ""
+  return got.length === expected.length && timingSafeEqual(Buffer.from(got), Buffer.from(expected))
+}
+```
+
+Delivery rules:
+
+- One attempt, 8 s timeout, no redirects, no retries. Poll `GET /renders/{id}` if you miss one.
+- Runs after the response via Next.js `after()`, so it never delays or fails `POST /renders`.
+- HTTPS only; localhost, private, link-local, CGNAT and metadata addresses are rejected at registration **and** re-checked by DNS lookup at delivery.
+- Failures are logged as `{"source":"public_api","route":"webhook_delivery",…}` with the webhook id only. The URL is never logged, because automation-tool URLs often contain their own secret.
+- Max 5 webhooks per account.
 
 ## Ops: `API_KEY_PEPPER`
 
 Server-only secret used when hashing API keys and encrypting webhook signing secrets (`lib/api/v1/keys.ts`, `lib/api/v1/webhooks.ts`). Checklist:
+
+Status 2026-11-08: set in Production only (sensitive). Preview has none, so Preview falls back to its `SUPABASE_SERVICE_ROLE_KEY` and production keys will not authenticate on Preview deployments. That is expected.
 
 1. **Production:** set `API_KEY_PEPPER` in the Production environment (Vercel → Project → Settings → Environment Variables → Production). Prefer a dedicated random value; do not reuse client-visible secrets.
 2. **Never `NEXT_PUBLIC_`:** this must stay server-only. A public pepper would let anyone forge key hashes offline.
@@ -59,7 +92,9 @@ Server-only secret used when hashing API keys and encrypting webhook signing sec
 
 ## Verifying rate limits
 
-Production is **fail-closed** without Upstash (`lib/api/v1/rateLimit.ts`): missing Redis URL/token or missing `UPSTASH_RATELIMIT_PREFIX` returns `configuration_error` (HTTP 503), not unlimited traffic.
+Production is **fail-closed** without Upstash (`lib/api/v1/rateLimit.ts`): missing Redis URL/token or missing `UPSTASH_RATELIMIT_PREFIX` returns `configuration_error` (HTTP 503), not unlimited traffic. An Upstash outage (configured but unreachable) also returns 503 with `Retry-After: 30` and logs `code: "rate_limit_unavailable"`.
+
+Production env as of 2026-11-08: `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` (Production + Preview) and `UPSTASH_RATELIMIT_PREFIX` (separate values for Production, Preview and Development) are set.
 
 ### Missing Upstash → 503 `configuration_error`
 

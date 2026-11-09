@@ -54,7 +54,7 @@ Thin GET wrappers. Prefer `create_render` for new work; `get_render` is for ids 
 ## Out of scope for the stub
 
 - Session cookie `/keys` management (dashboard only)
-- Webhooks (not in API v1)
+- Webhooks (session-registered from the dashboard, not exposed as MCP tools)
 - Multipart file upload (MCP can pass `image_url` after the host uploads elsewhere)
 - Full MCP SDK server binary — add later if listings require a runnable package
 

@@ -13,7 +13,10 @@ info:
 
     **Webhooks:** Register HTTPS completion endpoints via session-auth `POST /webhooks`
     (Pro/Business). After each API render reaches `completed` or `failed`, Renderspace
-    fire-and-forget POSTs a signed JSON body (`X-Renderspace-Signature: sha256=…`).
+    fire-and-forget POSTs a signed JSON body with headers `X-Renderspace-Event`
+    (`render.completed` | `render.failed`), `X-Renderspace-Timestamp` (unix seconds) and
+    `X-Renderspace-Signature: sha256=<hex>` = HMAC-SHA256(secret, `<timestamp>.<raw body>`).
+    Reject deliveries whose timestamp is more than 5 minutes old. One attempt, no retries.
     `POST /renders` remains synchronous for clients; webhook delivery never blocks or
     fails the render HTTP response. Async create mode is not in this phase.
 
@@ -23,7 +26,9 @@ info:
     (`/keys`, `/webhooks`, `/usage`) remain same-origin.
 
     **Rate limits:** 60 requests/minute per API key. Responses include
-    `X-RateLimit-Limit` and `X-RateLimit-Remaining`.
+    `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`; `429` adds
+    `Retry-After`. If the rate limiter is misconfigured or unreachable the API answers
+    `503 configuration_error` rather than serving unlimited traffic.
 
     Keep this file identical to `public/openapi/v1.yaml` (served at `/openapi/v1.yaml`).
   contact:
@@ -305,7 +310,8 @@ paths:
       description: |
         HTTPS URLs only. Private, localhost, and cloud-metadata hosts are rejected.
         The signing secret (`whsec_…`) is returned once. Verify deliveries with
-        `X-Renderspace-Signature: sha256=<hex>` (HMAC-SHA256 of the raw body).
+        `X-Renderspace-Signature: sha256=<hex>`, the HMAC-SHA256 of
+        `<X-Renderspace-Timestamp>.<raw body>` with that secret. Max 5 webhooks per account.
       requestBody:
         required: true
         content:
@@ -506,6 +512,9 @@ components:
       type: object
       description: JSON body POSTed to registered webhook URLs after a render finishes.
       properties:
+        event:
+          type: string
+          enum: [render.completed, render.failed]
         id:
           type: string
           format: uuid

@@ -18,7 +18,7 @@ Human docs: [Developers](https://www.renderspace.ai/developers) · internal note
 - **Base URL:** `https://www.renderspace.ai/api/v1`
 - **Auth:** `Authorization: Bearer rs_live_…` (or `X-API-Key: rs_live_…`)
 - **Credits:** successful `POST /renders` costs **2 credits**
-- **Webhooks:** none in v1 (sync HTTP response only)
+- **Webhooks:** optional completion webhooks (`render.completed` / `render.failed`), registered from a signed-in Pro/Business session; `POST /renders` itself stays synchronous
 - **CORS:** Bearer routes support CORS (`PUBLIC_API_CORS_ORIGINS` or `*`); cookie routes are same-origin
 - **Rate limit:** 60 req/min/key
 
