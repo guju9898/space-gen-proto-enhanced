@@ -65,6 +65,18 @@ export async function requireApiKeyAuth(request: Request): Promise<
       ),
     }
   }
+  if (rl.unavailable) {
+    return {
+      ok: false,
+      response: apiError(
+        "configuration_error",
+        "Rate limiting is temporarily unavailable. Retry shortly.",
+        undefined,
+        headers,
+        { route: "/api/v1", userId: apiKey.user_id }
+      ),
+    }
+  }
   if (!rl.ok) {
     return {
       ok: false,

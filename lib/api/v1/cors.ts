@@ -9,7 +9,8 @@
  */
 
 const ALLOW_HEADERS = "Authorization, Content-Type, X-API-Key"
-const EXPOSE_HEADERS = "X-RateLimit-Limit, X-RateLimit-Remaining, X-Credits-Remaining"
+const EXPOSE_HEADERS =
+  "X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, X-Credits-Remaining"
 const DEFAULT_MAX_AGE = "86400"
 
 export type CorsMode = { kind: "wildcard" } | { kind: "allowlist"; origins: Set<string> }

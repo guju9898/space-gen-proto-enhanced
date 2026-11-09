@@ -4,7 +4,7 @@
  * Production is fail-closed:
  * - Missing Upstash URL/token → configurationError (auth maps to 503)
  * - Missing UPSTASH_RATELIMIT_PREFIX in production → configurationError
- * - Upstash request errors → deny with short Retry-After (no in-memory bypass)
+ * - Upstash request errors → 503 with short Retry-After (no in-memory bypass)
  *
  * Preview/development may fall back to in-memory limits when Upstash is unset.
  * Identifiers are hashed before Redis/memory keys; never log raw API keys.
@@ -31,6 +31,9 @@ let redis: Redis | null = null
 if (upstashConfigured) {
   redis = new Redis({ url: REDIS_URL as string, token: REDIS_TOKEN as string })
 }
+
+/** `unavailable`: Upstash is configured but the check failed (outage) — deny with 503, never bypass. */
+export type PublicApiRateLimitResult = RateLimitResult & { unavailable?: boolean }
 
 const limiters = new Map<string, Ratelimit>()
 
@@ -65,7 +68,7 @@ function memoryLimit(id: string, limit: number, windowMs: number): RateLimitResu
 }
 
 /** 60 requests / minute per API key (generate counts too). Production: fail-closed without Upstash. */
-export async function checkPublicApiRateLimit(apiKeyId: string): Promise<RateLimitResult> {
+export async function checkPublicApiRateLimit(apiKeyId: string): Promise<PublicApiRateLimitResult> {
   const hashed = createHash("sha256").update(apiKeyId, "utf8").digest("hex").slice(0, 32)
   const prefixResult = resolveRateLimitPrefix()
   const env = resolveDeployEnvironment()
@@ -119,11 +122,11 @@ export async function checkPublicApiRateLimit(apiKeyId: string): Promise<RateLim
     logPublicApiEvent({
       level: "error",
       route: "/api/v1/*",
-      status: 429,
-      code: "rate_limited",
+      status: 503,
+      code: "rate_limit_unavailable",
       message: "upstash rate limit check failed; denying request",
     })
-    return { ok: false, remaining: 0, retryAfterSeconds: 30 }
+    return { ok: false, remaining: 0, retryAfterSeconds: 30, unavailable: true }
   }
 }
 

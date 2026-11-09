@@ -3,6 +3,8 @@
  * Descriptors only — no MCP server runtime. See docs/marketplace/mcp-wrapper.md.
  */
 
+import { API_RENDER_CREDIT_COST } from "@/lib/usage/creditCost"
+
 export type McpToolName = "create_render" | "get_render" | "list_renders" | "get_credits"
 
 export type McpJsonSchema = {
@@ -25,7 +27,7 @@ export const MCP_TOOLS: readonly McpToolDescriptor[] = [
   {
     name: "create_render",
     description:
-      "Create a photorealistic landscape, exterior, or interior concept from a job-site photo URL. Synchronous; charges 2 credits on success. Returns image_url when completed.",
+      `Create a photorealistic landscape, exterior, or interior concept from a job-site photo URL. Synchronous; charges ${API_RENDER_CREDIT_COST} credits on success. Returns image_url when completed.`,
     method: "POST",
     path: "/renders",
     inputSchema: {
@@ -108,7 +110,7 @@ export const MCP_TOOLS: readonly McpToolDescriptor[] = [
   {
     name: "get_credits",
     description:
-      "Return remaining credits and plan for the API key owner. Does not consume credits. API renders cost 2 credits each.",
+      `Return remaining credits and plan for the API key owner. Does not consume credits. API renders cost ${API_RENDER_CREDIT_COST} credits each.`,
     method: "GET",
     path: "/credits",
     inputSchema: {

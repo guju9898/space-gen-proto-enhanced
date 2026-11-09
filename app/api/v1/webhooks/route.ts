@@ -17,9 +17,11 @@ export async function GET() {
   try {
     const rows = await listWebhooksForUser(auth.db, auth.userId)
     return apiJson({ data: rows.map(toPublicWebhook) })
-  } catch (error) {
-    console.error("[api/v1/webhooks] list failed", error)
-    return apiError("internal_error", "Could not list webhooks.")
+  } catch {
+    return apiError("internal_error", "Could not list webhooks.", undefined, undefined, {
+      route: "/api/v1/webhooks",
+      userId: auth.userId,
+    })
   }
 }
 
@@ -56,8 +58,10 @@ export async function POST(request: Request) {
     if (message.startsWith("Limit of") || message.includes("https") || message.includes("not allowed")) {
       return apiError("validation_error", message)
     }
-    console.error("[api/v1/webhooks] create failed", error)
-    return apiError("internal_error", "Could not create webhook.")
+    return apiError("internal_error", "Could not create webhook.", undefined, undefined, {
+      route: "/api/v1/webhooks",
+      userId: auth.userId,
+    })
   }
 }
 
@@ -73,8 +77,10 @@ export async function DELETE(request: Request) {
     const deleted = await deleteWebhookForUser(auth.db, auth.userId, id)
     if (!deleted) return apiError("not_found", "Webhook not found.")
     return apiJson({ deleted: true, id })
-  } catch (error) {
-    console.error("[api/v1/webhooks] delete failed", error)
-    return apiError("internal_error", "Could not delete webhook.")
+  } catch {
+    return apiError("internal_error", "Could not delete webhook.", undefined, undefined, {
+      route: "/api/v1/webhooks",
+      userId: auth.userId,
+    })
   }
 }

@@ -8,6 +8,7 @@ import { SelfServePrices } from "@/components/conversion/group-3/SelfServePrices
 import { SiteHeader } from "@/components/site/SiteHeader"
 import { ChevronRight } from "lucide-react"
 import { SiteFooter } from "@/components/site/SiteFooter"
+import { API_RENDER_CREDIT_COST } from "@/lib/usage/creditCost"
 
 export const metadata: Metadata = pageMetadata({
   path: "/pricing",
@@ -61,6 +62,13 @@ export default function PricingPage() {
             <li>• No long-term commitment — cancel anytime</li>
             <li>• Secure payment via Stripe</li>
             <li>• Client-ready 4K exports</li>
+            <li>
+              • Professional and Business include{" "}
+              <Link href="/developers" className="text-primary hover:underline">
+                API access
+              </Link>{" "}
+              ({API_RENDER_CREDIT_COST} credits per API render)
+            </li>
           </ul>
           <p className="text-center mt-6">
             <Link href="/faq" className="text-primary hover:underline inline-flex items-center gap-1">

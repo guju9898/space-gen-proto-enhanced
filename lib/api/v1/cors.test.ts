@@ -51,6 +51,8 @@ describe("public API CORS", () => {
       "Authorization, Content-Type, X-API-Key"
     )
     assert.match(headers.get("Access-Control-Expose-Headers") || "", /X-Credits-Remaining/)
+    assert.match(headers.get("Access-Control-Expose-Headers") || "", /X-RateLimit-Reset/)
+    assert.match(headers.get("Access-Control-Expose-Headers") || "", /Retry-After/)
   })
 
   it("handles OPTIONS preflight", () => {

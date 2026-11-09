@@ -23,8 +23,10 @@ export async function GET(request: Request) {
   try {
     const rows = await listRendersForUser(auth.db, auth.userId, limit)
     return apiJson({ data: rows.map(toUsageItem) })
-  } catch (error) {
-    console.error("[api/v1/usage] list failed", error)
-    return apiError("internal_error", "Could not load API usage.")
+  } catch {
+    return apiError("internal_error", "Could not load API usage.", undefined, undefined, {
+      route: "/api/v1/usage",
+      userId: auth.userId,
+    })
   }
 }
