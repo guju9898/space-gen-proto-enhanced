@@ -22,6 +22,19 @@ const curlExample = `curl -X POST https://www.renderspace.ai/api/v1/renders \\
     "instruction": "Modern backyard with a linear pool and warm evening light"
   }'`
 
+const verifyExample = `import { createHmac, timingSafeEqual } from "node:crypto"
+
+// rawBody: the request body exactly as received (string), before JSON.parse
+function verifyRenderspace(rawBody, headers, secret) {
+  const ts = headers["x-renderspace-timestamp"]
+  if (!ts || Math.abs(Date.now() / 1000 - Number(ts)) > 300) return false
+  const expected =
+    "sha256=" + createHmac("sha256", secret).update(\`\${ts}.\${rawBody}\`).digest("hex")
+  const got = headers["x-renderspace-signature"] || ""
+  return got.length === expected.length &&
+    timingSafeEqual(Buffer.from(got), Buffer.from(expected))
+}`
+
 export default function DevelopersPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -169,6 +182,43 @@ export default function DevelopersPage() {
               <a href="/openapi/v1.yaml" className="underline hover:text-white">
                 /openapi/v1.yaml
               </a>
+            </p>
+          </div>
+        </section>
+
+        <section id="webhooks" className="border-t border-[#2a2a2a] scroll-mt-20">
+          <div className="container mx-auto px-4 py-14 md:py-16 max-w-3xl">
+            <h2 className="text-2xl font-semibold text-white mb-3">Webhooks</h2>
+            <p className="text-muted-foreground mb-4">
+              <code className="text-xs">POST /renders</code> answers synchronously, so you don&apos;t need
+              webhooks. Add one in{" "}
+              <Link href="/profile" className="underline hover:text-white">
+                Profile → Webhooks
+              </Link>{" "}
+              if another tool (n8n, Make, Zapier) should hear about every finished render. Each
+              delivery is a JSON POST with these headers:
+            </p>
+            <ul className="mb-4 space-y-1 text-sm text-muted-foreground">
+              <li>
+                <code className="text-xs text-zinc-200">X-Renderspace-Event</code>:{" "}
+                <code className="text-xs">render.completed</code>, <code className="text-xs">render.failed</code>{" "}
+                or <code className="text-xs">webhook.test</code>
+              </li>
+              <li>
+                <code className="text-xs text-zinc-200">X-Renderspace-Timestamp</code>: Unix seconds
+              </li>
+              <li>
+                <code className="text-xs text-zinc-200">X-Renderspace-Signature</code>:{" "}
+                <code className="text-xs">sha256=</code> HMAC of <code className="text-xs">timestamp.body</code>{" "}
+                using your <code className="text-xs">whsec_</code> secret
+              </li>
+            </ul>
+            <pre className="overflow-x-auto rounded-lg border border-[#343434] bg-[#0f0f0f] p-4 text-xs text-zinc-200 mb-4">
+              <code>{verifyExample}</code>
+            </pre>
+            <p className="text-sm text-muted-foreground">
+              One attempt per event with an 8-second timeout and no retries. If you miss one, fetch{" "}
+              <code className="text-xs">GET /renders/{"{id}"}</code>. HTTPS only, up to 5 per account.
             </p>
           </div>
         </section>

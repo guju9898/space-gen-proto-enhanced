@@ -83,7 +83,15 @@ export function signWebhookBody(secret: string, body: string, timestamp: string)
   return `sha256=${digest}`
 }
 
-export type WebhookEvent = "render.completed" | "render.failed"
+export type WebhookEvent = "render.completed" | "render.failed" | "webhook.test"
+
+/** Input problems the route should return as 422 (bad URL, too many webhooks). */
+export class WebhookInputError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = "WebhookInputError"
+  }
+}
 
 const BLOCKED_HOSTNAMES = new Set([
   "localhost",
@@ -228,11 +236,14 @@ export async function createWebhookForUser(
   url: string
 ): Promise<{ row: ApiWebhookRow; secret: string }> {
   const validated = validateWebhookUrl(url)
-  if (!validated.ok) throw new Error(validated.message)
+  if (!validated.ok) throw new WebhookInputError(validated.message)
 
   const existing = await listWebhooksForUser(db, userId)
   if (existing.length >= MAX_WEBHOOKS_PER_USER) {
-    throw new Error(`Limit of ${MAX_WEBHOOKS_PER_USER} webhooks per account.`)
+    throw new WebhookInputError(`Limit of ${MAX_WEBHOOKS_PER_USER} webhooks per account.`)
+  }
+  if (existing.some((w) => w.url === validated.url)) {
+    throw new WebhookInputError("That URL is already registered.")
   }
 
   const secret = generateWebhookSecretPlaintext()
@@ -278,21 +289,41 @@ function logDelivery(level: "warn" | "error", webhookId: string, message: string
   })
 }
 
+/** Pause or resume a webhook. Returns the updated row, or null when it isn't the user's. */
+export async function setWebhookActiveForUser(
+  db: SupabaseClient,
+  userId: string,
+  webhookId: string,
+  active: boolean
+): Promise<ApiWebhookRow | null> {
+  const { data, error } = await db
+    .from("api_webhooks")
+    .update({ active })
+    .eq("id", webhookId)
+    .eq("user_id", userId)
+    .select("id, user_id, url, secret_encrypted, active, created_at")
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+  return (data as ApiWebhookRow | null) ?? null
+}
+
+export type DeliveryResult = { ok: boolean; status: number | null; reason?: string }
+
 async function deliverOne(
   webhook: ApiWebhookRow,
   body: string,
   event: WebhookEvent
-): Promise<void> {
+): Promise<DeliveryResult> {
   let host: string
   try {
     host = new URL(webhook.url).hostname
   } catch {
     logDelivery("warn", webhook.id, "invalid stored url")
-    return
+    return { ok: false, status: null, reason: "invalid_url" }
   }
   if (!(await resolvesToPublicAddress(host))) {
     logDelivery("warn", webhook.id, "host did not resolve to a public address; skipped")
-    return
+    return { ok: false, status: null, reason: "host_not_public" }
   }
 
   const timestamp = String(Math.floor(Date.now() / 1000))
@@ -315,9 +346,11 @@ async function deliverOne(
       redirect: "error",
     })
     if (!res.ok) logDelivery("warn", webhook.id, "receiver returned non-2xx", res.status)
+    return { ok: res.ok, status: res.status, ...(res.ok ? {} : { reason: "non_2xx" }) }
   } catch (error) {
-    const reason = error instanceof Error && error.name === "AbortError" ? "timed out" : "request failed"
-    logDelivery("warn", webhook.id, reason)
+    const timedOut = error instanceof Error && error.name === "AbortError"
+    logDelivery("warn", webhook.id, timedOut ? "timed out" : "request failed")
+    return { ok: false, status: null, reason: timedOut ? "timeout" : "request_failed" }
   } finally {
     clearTimeout(timer)
   }
@@ -348,7 +381,9 @@ export async function deliverRenderWebhooks(userId: string, row: WebhookRenderPa
     const body = JSON.stringify(buildWebhookPayload(row))
     await Promise.all(
       hooks.map((hook) =>
-        deliverOne(hook, body, event).catch(() => logDelivery("error", hook.id, "could not sign or send"))
+        deliverOne(hook, body, event).catch(() => {
+          logDelivery("error", hook.id, "could not sign or send")
+        })
       )
     )
   } catch {
@@ -369,5 +404,37 @@ export function notifyRenderWebhooks(userId: string, row: WebhookRenderPayloadSo
   } catch {
     // Outside a request scope (scripts/tests): run detached.
     void task()
+  }
+}
+
+export function buildTestPayload(webhookId: string) {
+  return {
+    event: "webhook.test" as const,
+    webhook_id: webhookId,
+    message: "Test delivery from Renderspace. Verify the signature, then return any 2xx.",
+    sent_at: new Date().toISOString(),
+  }
+}
+
+/** Send one signed `webhook.test` delivery now and report what the receiver answered. */
+export async function sendTestWebhookForUser(
+  db: SupabaseClient,
+  userId: string,
+  webhookId: string
+): Promise<DeliveryResult | null> {
+  const { data, error } = await db
+    .from("api_webhooks")
+    .select("id, user_id, url, secret_encrypted, active, created_at")
+    .eq("id", webhookId)
+    .eq("user_id", userId)
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+  if (!data) return null
+  const hook = data as ApiWebhookRow
+  try {
+    return await deliverOne(hook, JSON.stringify(buildTestPayload(hook.id)), "webhook.test")
+  } catch {
+    logDelivery("error", hook.id, "could not sign test delivery")
+    return { ok: false, status: null, reason: "signing_failed" }
   }
 }

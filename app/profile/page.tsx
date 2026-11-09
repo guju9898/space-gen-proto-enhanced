@@ -12,6 +12,7 @@ import { getCreditErrorMessage } from "@/lib/usage/errorMessages"
 import { LifecycleOffer } from "@/components/conversion/group-4/LifecycleOffer"
 import { ProfileApiKeys } from "@/components/profile/ProfileApiKeys"
 import { ProfileApiUsage } from "@/components/profile/ProfileApiUsage"
+import { ProfileApiWebhooks } from "@/components/profile/ProfileApiWebhooks"
 
 interface ProfileData {
   email: string | undefined
@@ -370,6 +371,8 @@ export default function ProfilePage() {
       <ProfileApiKeys eligible={apiEligible} />
 
       <ProfileApiUsage eligible={apiEligible} />
+
+      <ProfileApiWebhooks eligible={apiEligible} />
 
       <LifecycleOffer busy={false} />
 

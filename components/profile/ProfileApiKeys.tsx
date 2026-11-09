@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { KeyRound, Loader2, Copy, Check, Trash2 } from "lucide-react"
 import Link from "next/link"
+import { API_RENDER_CREDIT_COST } from "@/lib/usage/creditCost"
 
 type ApiKeyRow = {
   id: string
@@ -130,7 +131,7 @@ export function ProfileApiKeys({ eligible }: { eligible: boolean }) {
         </CardTitle>
         <CardDescription>
           Automate renders with the public API. Each successful API render uses{" "}
-          <span className="text-foreground">2 credits</span>.{" "}
+          <span className="text-foreground">{API_RENDER_CREDIT_COST} credits</span>.{" "}
           <Link href="/developers" className="underline hover:text-white">
             Developer docs
           </Link>

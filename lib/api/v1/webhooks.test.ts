@@ -2,7 +2,9 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 import {
+  buildTestPayload,
   buildWebhookPayload,
+  createWebhookForUser,
   decryptWebhookSecret,
   encryptWebhookSecret,
   generateWebhookSecretPlaintext,
@@ -10,6 +12,7 @@ import {
   signWebhookBody,
   validateWebhookUrl,
   webhookEventFor,
+  WebhookInputError,
 } from "@/lib/api/v1/webhooks"
 
 describe("public API webhooks", () => {
@@ -81,5 +84,19 @@ describe("public API webhooks", () => {
     assert.equal(webhookEventFor("completed"), "render.completed")
     assert.equal(webhookEventFor("failed"), "render.failed")
     assert.equal(webhookEventFor("running"), null)
+  })
+
+  it("rejects bad URLs as input errors before touching the database", async () => {
+    const db = new Proxy({}, { get: () => { throw new Error("db should not be used") } })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await assert.rejects(createWebhookForUser(db as any, "user-1", "http://hooks.example.com"), WebhookInputError)
+  })
+
+  it("builds a test payload that can't be mistaken for a render", () => {
+    const p = buildTestPayload("22222222-2222-2222-2222-222222222222")
+    assert.equal(p.event, "webhook.test")
+    assert.equal(p.webhook_id, "22222222-2222-2222-2222-222222222222")
+    assert.ok(!("status" in p))
+    assert.ok(!Number.isNaN(Date.parse(p.sent_at)))
   })
 })

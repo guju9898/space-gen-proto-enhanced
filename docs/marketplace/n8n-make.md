@@ -1,6 +1,6 @@
 # n8n & Make.com workflows
 
-Sample automation patterns against the live REST API. Create your own Renderspace API key from Profile → API Keys (Professional or Business). Each successful render costs **2 credits**. Prefer the sync `POST /renders` response; optional completion webhooks can also be registered from a signed-in session.
+Sample automation patterns against the live REST API. Create your own Renderspace API key from Profile → API Keys (Professional or Business). Each successful render costs **2 credits**. Prefer the sync `POST /renders` response; optional completion webhooks can be added in Profile → Webhooks (point one at an n8n **Webhook** node or a Make **Custom webhook**, then press **Test** to send a signed `webhook.test` event). Verify `X-Renderspace-Signature` as shown on /developers#webhooks.
 
 Base URL: `https://www.renderspace.ai/api/v1`
 

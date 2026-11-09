@@ -77,7 +77,13 @@ Delivery rules:
 - Runs after the response via Next.js `after()`, so it never delays or fails `POST /renders`.
 - HTTPS only; localhost, private, link-local, CGNAT and metadata addresses are rejected at registration **and** re-checked by DNS lookup at delivery.
 - Failures are logged as `{"source":"public_api","route":"webhook_delivery",…}` with the webhook id only. The URL is never logged, because automation-tool URLs often contain their own secret.
-- Max 5 webhooks per account.
+- Max 5 webhooks per account; the same URL can't be registered twice.
+
+Managing webhooks (signed-in session, Pro/Business):
+
+- **Profile → Webhooks** lists them and has Add, Test, Pause/Resume and Delete. The secret is shown once after Add.
+- `PATCH /api/v1/webhooks?id=…` with `{"active": false}` pauses deliveries; `{"active": true}` resumes.
+- `POST /api/v1/webhooks/test?id=…` sends one signed `webhook.test` event now and returns `{delivered, receiver_status, reason?}`. It has its own 60-per-minute limit per account.
 
 ## Ops: `API_KEY_PEPPER`
 
@@ -140,7 +146,7 @@ Successful image generation that fails credit settlement already writes a row to
 4. Postman — public workspace from OpenAPI. → same doc (#9). Keep `openapi/v1.yaml` ↔ `public/openapi/v1.yaml` in sync (2 credits, webhooks, CORS note).
 5. n8n / Make / Albato — HTTP credential + sample workflow using `POST /renders`. → `docs/marketplace/n8n-make.md` (#10).
 6. Composio / Cursor Directory / MCP — wrap the four tools after REST is stable. → `docs/marketplace/mcp-wrapper.md` + `lib/api/v1/mcp-tools.ts` (#11).
-7. Add dashboard UI for key create/revoke (session routes already exist).
-8. Phase 2 foundation: completion webhooks (done); optional async mode later.
+7. Dashboard UI for keys, usage and webhooks: done (Profile).
+8. Phase 2 foundation: completion webhooks with Profile UI, pause/resume and test delivery (done); optional async mode later.
 
 Index: [`docs/marketplace/README.md`](./marketplace/README.md).

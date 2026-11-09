@@ -337,6 +337,43 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "422":
           $ref: "#/components/responses/ValidationError"
+    patch:
+      tags: [Webhooks]
+      summary: Pause or resume a webhook (session cookie auth)
+      security: []
+      operationId: updateWebhook
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [active]
+              properties:
+                active:
+                  type: boolean
+      responses:
+        "200":
+          description: Updated webhook
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Webhook"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
     delete:
       tags: [Webhooks]
       summary: Delete webhook (session cookie auth)
@@ -368,6 +405,45 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
+  /webhooks/test:
+    post:
+      tags: [Webhooks]
+      summary: Send a signed test delivery now (session cookie auth)
+      security: []
+      operationId: testWebhook
+      description: |
+        Sends one `webhook.test` event to the webhook and reports the receiver's answer.
+        Limited to 60 per minute per account.
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Delivery attempted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  delivered:
+                    type: boolean
+                  receiver_status:
+                    type: [integer, "null"]
+                  reason:
+                    type: string
+                    enum: [non_2xx, timeout, request_failed, host_not_public, invalid_url, signing_failed]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
 components:
   securitySchemes:
     bearerAuth:
@@ -515,6 +591,7 @@ components:
         event:
           type: string
           enum: [render.completed, render.failed]
+          description: "Test deliveries send a different body: event webhook.test with webhook_id, message and sent_at."
         id:
           type: string
           format: uuid
