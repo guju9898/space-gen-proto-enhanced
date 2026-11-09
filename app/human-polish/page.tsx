@@ -6,9 +6,9 @@ import { HumanPolishPage } from "@/components/human-polish/marketing/HumanPolish
 
 export const metadata: Metadata = pageMetadata({
   path: "/human-polish",
-  title: "Human Polish™: Done-for-You AI Render Packs",
+  title: "Human Polish AI Rendering Service",
   description:
-    "Done-for-you AI renderings for contractors: packs of 25, 50 or 100 concepts from $399 ($349 on a first pack), plus 2D and 3D presentation plans.",
+    "Done-for-you AI rendering service for contractors: 25, 50 or 100 concepts from $399 ($349 on a first pack), plus 2D and 3D presentation plans.",
 })
 
 export default function HumanPolishRoute() {

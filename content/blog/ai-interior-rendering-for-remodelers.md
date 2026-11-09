@@ -6,7 +6,7 @@ description: "Remodelers: turn a photo of the client's existing kitchen or bath 
 excerpt: "How remodelers turn a photo of the client's existing kitchen, bath or living room into a photorealistic concept, where it fits in the sale, and what it can't do."
 category: Use case
 datePublished: 2026-10-19
-dateModified: 2026-10-19
+dateModified: 2026-11-09
 author: KeSean Fallon
 featuredImage: /landing/renders/interior-hero-01.jpg
 featuredImageAlt: "Open-plan living room and kitchen concept with white cabinets, a light sofa, a wood coffee table and a staircase"
@@ -36,7 +36,7 @@ It turns the room the client already knows into the room they are paying for.
 
 You photograph the existing space from where the client usually sees it: the kitchen doorway, the bathroom entry. The AI generates a concept of that same room with new cabinets, counters, flooring, fixtures or paint, keeping the layout and the window in the same place. Because it is their room, they recognize it instantly. The same workflow works outside the house too; see [exterior renovation visualization for contractors](/blog/exterior-renovation-visualization-for-contractors).
 
-![A bright, modern kitchen with white quartzite countertops, white inset cabinets, a smooth plaster range hood, and light wood floors.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-16/kitchen-remodel-plaster-range-hood-dallas-concept-09-17d95d.png)
+![Concept: bright kitchen remodel with white quartzite counters, white inset cabinets, plaster range hood, light wood floors](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-16/kitchen-remodel-plaster-range-hood-dallas-concept-09-17d95d.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/kitchen-remodel-plaster-range-hood-dallas-concept-09-17d95d)
 
@@ -49,6 +49,8 @@ Settings carry over between generations, so you can change one thing at a time. 
 **3D design software** builds the room from measurements. It is precise and the right tool for final layouts and cabinet orders, but building a full model for every lead takes hours.
 
 **Rendering services** can produce polished images. Turnaround is usually days, you pay per image, and changes go back into a queue. We compare the two approaches in [AI rendering vs traditional rendering services](/blog/ai-rendering-vs-traditional-rendering-services) and [the Fiverr rendering alternative for contractors](/blog/fiverr-rendering-alternative-for-contractors).
+
+If you would rather hand the work off, [Human Polish](/human-polish) is a done-for-you AI rendering service: a 25-concept pack is delivered in 24-48 hours.
 
 **AI rendering from a photo** is built for the sales stage: quick, visual, and done on the visit. It shows the idea. It does not produce dimensions, cabinet lists or construction documents.
 

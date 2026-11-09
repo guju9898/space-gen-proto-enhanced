@@ -31,6 +31,13 @@ export default function FAQPage() {
             <div key={faq.id} id={faq.id} className="bg-[#191f33]/50 rounded-xl p-6 border border-[#343434]">
               <h2 className="text-lg font-bold text-white mb-3">{faq.q}</h2>
               <p className="text-muted-foreground text-sm leading-relaxed">{faq.a}</p>
+              {faq.id === "done-for-you-rendering-service" && (
+                <p className="text-sm mt-3">
+                  <Link href="/human-polish" className="text-primary hover:underline">
+                    See Human Polish AI Render Packs
+                  </Link>
+                </p>
+              )}
             </div>
           ))}
         </div>

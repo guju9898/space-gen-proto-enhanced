@@ -45,7 +45,7 @@ There are a growing number of AI design tools, including pool-specific apps and 
 
 Catalog scenes and empty templates are fine for inspiration. They do not close a sale. The tool should start from a phone photo you take on site, so the fence line, the house, the trees and the slope are the client's own.
 
-![A freeform lagoon pool with Oklahoma-style flagstone coping and patio, an aqua-green pebble interior, and a cascading boulder spillway.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-16/freeform-pool-boulders-jumping-rock-atlanta-photo-to-concept-04-2bf589.png)
+![Concept: freeform lagoon pool with flagstone coping and patio, aqua-green pebble interior and a boulder spillway](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-16/freeform-pool-boulders-jumping-rock-atlanta-photo-to-concept-04-2bf589.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/freeform-pool-boulders-jumping-rock-atlanta-photo-to-concept-04-2bf589)
 
