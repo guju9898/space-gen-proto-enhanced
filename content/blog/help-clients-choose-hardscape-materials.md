@@ -54,7 +54,7 @@ Show each option on their property, side by side. Here is a simple way to run it
 3. **Swap only the material.** In Renderspace the settings carry over, so the layout, furniture and planting stay put while the paving changes from travertine to pavers to flagstone. Each concept takes about 30 seconds, typically 20 to 40.
 4. **Put the options next to each other** and let the homeowner pick. Then talk price.
 
-![A Mediterranean dining terrace with tumbled travertine pavers, a whitewashed loggia, a carved limestone fountain and bougainvillea](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-17/mediterranean-terrace-limestone-wall-fountain-southern-california-concept-14-cf78d5.png)
+![Concept: Mediterranean dining terrace with tumbled travertine pavers, whitewashed loggia, limestone fountain, bougainvillea](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-17/mediterranean-terrace-limestone-wall-fountain-southern-california-concept-14-cf78d5.png)
 
 *[See this concept in the gallery](https://www.renderspace.ai/gallery/mediterranean-terrace-limestone-wall-fountain-southern-california-conc-cf78d5)*
 

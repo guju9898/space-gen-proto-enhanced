@@ -58,7 +58,7 @@ Take a photo on the site visit from where the homeowner usually looks at the spa
 
 Put that image on the first page of the proposal. Then the scope. Then the price. The picture tells the homeowner what they are buying, and the line items explain it.
 
-![A bluestone walkway with a red brick soldier-course border leads to a house. Flanking the path are zinc planters with boxwood shrubs.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-16/front-yard-curb-appeal-bluestone-walkway-orlando-photo-to-concept-16-46975c.png)
+![Concept: bluestone walkway with a red brick soldier-course border, flanked by zinc planters with boxwood](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-16/front-yard-curb-appeal-bluestone-walkway-orlando-photo-to-concept-16-46975c.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/front-yard-curb-appeal-bluestone-walkway-orlando-photo-to-concept-16-46975c)
 

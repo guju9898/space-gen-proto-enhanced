@@ -47,7 +47,7 @@ The questions underneath are almost always visual:
 
 **An AI concept from a photo.** You take one photo of the back of the house and generate a photorealistic concept with the deck in place. With Renderspace a render typically comes back in 20 to 40 seconds, and settings carry over, so you can change one thing at a time: the board color, the railing, a spa built in, a privacy screen.
 
-![A wooden deck with a cedar privacy screen, a cedar soaking tub, and potted ferns, set against a stone building and lush trees.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-19/spa-deck-cedar-soaking-tub-southern-california-photo-to-concept-04-dae4b5.png)
+![Concept: wood deck with a cedar privacy screen, cedar soaking tub and potted ferns beside a stone building](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-19/spa-deck-cedar-soaking-tub-southern-california-photo-to-concept-04-dae4b5.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/spa-deck-cedar-soaking-tub-southern-california-photo-to-concept-04-dae4b5)
 

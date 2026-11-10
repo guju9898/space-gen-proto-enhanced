@@ -6,7 +6,7 @@ description: "Are 3D renderings worth paying for? Costs, wait times and when a f
 excerpt: "What 3D renderings cost, when a detailed model earns its price, and when a fast photo-based concept does the job better at the bidding stage."
 category: Comparison
 datePublished: 2026-10-19
-dateModified: 2026-10-19
+dateModified: 2026-11-09
 author: KeSean Fallon
 featuredImage: /gallery/modern-limestone-house-olive-trees-courtyard-concept.jpg
 featuredImageAlt: "Modern limestone house concept with olive trees, clay pots and a gravel forecourt"
@@ -26,7 +26,7 @@ Before you spend hundreds on a backyard rendering, ask what you actually need it
 
 ## What do 3D renderings cost?
 
-Prices vary widely by provider and complexity. Cedreo, a home design software company, [puts outsourced exterior renders at about $600 to $1,500 per image](https://cedreo.com/blog/architectural-rendering-costs), and aerial or site views at roughly $300 to $2,000 per view, depending on terrain, landscaping and context modeling.
+Prices vary widely by provider and complexity. Cedreo, a home design software company, [puts outsourced exterior renders at about $600 to $1,500 per image](https://cedreo.com/blog/architectural-rendering-costs), and aerial or site views at roughly $300 to $2,000 per view, depending on terrain, landscaping and context modeling. A done-for-you AI rendering service sits in between: a [Human Polish](/human-polish) pack of 25 concepts is $399 ($349 on a first purchase), delivered in 24-48 hours.
 
 Then there is time. Studios build a 3D scene, light it, render it and retouch it, and every revision round adds days. We look at what that wait costs in [what late-night rendering really costs before an estimate](/blog/late-night-rendering-cost-before-estimate).
 

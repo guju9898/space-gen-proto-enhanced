@@ -14,8 +14,8 @@ export function HeroSection({ onSelectFamily }: HeroSectionProps) {
           Your Outsourced Visualization Department
         </h1>
         <p className="text-muted-foreground text-lg mt-5 max-w-3xl mx-auto">
-          Use Renderspace to explore quickly. Use Human Polish when the project needs a real team behind it —
-          done-for-you concept packs or Build-Ready presentation packages.
+          Use Renderspace to explore quickly. Use Human Polish, our done-for-you AI rendering service, when the
+          project needs a real team behind it: concept packs or Build-Ready presentation packages.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
           <a

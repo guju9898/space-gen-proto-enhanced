@@ -58,7 +58,7 @@ Renderspace was built for this one job. Here is what that means in practice:
 - **It exports in 4K,** so the image holds up in a proposal.
 - **You can use it commercially.** Every paid plan may use renders in proposals, websites, social and ads.
 
-![An outdoor kitchen featuring a cedar pergola, polished concrete countertops, and a built-in pizza oven, set on warm-gray pavers.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-19/outdoor-kitchen-pergola-pizza-oven-phoenix-photo-to-concept-01-311176.png)
+![Concept: outdoor kitchen with a cedar pergola, polished concrete counters and a built-in pizza oven on warm-gray pavers](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-19/outdoor-kitchen-pergola-pizza-oven-phoenix-photo-to-concept-01-311176.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/outdoor-kitchen-pergola-pizza-oven-phoenix-photo-to-concept-01-311176)
 

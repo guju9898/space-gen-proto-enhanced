@@ -8,6 +8,7 @@
 
 import {
   HUMAN_POLISH_BUILD_READY,
+  HUMAN_POLISH_FIRST_PACK_PRICE_USD,
   HUMAN_POLISH_RENDER_PACKS,
   PLANS,
   PROOF,
@@ -63,6 +64,12 @@ export const FAQ_ITEMS: FaqItem[] = [
     q: "Can I use Renderspace for permit plans?",
     a: `No. Renderspace creates concept visualizations for early design decisions and sales conversations. It does not produce construction drawings, permit plans, engineering, or stamped documents. For HOA or design-review presentations, Human Polish Build-Ready packages (from ${usd(HUMAN_POLISH_BUILD_READY[0].priceUsd)}) give you presentation-grade materials; permits still need to go through a licensed professional.`,
     surfaces: ["home", "faq"],
+  },
+  {
+    id: "done-for-you-rendering-service",
+    q: "Is there a done-for-you AI rendering service?",
+    a: `Yes. Human Polish AI Render Packs are produced for you: ${HUMAN_POLISH_RENDER_PACKS[0].name.replace("AI Render Pack: ", "")} for ${usd(HUMAN_POLISH_RENDER_PACKS[0].priceUsd)} (${usd(HUMAN_POLISH_FIRST_PACK_PRICE_USD)} on a first purchase) in ${HUMAN_POLISH_RENDER_PACKS[0].delivery}, ${HUMAN_POLISH_RENDER_PACKS[1].name.replace("AI Render Pack: ", "")} for ${usd(HUMAN_POLISH_RENDER_PACKS[1].priceUsd)} in ${HUMAN_POLISH_RENDER_PACKS[1].delivery}, or ${HUMAN_POLISH_RENDER_PACKS[2].name.replace("AI Render Pack: ", "")} for ${usd(HUMAN_POLISH_RENDER_PACKS[2].priceUsd)} in ${HUMAN_POLISH_RENDER_PACKS[2].delivery}. They are for visualization and presentation, not permit or construction drawings.`,
+    surfaces: ["faq"],
   },
   {
     id: "add-pool",

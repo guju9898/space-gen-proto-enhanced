@@ -41,7 +41,7 @@ A good design answers all of those. The trouble is that a homeowner who cannot p
 
 You take a phone photo of the yard from the street or the back door. An AI rendering tool turns that photo into a photorealistic concept of the same property with the lawn replaced: decomposed granite or crushed stone, steel or stone edging, boulders, a path, and drought-tolerant plants in planted beds. With Renderspace a render typically comes back in about 30 seconds, and settings carry over, so you can change one thing at a time. Same yard, more planting and less gravel. Same yard, a flagstone path instead of stepping pads.
 
-![A xeriscape backyard with rust-toned crushed stone, corten steel edging, a corten steel water bowl, a palo verde tree, lantana, and pink muhly.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-16/xeriscape-corten-water-bowl-san-antonio-photo-to-concept-07-fa0dfe.png)
+![Concept: xeriscape backyard with rust crushed stone, corten edging and water bowl, palo verde, lantana and pink muhly](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-16/xeriscape-corten-water-bowl-san-antonio-photo-to-concept-07-fa0dfe.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/xeriscape-corten-water-bowl-san-antonio-photo-to-concept-07-fa0dfe)
 
