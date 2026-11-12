@@ -140,7 +140,7 @@ export function StudioPreview({
           <div
             ref={renderBoxRef}
             data-render-box
-            className="mx-auto aspect-[4/3] w-[min(87%,calc((100dvh_-_17rem)*4/3))] min-w-[240px] max-w-full rounded-md overflow-hidden bg-muted"
+            className="mx-auto aspect-[4/3] w-[min(87%,calc((100dvh_-_21rem)*4/3))] min-w-[240px] max-w-full rounded-md overflow-hidden bg-muted"
           >
             {currentRender ? (
               <img
