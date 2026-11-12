@@ -50,9 +50,9 @@ export default function StepOne({ email, setEmail }: StepOneProps) {
         <Mail size={32} className="text-[#ec4899]" />
       </div>
 
-      <h2 className="text-xl md:text-2xl font-bold mb-2 text-center">Welcome to our platform</h2>
+      <h2 className="text-xl md:text-2xl font-bold mb-2 text-center">Start your first concept</h2>
       <p className="text-gray-400 mb-8 text-center max-w-md">
-        Enter your email address to get started with the onboarding process.
+        Enter your email and we'll send you a sign-in link. No password needed.
       </p>
 
       <form onSubmit={handleSubmit} className="w-full max-w-md">
