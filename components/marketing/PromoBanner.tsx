@@ -21,11 +21,12 @@ function endLabel(iso: string): string {
 
 /** Hook: the Intro Plan campaign that may be advertised on this page right now, or null. */
 export function useIntroCampaign(): PricingCampaign | null {
-  const searchParams = useSearchParams()
+  // Reads the address in the browser after mount (no useSearchParams), so static
+  // pages like /pricing can still be prerendered.
   const [campaign, setCampaign] = useState<PricingCampaign | null>(null)
   useEffect(() => {
-    setCampaign(introCampaignToShow(new Date(), promoPreviewAllowed(searchParams?.toString())))
-  }, [searchParams])
+    setCampaign(introCampaignToShow(new Date(), promoPreviewAllowed(window.location.search)))
+  }, [])
   return campaign
 }
 
