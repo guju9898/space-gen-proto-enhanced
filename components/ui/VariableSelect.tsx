@@ -133,6 +133,7 @@ export function VariableSelect({
         value={searchValue}
         onValueChange={setSearchValue}
         onKeyDown={handleKeyDown}
+        className={cn(isMobile && "text-base")}
       />
       <CommandList className={cn(isMobile && pres.v2 && "max-h-[50vh]")}>
         {offerTyped && (

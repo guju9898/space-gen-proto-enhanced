@@ -438,7 +438,7 @@ export default function LandscapeStudioPage() {
                   <VariableSelect
                     label="Theme Style"
                     value={landscapeConfig?.themeStyle ?? landscapeDefaults.style}
-                    options={["zen", "tropical", "mediterranean", "cottage", "formal"]}
+                    options={["modern", "zen", "tropical", "mediterranean", "cottage", "formal"]}
                     placeholder="Select or type theme style"
                     onChange={(value) => handleConfigChange("themeStyle", value)}
                   />
