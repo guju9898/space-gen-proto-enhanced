@@ -6,6 +6,9 @@ import { cn } from "@/lib/utils"
 import { Dialog, DialogContent, DialogDescription, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { isCustomValue, resolveTypedValue } from "@/lib/studio/customValue"
+import { useFieldPresentation } from "@/components/Studio/useFieldPresentation"
+import { FieldHint } from "@/components/Studio/FieldHint"
+import { trackStudioEvent } from "@/components/Studio/analytics"
 
 interface ImageOption {
   value: string
@@ -79,6 +82,7 @@ export function ImageOptionGrid({
   className,
   allowCustom = true,
 }: ImageOptionGridProps) {
+  const pres = useFieldPresentation(label)
   const [open, setOpen] = React.useState(false)
   const [draft, setDraft] = React.useState("")
   const inputId = React.useId()
@@ -94,12 +98,16 @@ export function ImageOptionGrid({
 
   const useDraft = () => {
     const next = resolveTypedValue(draft, optionValues)
+    if (next && isCustomValue(next, optionValues)) trackStudioEvent("custom_value_entered", { field: pres.meta?.key ?? label })
     if (next) pick(next)
   }
 
+  if (pres.hidden) return null
+
   return (
     <div className={cn("w-full", className)}>
-      {label && <label className="text-sm font-medium mb-2 block">{label}</label>}
+      {pres.label && <label className="text-sm font-medium mb-2 block">{pres.label}</label>}
+      <FieldHint>{pres.hint}</FieldHint>
       <Dialog
         open={open}
         onOpenChange={(next) => {
@@ -130,7 +138,7 @@ export function ImageOptionGrid({
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-2xl p-5 sm:p-6">
-          <h3 className="text-lg font-semibold pr-8 mb-1">{label || "Select an option"}</h3>
+          <h3 className="text-lg font-semibold pr-8 mb-1">{pres.label || "Select an option"}</h3>
           <DialogDescription className="sr-only">Pick a card or type your own value.</DialogDescription>
 
           {allowCustom && (
@@ -148,7 +156,7 @@ export function ImageOptionGrid({
                 id={inputId}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                placeholder={`Type your own${label ? ` ${label.toLowerCase()}` : ""}, e.g. something not shown below`}
+                placeholder={`Type your own${pres.label ? ` ${pres.label.toLowerCase()}` : ""}${pres.hint ? "" : ", e.g. something not shown below"}`}
                 maxLength={200}
                 className="h-10 flex-1 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />

@@ -3,7 +3,10 @@
 import { Loader2, Image as ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
+import { usePathname } from "next/navigation"
+import { studioKindFromPath } from "@/lib/studio/lastStudio"
+import { trackStudioEvent } from "@/components/Studio/analytics"
 
 interface StudioPreviewProps {
   currentRender: string | null
@@ -72,6 +75,23 @@ export function StudioPreview({
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Funnel events from the render state: started, then completed (new image) or failed.
+  const pathname = usePathname();
+  const wasRendering = useRef(false);
+  const renderAtStart = useRef<string | null>(null);
+  useEffect(() => {
+    const studio = studioKindFromPath(pathname) ?? undefined;
+    if (rendering && !wasRendering.current) {
+      renderAtStart.current = currentRender;
+      trackStudioEvent("render_started", { studio, version: latestRenders.length + 1 });
+    }
+    if (!rendering && wasRendering.current) {
+      const gotNew = Boolean(currentRender) && currentRender !== renderAtStart.current;
+      trackStudioEvent(gotNew ? "render_completed" : "render_failed", { studio, version: latestRenders.length });
+    }
+    wasRendering.current = rendering;
+  }, [rendering, currentRender, latestRenders.length, pathname]);
 
   // Debug image rendering
   useEffect(() => {

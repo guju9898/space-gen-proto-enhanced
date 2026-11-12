@@ -50,6 +50,9 @@ import { downloadImage } from "@/lib/projects/utils"
 import { enableProjectShare, disableProjectShare } from "@/app/studio/projects/actions"
 import type { Project } from "@/lib/projects/types"
 import { PhotoDropArea } from "@/components/Studio/PhotoDropArea"
+import { useStudioV2Flag } from "@/components/Studio/StudioV2Context"
+import { CameraControlsGate, PhotoStepFooter } from "@/components/Studio/StudioV2Bits"
+import { trackStudioEvent } from "@/components/Studio/analytics"
 
 const gardenTypeOptions = [
   { value: "Residential", label: "Residential" },
@@ -97,6 +100,9 @@ export default function LandscapeStudioPage() {
   const [latestRenders, setLatestRenders] = useState<string[]>([])
   const [isRendering, setIsRendering] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Studio v2 redesign (flagged; ?studio_v2=1 turns it on in this browser).
+  const studioV2 = useStudioV2Flag()
+  const [noPhotoMode, setNoPhotoMode] = useState(false)
   const [realisticValue, setRealisticValue] = useState(50)
   const [imageState, setImageState] = useState<ImageState>({
     file: null,
@@ -324,14 +330,80 @@ export default function LandscapeStudioPage() {
     setCurrentRender(renderUrl)
   }
 
+  // Chip remove: reset to the default when there is one, otherwise clear the field.
   const handleRemoveTag = (key: string) => {
     if (key in landscapeDefaults) {
       const typedKey = key as keyof typeof landscapeDefaults
       updateConfig({
         [typedKey]: landscapeDefaults[typedKey]
       })
+    } else {
+      updateConfig({ [key]: "" } as never)
     }
   }
+  const hasSitePhoto = Boolean(imageState?.previewUrl || imageState?.uploadedUrl)
+
+  const photoSection = (
+            <FormSection
+              title={studioV2 ? "Site photo" : "Reference Image (Optional)"}
+              tips={studioV2 ? "Start here: a photo from where the homeowner will stand, in even daylight." : "Upload a real photo of the site to ground scale, planting layout, and materials."}
+            >
+          <div className="space-y-4">
+            <p className="text-xs text-muted-foreground mb-2">
+              Upload JPG, PNG, or WEBP under 10MB. Higher resolution produces better results.
+            </p>
+            <PhotoDropArea onFile={handleImageUpload} isUploading={isUploading}>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                disabled={isUploading}
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    const reader = new FileReader()
+                    reader.onload = (ev) => {
+                      handleImageUpload(file, ev.target?.result as string)
+                    }
+                    reader.readAsDataURL(file)
+                  }
+                  e.target.value = ""
+                }}
+                className="hidden"
+                id="image-upload"
+              />
+              <label
+                htmlFor="image-upload"
+                className={isUploading ? "cursor-wait flex flex-col items-center space-y-2" : "cursor-pointer flex flex-col items-center space-y-2"}
+              >
+                <div className="p-3 rounded-full bg-muted">
+                  <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{isUploading ? "Uploading..." : "Click to upload"}</p>
+                  <p className="text-xs text-muted-foreground">or drag and drop</p>
+                </div>
+                {imageState.previewUrl && (
+                  <div className="mt-4">
+                    <img
+                      src={imageState.previewUrl}
+                      alt="Preview"
+                      className="max-h-48 rounded-lg object-cover"
+                    />
+                  </div>
+                )}
+              </label>
+            </PhotoDropArea>
+            <div className="text-xs text-muted-foreground space-y-1">
+              <p>Supported formats: JPG, PNG, WEBP</p>
+              <p>Max size: 10MB</p>
+              <p>Higher resolution images produce better results.</p>
+              <p>Avoid blurry, dark, or heavily compressed images.</p>
+            </div>
+          </div>
+                        <PhotoStepFooter hasPhoto={hasSitePhoto} noPhotoMode={noPhotoMode} onNoPhotoModeChange={setNoPhotoMode} />
+            </FormSection>
+  )
+
 
       const formContent = (
         <FormPanel>
@@ -342,6 +414,7 @@ export default function LandscapeStudioPage() {
               hasPhoto={Boolean(imageState.previewUrl || imageState.uploadedUrl)}
               brief={landscape.presetBrief ?? ""}
             />
+        {studioV2 && photoSection}
             {/* Essential Controls - Always Visible */}
             <FormSection
               title="Project Basics"
@@ -428,11 +501,14 @@ export default function LandscapeStudioPage() {
             {/* Advanced (Optional) - Collapsed by Default */}
             <div className="border-t border-border pt-6">
               <button
-                onClick={() => setAdvancedControlsOpen(!advancedControlsOpen)}
+                onClick={() => {
+                  if (!advancedControlsOpen) trackStudioEvent("more_options_opened", { studio_version: studioV2 ? "v2" : "v1" })
+                  setAdvancedControlsOpen(!advancedControlsOpen)
+                }}
                 className="w-full flex items-center justify-between text-left mb-2"
               >
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-medium text-muted-foreground">Advanced (Optional)</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground">{studioV2 ? "More options" : "Advanced (Optional)"}</h3>
                 </div>
                 {advancedControlsOpen ? (
                   <ChevronUp className="h-4 w-4 text-muted-foreground transition-transform duration-150" />
@@ -539,6 +615,7 @@ export default function LandscapeStudioPage() {
                     </div>
                   </FormSection>
 
+                  {!studioV2 && (
                   <FormSection
                     title="Furniture & Structures"
                     tips="Additional control over outdoor seating and structures when you need more specificity."
@@ -573,6 +650,7 @@ export default function LandscapeStudioPage() {
                       </div>
                     </div>
                   </FormSection>
+                  )}
 
                   <FormSection
                     title="Activity & Interaction"
@@ -705,7 +783,8 @@ export default function LandscapeStudioPage() {
                   </FormSection>
 
                   {/* Advanced Controls - Architect, Lens, etc. */}
-                  <div className="border-t border-border pt-6">
+                  <CameraControlsGate>
+<div className="border-t border-border pt-6">
                     <div className="space-y-4 opacity-90">
                       {/* Architect Influence */}
                       <div>
@@ -844,67 +923,13 @@ export default function LandscapeStudioPage() {
                       </div>
                     </div>
                   </div>
+</CameraControlsGate>
                 </div>
               )}
             </div>
 
-            <FormSection
-              title="Reference Image (Optional)"
-              tips="Upload a real photo of the site to ground scale, planting layout, and materials."
-            >
-          <div className="space-y-4">
-            <p className="text-xs text-muted-foreground mb-2">
-              Upload JPG, PNG, or WEBP under 10MB. Higher resolution produces better results.
-            </p>
-            <PhotoDropArea onFile={handleImageUpload} isUploading={isUploading}>
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                disabled={isUploading}
-                onChange={(e) => {
-                  const file = e.target.files?.[0]
-                  if (file) {
-                    const reader = new FileReader()
-                    reader.onload = (ev) => {
-                      handleImageUpload(file, ev.target?.result as string)
-                    }
-                    reader.readAsDataURL(file)
-                  }
-                  e.target.value = ""
-                }}
-                className="hidden"
-                id="image-upload"
-              />
-              <label
-                htmlFor="image-upload"
-                className={isUploading ? "cursor-wait flex flex-col items-center space-y-2" : "cursor-pointer flex flex-col items-center space-y-2"}
-              >
-                <div className="p-3 rounded-full bg-muted">
-                  <ImageIcon className="w-6 h-6 text-muted-foreground" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">{isUploading ? "Uploading..." : "Click to upload"}</p>
-                  <p className="text-xs text-muted-foreground">or drag and drop</p>
-                </div>
-                {imageState.previewUrl && (
-                  <div className="mt-4">
-                    <img
-                      src={imageState.previewUrl}
-                      alt="Preview"
-                      className="max-h-48 rounded-lg object-cover"
-                    />
-                  </div>
-                )}
-              </label>
-            </PhotoDropArea>
-            <div className="text-xs text-muted-foreground space-y-1">
-              <p>Supported formats: JPG, PNG, WEBP</p>
-              <p>Max size: 10MB</p>
-              <p>Higher resolution images produce better results.</p>
-              <p>Avoid blurry, dark, or heavily compressed images.</p>
-            </div>
-          </div>
-            </FormSection>
+            {!studioV2 && photoSection}
+
 
             <div className="space-y-6">
           <div>
@@ -944,7 +969,12 @@ export default function LandscapeStudioPage() {
 
           {!demoMode && <FirstPaidSessionHint className="mt-4" />}
           <LifecycleOffer busy={isRendering || isUploading} completedRenders={latestRenders.length} />
-          <div className="pt-4 border-t border-border">
+          <div
+            className={cn(
+              "pt-4 border-t border-border",
+              studioV2 && "sticky bottom-0 z-10 -mx-6 px-6 pb-4 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/85"
+            )}
+          >
             <Button 
               className={cn(
                 "w-full bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium",
@@ -955,9 +985,11 @@ export default function LandscapeStudioPage() {
                 isRendering && "cursor-wait"
               )}
               onClick={() => handleRender()}
-              disabled={(demoMode ? rendersRemaining <= 0 : authStatus === "initializing") || isRendering}
+              disabled={(studioV2 && !hasSitePhoto && !noPhotoMode) || ((demoMode ? rendersRemaining <= 0 : authStatus === "initializing") || isRendering)}
             >
-              {authStatus === "initializing" && !demoMode
+              {studioV2 && !hasSitePhoto && !noPhotoMode && !isRendering
+                ? "Add a photo to start"
+                : authStatus === "initializing" && !demoMode
                 ? "Checking..."
                 : isRendering
                   ? "Rendering..."
@@ -1012,6 +1044,9 @@ export default function LandscapeStudioPage() {
     <>
       <StudioLayout
         formContent={formContent}
+        studioV2={studioV2}
+        hasPhoto={hasSitePhoto}
+        noPhotoMode={noPhotoMode}
         previewContent={previewContent}
         requestContent={requestContent}
         demoMode={demoMode}

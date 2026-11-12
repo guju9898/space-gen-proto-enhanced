@@ -1,95 +1,93 @@
 "use client"
 
-import { ElementType, useState, useEffect } from "react"
+import { ElementType, useEffect, useState } from "react"
+import { usePathname } from "next/navigation"
+import { X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { InteriorConfig, ExteriorConfig, LandscapeConfig } from "@/types/studio"
 import { cn } from "@/lib/utils"
+import { labelForKey } from "@/lib/studio/fields"
+import { studioKindFromPath } from "@/lib/studio/lastStudio"
 
 interface RequestSummaryProps {
-  tags?: string[];
-  config?: InteriorConfig | ExteriorConfig | LandscapeConfig;
-  icon?: ElementType;
-  onRemove?: (key: string) => void;
-  onClearAll?: () => void;
+  tags?: string[]
+  config?: InteriorConfig | ExteriorConfig | LandscapeConfig
+  icon?: ElementType
+  /** Called with the config key of the chip (resets or clears that field). */
+  onRemove?: (key: string) => void
+  onClearAll?: () => void
 }
 
+const HIDDEN_KEYS = new Set(["image", "realism", "advanced", "renderType"])
+
+/**
+ * What this render will ask for, as "Field: value" chips. Removing a chip resets
+ * that field in the form (it used to pass the value instead of the field, so most
+ * removals did nothing).
+ */
 export function RequestSummary({ tags, config, icon: Icon, onRemove, onClearAll }: RequestSummaryProps) {
-  const [mounted, setMounted] = useState(false);
-  const [removingTags, setRemovingTags] = useState<Set<string>>(new Set());
+  const [mounted, setMounted] = useState(false)
+  const pathname = usePathname()
+  const studio = studioKindFromPath(pathname)
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    setMounted(true)
+  }, [])
 
-  // Early return during SSR
-  if (!mounted) {
-    return <div className="h-[40px]" />;
-  }
+  if (!mounted) return <div className="h-[40px]" />
 
-  const displayTags = tags || Object.entries(config || {})
-    .filter(([key, value]) => 
-      key !== 'image' && 
-      key !== 'realism' && 
-      key !== 'advanced' &&
-      value !== null && 
-      value !== undefined &&
-      (typeof value === 'string' || typeof value === 'number') &&
-      String(value).trim() !== ''
-    )
-    .map(([key, value]) => String(value));
+  const entries: { key: string; label: string; value: string }[] = tags
+    ? tags.map((tag) => ({ key: tag, label: "", value: tag }))
+    : Object.entries(config || {})
+        .filter(
+          ([key, value]) =>
+            !HIDDEN_KEYS.has(key) &&
+            (typeof value === "string" || typeof value === "number") &&
+            String(value).trim() !== "" &&
+            String(value).trim().toLowerCase() !== "none"
+        )
+        .map(([key, value]) => ({ key, label: labelForKey(studio, key), value: String(value) }))
 
-  const handleRemove = (tag: string) => {
-    if (onRemove) {
-      setRemovingTags(prev => new Set(prev).add(tag))
-      setTimeout(() => {
-        onRemove(tag)
-        setRemovingTags(prev => {
-          const next = new Set(prev)
-          next.delete(tag)
-          return next
-        })
-      }, 150)
-    }
-  }
+  if (entries.length === 0) return null
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {Icon && <Icon className="w-4 h-4 text-muted-foreground" />}
-      {displayTags.map((tag, index) => {
-        const isRemoving = removingTags.has(tag)
-        return (
-          <Badge 
-            key={`${tag}-${index}`} 
+    <div className="space-y-2">
+      <h3 className="text-sm font-medium text-muted-foreground">This render will ask for</h3>
+      <div className="flex flex-wrap gap-2">
+        {Icon && <Icon className="w-4 h-4 text-muted-foreground" />}
+        {entries.map((entry) => (
+          <Badge
+            key={entry.key}
             variant="secondary"
-            onClick={onRemove ? () => handleRemove(tag) : undefined}
-            className={cn(
-              "transition-all duration-150 ease-out",
-              "animate-in fade-in-0 zoom-in-95 slide-in-from-left-1",
-              "hover:bg-secondary/80",
-              onRemove && "cursor-pointer",
-              isRemoving && "opacity-0 scale-95"
-            )}
-            style={{
-              animationDelay: `${index * 20}ms`,
-            }}
-            title={tag}
+            className={cn("max-w-full gap-1 py-1 pl-2.5 pr-1 font-normal", "animate-in fade-in-0 zoom-in-95")}
+            title={`${entry.label ? `${entry.label}: ` : ""}${entry.value}`}
           >
-            {tag}
+            <span className="truncate max-w-[260px]">
+              {entry.label && <span className="text-muted-foreground">{entry.label}: </span>}
+              {entry.value}
+            </span>
+            {onRemove && (
+              <button
+                type="button"
+                onClick={() => onRemove(entry.key)}
+                aria-label={`Remove ${entry.label || entry.value}`}
+                className="rounded p-0.5 hover:bg-background/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <X className="h-3 w-3" aria-hidden="true" />
+              </button>
+            )}
           </Badge>
-        )
-      })}
-      {onClearAll && displayTags.length > 0 && (
-        <Badge 
-          variant="outline" 
-          onClick={() => onClearAll()}
-          className={cn(
-            "cursor-pointer transition-all duration-150 ease-out",
-            "hover:bg-destructive/10 hover:border-destructive/20"
-          )}
-        >
-          Clear All
-        </Badge>
-      )}
+        ))}
+        {onClearAll && (
+          <Badge
+            variant="outline"
+            onClick={() => onClearAll()}
+            className="cursor-pointer transition-colors hover:bg-destructive/10 hover:border-destructive/20"
+          >
+            Clear all
+          </Badge>
+        )}
+      </div>
     </div>
-  );
+  )
 }

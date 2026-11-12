@@ -75,6 +75,9 @@ import { CreateMockupDialog } from "@/components/Studio/projects/CreateMockupDia
 import { downloadImage } from "@/lib/projects/utils"
 import { enableProjectShare, disableProjectShare } from "@/app/studio/projects/actions"
 import type { Project } from "@/lib/projects/types"
+import { useStudioV2Flag } from "@/components/Studio/StudioV2Context"
+import { CameraControlsGate, PhotoStepFooter } from "@/components/Studio/StudioV2Bits"
+import { trackStudioEvent } from "@/components/Studio/analytics"
 
 interface ImageState {
   file: File | null;
@@ -93,6 +96,9 @@ export default function InteriorStudioPage() {
   const [latestRenders, setLatestRenders] = useState<string[]>([])
   const [isRendering, setIsRendering] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Studio v2 redesign (flagged; ?studio_v2=1 turns it on in this browser).
+  const studioV2 = useStudioV2Flag()
+  const [noPhotoMode, setNoPhotoMode] = useState(false)
   const [imageState, setImageState] = useState<ImageState | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
@@ -325,14 +331,42 @@ export default function InteriorStudioPage() {
     setCurrentRender(renderUrl)
   }
 
+  // Chip remove: reset to the default when there is one, otherwise clear the field.
   const handleRemoveTag = (key: string) => {
     if (key in interiorDefaults) {
       const typedKey = key as keyof typeof interiorDefaults
       updateConfig({
         [typedKey]: interiorDefaults[typedKey]
       })
+    } else {
+      updateConfig({ [key]: "" } as never)
     }
   }
+  const hasSitePhoto = Boolean(imageState?.previewUrl || imageState?.uploadedUrl)
+
+  const photoSection = (
+        <FormSection tips={studioV2 ? "Start here: a straight-on photo of the room in daylight works best." : undefined}
+          title={studioV2 ? "Room photo" : "Reference Image"} icon={ImageIcon}>
+          <p className="text-xs text-muted-foreground mb-2">
+            Upload JPG, PNG, or WEBP images under 10MB. Higher resolution images produce better results.
+          </p>
+          <ImageUpload
+            onUpload={handleImageUpload}
+            currentPreview={imageState?.previewUrl}
+            accept="image/jpeg,image/png,image/webp"
+            maxSize={MAX_IMAGE_SIZE}
+            isLoading={isUploading}
+          />
+          <div className="mt-3 text-xs text-muted-foreground space-y-1">
+            <p>Supported formats: JPG, PNG, WEBP</p>
+            <p>Max size: 10MB</p>
+            <p>Higher resolution images produce better results.</p>
+            <p>Avoid blurry, dark, or heavily compressed images.</p>
+          </div>
+                    <PhotoStepFooter hasPhoto={hasSitePhoto} noPhotoMode={noPhotoMode} allowNoPhoto={false} />
+            </FormSection>
+  )
+
 
   const formContent = (
     <FormPanel>
@@ -343,6 +377,7 @@ export default function InteriorStudioPage() {
           hasPhoto={Boolean(imageState?.previewUrl || imageState?.uploadedUrl)}
           brief={config.presetBrief ?? ""}
         />
+        {studioV2 && photoSection}
         {error && (
           <div className="bg-destructive/10 text-destructive px-4 py-2 rounded-md text-sm">
             {error}
@@ -618,24 +653,8 @@ export default function InteriorStudioPage() {
           </div>
         </FormSection>
 
-        <FormSection title="Reference Image" icon={ImageIcon}>
-          <p className="text-xs text-muted-foreground mb-2">
-            Upload JPG, PNG, or WEBP images under 10MB. Higher resolution images produce better results.
-          </p>
-          <ImageUpload
-            onUpload={handleImageUpload}
-            currentPreview={imageState?.previewUrl}
-            accept="image/jpeg,image/png,image/webp"
-            maxSize={MAX_IMAGE_SIZE}
-            isLoading={isUploading}
-          />
-          <div className="mt-3 text-xs text-muted-foreground space-y-1">
-            <p>Supported formats: JPG, PNG, WEBP</p>
-            <p>Max size: 10MB</p>
-            <p>Higher resolution images produce better results.</p>
-            <p>Avoid blurry, dark, or heavily compressed images.</p>
-          </div>
-        </FormSection>
+            {!studioV2 && photoSection}
+
 
         <div className="space-y-6">
           <div>
@@ -675,7 +694,12 @@ export default function InteriorStudioPage() {
 
           {!demoMode && <FirstPaidSessionHint className="mt-4" />}
           <LifecycleOffer busy={isRendering || isUploading} completedRenders={latestRenders.length} />
-          <div className="pt-4 border-t border-border">
+          <div
+            className={cn(
+              "pt-4 border-t border-border",
+              studioV2 && "sticky bottom-0 z-10 -mx-6 px-6 pb-4 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/85"
+            )}
+          >
             <Button 
               className={cn(
                 "w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium",
@@ -742,6 +766,9 @@ export default function InteriorStudioPage() {
     <>
       <StudioLayout
         formContent={formContent}
+        studioV2={studioV2}
+        hasPhoto={hasSitePhoto}
+        noPhotoMode={noPhotoMode}
         previewContent={previewContent}
         requestContent={requestContent}
         demoMode={demoMode}

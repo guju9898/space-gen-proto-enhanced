@@ -4,6 +4,9 @@ import * as React from "react"
 import { PenLine } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { isCustomValue, resolveTypedValue } from "@/lib/studio/customValue"
+import { useFieldPresentation } from "@/components/Studio/useFieldPresentation"
+import { FieldHint } from "@/components/Studio/FieldHint"
+import { trackStudioEvent } from "@/components/Studio/analytics"
 
 interface ToggleOption {
   value: string
@@ -19,9 +22,12 @@ interface SegmentedToggleProps {
   className?: string
   /** Adds a "Custom" segment with a text box (e.g. "golden hour", "blue hour"). On by default. */
   allowCustom?: boolean
+  /** Help line under the label (v2). */
+  hint?: string
 }
 
-export function SegmentedToggle({ label, value, options, onChange, className, allowCustom = true }: SegmentedToggleProps) {
+export function SegmentedToggle({ label, value, options, onChange, className, allowCustom = true, hint }: SegmentedToggleProps) {
+  const pres = useFieldPresentation(label)
   const optionValues = React.useMemo(() => options.map((o) => o.value), [options])
   const custom = isCustomValue(value, optionValues)
   const [editing, setEditing] = React.useState(false)
@@ -31,6 +37,7 @@ export function SegmentedToggle({ label, value, options, onChange, className, al
 
   const save = () => {
     const next = resolveTypedValue(draft, optionValues)
+    if (next && isCustomValue(next, optionValues)) trackStudioEvent("custom_value_entered", { field: pres.meta?.key ?? label })
     if (next) onChange(next)
     setEditing(false)
   }
@@ -42,10 +49,13 @@ export function SegmentedToggle({ label, value, options, onChange, className, al
       selected ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
     )
 
+  if (pres.hidden) return null
+
   return (
     <div className={cn("w-full", className)}>
-      {label && <label className="text-sm font-medium mb-2 block">{label}</label>}
-      <div role="group" aria-label={label} className="flex gap-1 p-1 bg-muted rounded-lg">
+      {pres.label && <label className="text-sm font-medium mb-2 block">{pres.label}</label>}
+      <FieldHint>{hint ?? pres.hint}</FieldHint>
+      <div role="group" aria-label={pres.label} className="flex gap-1 p-1 bg-muted rounded-lg">
         {options.map((option) => {
           const Icon = option.icon
           const selected = !custom && !editing && value === option.value
