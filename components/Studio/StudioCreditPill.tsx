@@ -6,7 +6,7 @@ import { Coins } from "lucide-react"
 import { useAuth } from "@/components/auth/AuthContext"
 import { cn } from "@/lib/utils"
 
-type Status = { creditsRemaining: number | null; monthlyLimit: number | null; resetsAt: string | null; reason?: string | null }
+type Status = { creditsRemaining: number | null; monthlyLimit: number | null; resetsAt: string | null; reason?: string | null; planId?: string | null }
 
 function fmt(n: number) {
   return Number.isInteger(n) ? String(n) : n.toFixed(1)
@@ -44,7 +44,17 @@ export function StudioCreditPill({ className }: { className?: string }) {
   }, [auth, refreshKey])
 
   if (auth !== "authenticated" || !status) return null
-  if (status.creditsRemaining === null && !status.reason) return null
+  if (status.creditsRemaining === null && !status.reason) {
+    // Plans without a metered balance (Business today) show the plan name only.
+    if (!status.planId) return null
+    const name = status.planId.charAt(0).toUpperCase() + status.planId.slice(1)
+    return (
+      <Link href="/profile" className={cn("inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground", className)}>
+        <Coins className="h-3.5 w-3.5" aria-hidden="true" />
+        <span className="font-medium text-foreground">{name} plan</span>
+      </Link>
+    )
+  }
 
   const out = status.reason === "credits_exhausted" || status.reason === "intro_period_ended" || (status.creditsRemaining ?? 0) <= 0
   const resets = status.resetsAt

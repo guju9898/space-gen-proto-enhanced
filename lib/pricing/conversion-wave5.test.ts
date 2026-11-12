@@ -103,3 +103,13 @@ describe("projects", () => {
     assert.doesNotMatch(meetingNudge(null), /today|week|hours/)
   })
 })
+
+import { isSupersededKey } from "../studio/summary"
+describe("request summary", () => {
+  it("hides fields the prompt ignores", () => {
+    assert.equal(isSupersededKey("buildingType", { buildingType: "house", exteriorType: "loft" }), true)
+    assert.equal(isSupersededKey("buildingType", { buildingType: "house" }), false)
+    assert.equal(isSupersededKey("style", { style: "modern", architecturalStyle: "industrial" }), true)
+    assert.equal(isSupersededKey("style", { style: "modern", themeStyle: "none" }), false)
+  })
+})
