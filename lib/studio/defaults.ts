@@ -7,7 +7,7 @@ export const interiorDefaults: InteriorConfig = {
   lighting: "natural",
   timeOfDay: "day",
   mood: "calm",
-  architect: "foster",
+  architect: "none",
   lens: "wide",
   typology: "open",
   geometry: "rectangular",

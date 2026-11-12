@@ -509,7 +509,6 @@ export default function InteriorStudioPage() {
                   value={config?.symmetryLevel?.toString() ?? ""}
                   options={["0", "25", "50", "75", "100"]}
                   placeholder="Select symmetry level"
-                  allowCustom={false}
                   onChange={(value) => handleConfigChange("symmetryLevel", value ? parseInt(value, 10) : null)}
                 />
               </div>
@@ -604,7 +603,6 @@ export default function InteriorStudioPage() {
                 value={config?.architect ?? interiorDefaults.architect}
                 options={architects.map(opt => opt.value)}
                 placeholder="Select architect"
-                allowCustom={false}
                 onChange={(value) => handleConfigChange("architect", value)}
               />
             </div>

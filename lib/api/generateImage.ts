@@ -72,6 +72,53 @@ function sanitizePromptValue(raw: string): string {
   return cleaned.length > 120 ? cleaned.slice(0, 117).trimEnd() + "..." : cleaned
 }
 
+/** Interior defaults that mean "as in the photo": left out unless the user picks something else. */
+const INTERIOR_NEUTRAL: Record<string, string> = {
+  lens: "wide",
+  typology: "open",
+  geometry: "rectangular",
+  architect: "none",
+};
+
+function interiorValue(config: Record<string, any>, key: string): string {
+  const raw = config[key];
+  if (typeof raw === "number" && !isNaN(raw)) return String(raw);
+  if (typeof raw !== "string") return "";
+  const value = sanitizePromptValue(raw);
+  if (!value || value.toLowerCase() === "none") return "";
+  if (INTERIOR_NEUTRAL[key] && value.toLowerCase() === INTERIOR_NEUTRAL[key]) return "";
+  return value;
+}
+
+/**
+ * Every other Interior Studio control, including typed custom values. Before this,
+ * only room, style, palette, lighting, time of day and mood reached the prompt.
+ */
+export function buildInteriorDetails(config: Record<string, any>): string {
+  const parts: string[] = [];
+  const add = (key: string, render: (value: string) => string) => {
+    const value = interiorValue(config, key);
+    if (value) parts.push(render(value));
+  };
+  add("flooring", (x) => `${x} flooring`);
+  add("textures", (x) => `${x} textures`);
+  add("roomLayout", (x) => `${x} room layout`);
+  add("typology", (x) => `${x} floor plan`);
+  add("focalPoint", (x) => `focal point on ${x}`);
+  add("framing", (x) => `framed by ${x}`);
+  add("compositionStyle", (x) => `${x} composition`);
+  add("patternsRepetition", (x) => `${x} patterns`);
+  add("negativeSpace", (x) => `${x} negative space`);
+  add("viewType", (x) => `${x} view`);
+  add("cameraAngle", (x) => `${x} camera angle`);
+  add("lens", (x) => `${x} lens`);
+  add("geometry", (x) => `${x} geometry`);
+  add("architect", (x) => `subtle architectural influence from ${x}`);
+  const symmetry = interiorValue(config, "symmetryLevel");
+  if (symmetry) parts.push(/^\d+(\.\d+)?%?$/.test(symmetry) ? `symmetry level ${symmetry.replace("%", "")}%` : `${symmetry} symmetry`);
+  return parts.join(", ");
+}
+
 export function buildPrompt(config: Record<string, any>): string {
   // Map config keys to their corresponding prompt prefixes
   const promptPrefixes: Record<string, string> = {
@@ -138,10 +185,15 @@ export function buildPrompt(config: Record<string, any>): string {
     .filter(Boolean)
     .join(', ');
 
+  const detailPrompt = buildInteriorDetails(config);
+
   const basePrompt = "professional architectural photography, 8k uhd, highly detailed";
   const brief = sanitizePresetBrief(config.presetBrief);
   const direction = brief ? `design direction: ${brief}` : "";
-  const fullPrompt = [configPrompt, direction, basePrompt].filter(Boolean).join(", ");
+  const notes = typeof config.notes === "string" ? sanitizePromptValue(config.notes.slice(0, 500)) : "";
+  const fullPrompt = [configPrompt, detailPrompt, direction, notes ? `additional details: ${notes}` : "", basePrompt]
+    .filter(Boolean)
+    .join(", ");
 
   // Debug: Log final prompt
   console.log('🧠 Final Prompt:', {

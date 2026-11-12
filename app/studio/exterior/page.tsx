@@ -598,7 +598,6 @@ export default function ExteriorStudioPage() {
                       value={exteriorConfig.symmetryLevel?.toString() ?? ""}
                       options={["0", "25", "50", "75", "100"]}
                       placeholder="Select symmetry level"
-                      allowCustom={false}
                       onChange={(value) => handleConfigChange("symmetryLevel")(value ? parseInt(value, 10) : null)}
                     />
                   </div>
@@ -668,7 +667,6 @@ export default function ExteriorStudioPage() {
                   value={exteriorConfig.advanced?.lens ?? "standard"}
                   options={["standard", "wide", "telephoto", "fisheye", "ultra-wide"]}
                   placeholder="Select lens"
-                  allowCustom={false}
                   onChange={(value) => updateConfig({ 
                     advanced: { 
                       ...(exteriorConfig.advanced || {}), 

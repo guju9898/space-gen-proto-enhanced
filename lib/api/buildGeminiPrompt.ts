@@ -8,6 +8,27 @@ function hasValue(value: any): boolean {
   return true
 }
 
+/**
+ * A user value ready for the prompt: trimmed, single line, capped at 200 characters.
+ * Returns "" for empty values and for "none", so "none" never reaches the model.
+ * Custom strings typed in the Studio pass through unchanged otherwise.
+ */
+function v(raw: any): string {
+  if (typeof raw === "number" && !isNaN(raw)) return String(raw)
+  if (typeof raw !== "string") return ""
+  const cleaned = raw.replace(/[\r\n\t]+/g, " ").replace(/\s+/g, " ").trim()
+  if (!cleaned || cleaned.toLowerCase() === "none") return ""
+  return cleaned.length > 200 ? cleaned.slice(0, 197).trimEnd() + "..." : cleaned
+}
+
+/** Free-text notes (Public API instruction). Longer cap than a single field. */
+function notesClause(raw: any): string {
+  if (typeof raw !== "string") return ""
+  const cleaned = raw.replace(/[\r\n\t]+/g, " ").replace(/\s+/g, " ").trim()
+  if (!cleaned) return ""
+  return `Additional details: ${cleaned.length > 500 ? cleaned.slice(0, 497).trimEnd() + "..." : cleaned}`
+}
+
 function sanitizeDescriptor(raw: any): string {
   if (typeof raw !== "string") return ""
   const cleaned = raw.replace(/[\r\n\t]+/g, " ").replace(/\s+/g, " ").trim()
@@ -27,11 +48,16 @@ function formatRealism(realism: number | undefined | null): string {
 }
 
 // Helper function to format numeric percentage
-function formatPercentage(value: number | undefined | null, label: string): string {
+function formatPercentage(value: number | string | undefined | null, label: string): string {
   if (!hasValue(value)) return ""
-  const num = typeof value === "number" ? value : parseInt(String(value))
-  if (isNaN(num)) return ""
-  return `${label}: ${num}%`
+  // Numbers (and "75") read as a percentage; typed words ("lush", "very sparse") pass through.
+  if (typeof value === "number" || /^\s*\d+(\.\d+)?\s*%?\s*$/.test(String(value))) {
+    const num = typeof value === "number" ? value : parseFloat(String(value))
+    if (isNaN(num)) return ""
+    return `${label}: ${num}%`
+  }
+  const text = v(value)
+  return text ? `${label}: ${text}` : ""
 }
 
 // Helper function to build a clause from multiple values
@@ -98,6 +124,13 @@ function buildLandscapeAdvancedRefinement(advanced: any): string {
   
   const refinementParts: string[] = []
   
+  if (hasValue(advanced.architectInfluence) && advanced.architectInfluence !== "none") {
+    const v = sanitizeDescriptor(advanced.architectInfluence)
+    if (v) {
+      refinementParts.push(`Design language may subtly echo ${v} while staying a believable residential landscape.`)
+    }
+  }
+  
   // Lens
   if (hasValue(advanced.lens) && advanced.lens !== "standard") {
     const v = sanitizeDescriptor(advanced.lens)
@@ -147,286 +180,169 @@ export function buildGeminiPrompt(config: Record<string, any>): string {
 
 function buildExteriorPrompt(config: Record<string, any>): string {
   const clauses: string[] = []
-  
-  // Core clause: architecturalStyle, buildingType, surroundingEnvironment, timeOfDay
-  const coreParts: string[] = []
-  if (hasValue(config.architecturalStyle)) {
-    coreParts.push(config.architecturalStyle)
-  }
-  if (hasValue(config.buildingType)) {
-    coreParts.push(config.buildingType)
-  } else if (hasValue(config.exteriorType)) {
-    coreParts.push(config.exteriorType)
-  }
-  
+
+  // Core: style + building. The Studio's "Exterior Type" (exteriorType) wins over the
+  // default buildingType, so a typed type such as "two-story farmhouse" is used.
+  const architecturalStyle = v(config.architecturalStyle)
+  const building = v(config.exteriorType) || v(config.buildingType)
+  const coreParts = [architecturalStyle, building].filter(Boolean)
   if (coreParts.length > 0) {
     let coreClause = `Create a photorealistic rendering of a ${coreParts.join(" ")}`
-    if (hasValue(config.surroundingEnvironment)) {
-      coreClause += `, situated in a ${config.surroundingEnvironment} setting`
-    }
-    if (hasValue(config.timeOfDay)) {
-      coreClause += ` during ${config.timeOfDay}`
-    }
-    coreClause += "."
-    clauses.push(coreClause)
+    const environment = v(config.surroundingEnvironment)
+    if (environment) coreClause += `, situated in a ${environment} setting`
+    const timeOfDay = v(config.timeOfDay)
+    if (timeOfDay) coreClause += ` during ${timeOfDay}`
+    clauses.push(coreClause + ".")
   } else {
     clauses.push("Create a photorealistic rendering of a building.")
   }
-  
-  // Visual clause: style, colorPalette
+
+  // Visual style. The generic "style" default only applies when no architectural style was chosen.
   const visualParts: string[] = []
-  if (hasValue(config.style)) {
-    visualParts.push(`${config.style} aesthetic`)
-  }
-  if (hasValue(config.colorPalette)) {
-    visualParts.push(`${config.colorPalette} color palette`)
-  }
-  if (visualParts.length > 0) {
-    clauses.push(`Visual Style: ${visualParts.join(" with ")}.`)
-  }
-  
-  // Composition clause: symmetryType, symmetryLevel, focalPoint, exteriorViews, cameraAngle
+  const style = architecturalStyle ? "" : v(config.style)
+  if (style) visualParts.push(`${style} aesthetic`)
+  const palette = v(config.colorPalette)
+  if (palette) visualParts.push(`${palette} color palette`)
+  if (visualParts.length > 0) clauses.push(`Visual Style: ${visualParts.join(" with ")}.`)
+
   const compositionParts: string[] = []
-  if (hasValue(config.symmetryType)) {
-    const symmetryDesc = config.symmetryType === "symmetrical" ? "symmetrical" : 
-                         config.symmetryType === "asymmetrical" ? "asymmetrical" : 
-                         config.symmetryType === "radial" ? "radial" : config.symmetryType
-    compositionParts.push(`${symmetryDesc} layout`)
-  }
-  if (hasValue(config.symmetryLevel)) {
-    compositionParts.push(formatPercentage(config.symmetryLevel, "symmetry level"))
-  }
-  if (hasValue(config.focalPoint)) {
-    compositionParts.push(`focal point on ${config.focalPoint}`)
-  }
-  if (hasValue(config.exteriorViews)) {
-    compositionParts.push(`viewed from ${config.exteriorViews} angle`)
-  }
-  if (hasValue(config.cameraAngle)) {
-    compositionParts.push(`${config.cameraAngle} perspective`)
-  }
-  if (compositionParts.length > 0) {
-    clauses.push(`Composition: ${compositionParts.join(", ")}.`)
-  }
-  
-  // Materials clause: exteriorMaterials, roofStyle
+  const symmetryType = v(config.symmetryType)
+  if (symmetryType) compositionParts.push(`${symmetryType} layout`)
+  if (hasValue(config.symmetryLevel)) compositionParts.push(formatPercentage(config.symmetryLevel, "symmetry level"))
+  const focalPoint = v(config.focalPoint)
+  if (focalPoint) compositionParts.push(`focal point on ${focalPoint}`)
+  const views = v(config.exteriorViews)
+  if (views) compositionParts.push(`viewed from ${views} angle`)
+  const cameraAngle = v(config.cameraAngle)
+  if (cameraAngle) compositionParts.push(`${cameraAngle} perspective`)
+  const composition = compositionParts.filter(Boolean)
+  if (composition.length > 0) clauses.push(`Composition: ${composition.join(", ")}.`)
+
   const materialParts: string[] = []
-  if (hasValue(config.exteriorMaterials)) {
-    materialParts.push(`${config.exteriorMaterials} exterior`)
-  }
-  if (hasValue(config.roofStyle)) {
-    materialParts.push(`${config.roofStyle} roof`)
-  }
-  if (materialParts.length > 0) {
-    clauses.push(`Materials: ${materialParts.join(", ")}.`)
-  }
-  
-  // Lighting clause: lighting
-  if (hasValue(config.lighting)) {
-    clauses.push(`Lighting: ${config.lighting} lighting conditions.`)
-  }
-  
-  // Details clause: outdoorFurnishings, exteriorAccents, landscapingElements
-  const detailParts: string[] = []
-  if (hasValue(config.outdoorFurnishings)) {
-    detailParts.push(config.outdoorFurnishings)
-  }
-  if (hasValue(config.exteriorAccents)) {
-    detailParts.push(config.exteriorAccents)
-  }
-  if (hasValue(config.landscapingElements)) {
-    detailParts.push(config.landscapingElements)
-  }
-  if (detailParts.length > 0) {
-    clauses.push(`Details: ${detailParts.join(", ")}.`)
-  }
-  
-  // Realism clause
+  const materials = v(config.exteriorMaterials)
+  if (materials) materialParts.push(`${materials} exterior`)
+  const roof = v(config.roofStyle)
+  if (roof) materialParts.push(`${roof} roof`)
+  if (materialParts.length > 0) clauses.push(`Materials: ${materialParts.join(", ")}.`)
+
+  const lighting = v(config.lighting)
+  if (lighting) clauses.push(`Lighting: ${lighting} lighting conditions.`)
+
+  const detailParts = [v(config.outdoorFurnishings), v(config.exteriorAccents), v(config.landscapingElements)].filter(Boolean)
+  if (detailParts.length > 0) clauses.push(`Details: ${detailParts.join(", ")}.`)
+
   if (hasValue(config.realism)) {
     const realismDesc = formatRealism(config.realism)
-    if (realismDesc) {
-      clauses.push(`Rendered with ${realismDesc}.`)
-    }
-  }
-  
-  const exteriorBrief = sanitizePresetBrief(config.presetBrief)
-  if (exteriorBrief) {
-    clauses.push(`Design direction: ${exteriorBrief}`)
+    if (realismDesc) clauses.push(`Rendered with ${realismDesc}.`)
   }
 
-  // Technical suffix
+  const exteriorBrief = sanitizePresetBrief(config.presetBrief)
+  if (exteriorBrief) clauses.push(`Design direction: ${exteriorBrief}`)
+  const notes = notesClause(config.notes)
+  if (notes) clauses.push(notes)
+
   clauses.push("Professional architectural photography, 8k uhd, highly detailed, balanced composition, defined shadows, natural lighting, visual coherence.")
-  
-  // Reference image note
-  if (config.image) {
-    clauses.push("Adapt visual output based on uploaded reference image.")
-  }
-  
-  // Advanced Refinement (appended last, only if non-neutral values exist)
+
+  if (config.image) clauses.push("Adapt visual output based on uploaded reference image.")
+
   const advancedRefinement = buildExteriorAdvancedRefinement(config.advanced)
-  if (advancedRefinement) {
-    clauses.push(advancedRefinement)
-  }
-  
+  if (advancedRefinement) clauses.push(advancedRefinement)
+
   return clauses.join(" ")
 }
 
 function buildLandscapePrompt(config: Record<string, any>): string {
   const clauses: string[] = []
-  
-  // Core clause: gardenType, style
-  const coreParts: string[] = []
-  if (hasValue(config.gardenType)) {
-    coreParts.push(config.gardenType)
-  } else if (hasValue(config.landscapeType)) {
-    coreParts.push(config.landscapeType)
-  }
-  
-  if (coreParts.length > 0) {
-    let coreClause = `Design a realistic ${coreParts[0]} landscape`
-    if (hasValue(config.themeStyle)) {
-      coreClause += ` with ${config.themeStyle} theme`
-    }
-    if (hasValue(config.style)) {
-      coreClause += ` using a ${config.style} aesthetic`
-    }
-    if (hasValue(config.topography)) {
-      coreClause += ` on ${config.topography} terrain`
-    }
-    coreClause += "."
-    clauses.push(coreClause)
+
+  // Core: garden type + theme. The Studio's "Theme Style" (themeStyle) replaces the
+  // default "style", so a typed theme is not contradicted by "modern".
+  const gardenType = v(config.gardenType) || v(config.landscapeType)
+  if (gardenType) {
+    let coreClause = `Design a realistic ${gardenType} landscape`
+    const theme = v(config.themeStyle)
+    const style = theme ? "" : v(config.style)
+    if (theme) coreClause += ` with ${theme} theme`
+    if (style) coreClause += ` using a ${style} aesthetic`
+    const topography = v(config.topography)
+    if (topography) coreClause += ` on ${topography} terrain`
+    clauses.push(coreClause + ".")
   } else {
     clauses.push("Design a realistic landscape.")
   }
-  
-  // Visual clause: colorPalette, atmosphere
+
   const visualParts: string[] = []
-  if (hasValue(config.colorPalette)) {
-    visualParts.push(`${config.colorPalette} color palette`)
-  }
-  if (hasValue(config.atmosphere)) {
-    visualParts.push(`${config.atmosphere} atmosphere`)
-  }
-  if (visualParts.length > 0) {
-    clauses.push(`Visual Style: ${visualParts.join(", ")}.`)
-  }
-  
-  // Composition clause: gardenGeometry, geometry, scale, cameraAngle
+  const palette = v(config.colorPalette)
+  if (palette) visualParts.push(`${palette} color palette`)
+  const atmosphere = v(config.atmosphere)
+  if (atmosphere) visualParts.push(`${atmosphere} atmosphere`)
+  if (visualParts.length > 0) clauses.push(`Visual Style: ${visualParts.join(", ")}.`)
+
+  // Both geometry fields are used when both are set (they are separate controls).
   const compositionParts: string[] = []
-  if (hasValue(config.gardenGeometry)) {
-    compositionParts.push(`${config.gardenGeometry} garden layout`)
-  } else if (hasValue(config.geometry)) {
-    compositionParts.push(`${config.geometry} layout`)
-  }
-  if (hasValue(config.scale)) {
-    compositionParts.push(`${config.scale} scale`)
-  }
-  if (hasValue(config.cameraAngle)) {
-    compositionParts.push(`${config.cameraAngle} perspective`)
-  }
-  if (hasValue(config.focalPoint)) {
-    compositionParts.push(`focal point on ${config.focalPoint}`)
-  }
-  if (compositionParts.length > 0) {
-    clauses.push(`Composition: ${compositionParts.join(", ")}.`)
-  }
-  
-  // Planting clause: plantTypes, plantingDensity
+  const gardenGeometry = v(config.gardenGeometry)
+  const geometry = v(config.geometry)
+  if (gardenGeometry) compositionParts.push(`${gardenGeometry} garden layout`)
+  if (geometry && geometry !== gardenGeometry) compositionParts.push(`${geometry} layout`)
+  const scale = v(config.scale)
+  if (scale) compositionParts.push(`${scale} scale`)
+  const cameraAngle = v(config.cameraAngle)
+  if (cameraAngle) compositionParts.push(`${cameraAngle} perspective`)
+  const focalPoint = v(config.focalPoint)
+  if (focalPoint) compositionParts.push(`focal point on ${focalPoint}`)
+  if (compositionParts.length > 0) clauses.push(`Composition: ${compositionParts.join(", ")}.`)
+
   const plantingParts: string[] = []
-  if (hasValue(config.plantTypes)) {
-    plantingParts.push(config.plantTypes)
-  }
-  if (hasValue(config.plantingDensity)) {
-    plantingParts.push(formatPercentage(config.plantingDensity, "planting density"))
-  }
-  if (plantingParts.length > 0) {
-    clauses.push(`Planting: ${plantingParts.join(", ")}.`)
-  }
-  
-  // Features clause: waterFeature, seatingFeature, structures, decorativeElement, playActivityArea, interactiveElements, outdoorFurniture, hardscaping, wallMaterials, wildlifeElements
-  const featureParts: string[] = []
-  if (hasValue(config.waterFeature)) {
-    featureParts.push(config.waterFeature)
-  }
-  if (hasValue(config.seatingFeature)) {
-    featureParts.push(config.seatingFeature)
-  }
-  if (hasValue(config.structures)) {
-    featureParts.push(config.structures)
-  }
-  if (hasValue(config.decorativeElement)) {
-    featureParts.push(config.decorativeElement)
-  }
-  if (hasValue(config.playActivityArea)) {
-    featureParts.push(config.playActivityArea)
-  }
-  if (hasValue(config.interactiveElements)) {
-    featureParts.push(config.interactiveElements)
-  }
-  if (hasValue(config.outdoorFurniture)) {
-    featureParts.push(config.outdoorFurniture)
-  }
-  if (hasValue(config.hardscaping)) {
-    featureParts.push(config.hardscaping)
-  }
-  if (hasValue(config.wallMaterials)) {
-    featureParts.push(config.wallMaterials)
-  }
-  if (hasValue(config.wildlifeElements)) {
-    featureParts.push(config.wildlifeElements)
-  }
-  if (featureParts.length > 0) {
-    clauses.push(`Features: ${featureParts.join(", ")}.`)
-  }
-  
-  // Environment clause: climateZone, weather, timeOfDay
+  const plants = v(config.plantTypes)
+  if (plants) plantingParts.push(plants)
+  if (hasValue(config.plantingDensity)) plantingParts.push(formatPercentage(config.plantingDensity, "planting density"))
+  const planting = plantingParts.filter(Boolean)
+  if (planting.length > 0) clauses.push(`Planting: ${planting.join(", ")}.`)
+
+  const featureParts = [
+    v(config.waterFeature),
+    v(config.seatingFeature),
+    v(config.structures),
+    v(config.decorativeElement),
+    v(config.playActivityArea),
+    v(config.interactiveElements),
+    v(config.outdoorFurniture),
+    v(config.hardscaping),
+    v(config.wallMaterials),
+    v(config.wildlifeElements),
+  ].filter(Boolean)
+  const uniqueFeatures = featureParts.filter((part, idx) => featureParts.indexOf(part) === idx)
+  if (uniqueFeatures.length > 0) clauses.push(`Features: ${uniqueFeatures.join(", ")}.`)
+
   const envParts: string[] = []
-  if (hasValue(config.climateZone)) {
-    envParts.push(`${config.climateZone} climate`)
-  }
-  if (hasValue(config.weather)) {
-    envParts.push(config.weather)
-  }
-  if (hasValue(config.timeOfDay)) {
-    envParts.push(config.timeOfDay)
-  }
-  if (envParts.length > 0) {
-    clauses.push(`Environment: ${envParts.join(", ")}.`)
-  }
-  
-  // Lighting clause: lighting, lightingIntensity
+  const climate = v(config.climateZone)
+  if (climate) envParts.push(`${climate} climate`)
+  const weather = v(config.weather)
+  if (weather) envParts.push(weather)
+  const timeOfDay = v(config.timeOfDay)
+  if (timeOfDay) envParts.push(timeOfDay)
+  if (envParts.length > 0) clauses.push(`Environment: ${envParts.join(", ")}.`)
+
   const lightingParts: string[] = []
-  if (hasValue(config.lighting)) {
-    lightingParts.push(config.lighting)
-  }
-  if (hasValue(config.lightingIntensity)) {
-    lightingParts.push(formatPercentage(config.lightingIntensity, "lighting intensity"))
-  }
-  if (lightingParts.length > 0) {
-    clauses.push(`Lighting: ${lightingParts.join(", ")}.`)
-  }
-  
-  // Realism clause
+  const lighting = v(config.lighting)
+  if (lighting) lightingParts.push(lighting)
+  if (hasValue(config.lightingIntensity)) lightingParts.push(formatPercentage(config.lightingIntensity, "lighting intensity"))
+  const lightingClause = lightingParts.filter(Boolean)
+  if (lightingClause.length > 0) clauses.push(`Lighting: ${lightingClause.join(", ")}.`)
+
   if (hasValue(config.realism)) {
     const realismDesc = formatRealism(config.realism)
-    if (realismDesc) {
-      clauses.push(`Rendered with ${realismDesc}.`)
-    }
-  }
-  
-  const landscapeBrief = sanitizePresetBrief(config.presetBrief)
-  if (landscapeBrief) {
-    clauses.push(`Design direction: ${landscapeBrief}`)
+    if (realismDesc) clauses.push(`Rendered with ${realismDesc}.`)
   }
 
-  // Technical suffix
+  const landscapeBrief = sanitizePresetBrief(config.presetBrief)
+  if (landscapeBrief) clauses.push(`Design direction: ${landscapeBrief}`)
+  const notes = notesClause(config.notes)
+  if (notes) clauses.push(notes)
+
   clauses.push("Professional landscape photography, 8k uhd, highly detailed, emphasis on usability, emotional ambiance, realism in vegetation layout and shading, visual coherence.")
-  
-  // Reference image note
-  if (config.image) {
-    clauses.push("Adapt visual output based on uploaded reference image.")
-  }
-  
+
+  if (config.image) clauses.push("Adapt visual output based on uploaded reference image.")
+
   // Advanced Refinement (appended last, only if non-neutral values exist)
   const advancedRefinement = buildLandscapeAdvancedRefinement(config.advanced)
   if (advancedRefinement) {

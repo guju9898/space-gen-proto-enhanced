@@ -393,7 +393,6 @@ export default function LandscapeStudioPage() {
                     value={landscapeConfig?.timeOfDay ?? "morning"}
                     options={["morning", "afternoon", "evening", "night"]}
                     placeholder="Select time of day"
-                    allowCustom={false}
                     onChange={(value) => handleConfigChange("timeOfDay", value)}
                   />
                 </div>
@@ -465,7 +464,6 @@ export default function LandscapeStudioPage() {
                           value={landscapeConfig?.plantingDensity?.toString() ?? ""}
                           options={["0", "25", "50", "75", "100"]}
                           placeholder="Select planting density"
-                          allowCustom={false}
                           onChange={(value) => handleConfigChange("plantingDensity", value ? parseInt(value, 10) : null)}
                         />
                       </div>
@@ -535,7 +533,6 @@ export default function LandscapeStudioPage() {
                           value={landscapeConfig?.lightingIntensity?.toString() ?? ""}
                           options={["0", "25", "50", "75", "100"]}
                           placeholder="Select lighting intensity"
-                          allowCustom={false}
                           onChange={(value) => handleConfigChange("lightingIntensity", value ? parseInt(value, 10) : null)}
                         />
                       </div>
@@ -666,7 +663,6 @@ export default function LandscapeStudioPage() {
                           value={landscapeConfig?.geometry ?? ""}
                           options={["rectangular", "square", "circular", "l-shaped", "u-shaped"]}
                           placeholder="Select geometry"
-                          allowCustom={false}
                           onChange={(value) => handleConfigChange("geometry", value)}
                         />
                       </div>
@@ -676,7 +672,6 @@ export default function LandscapeStudioPage() {
                           value={landscapeConfig?.gardenGeometry ?? ""}
                           options={["rectangular", "square", "circular", "l-shaped", "u-shaped"]}
                           placeholder="Select garden geometry"
-                          allowCustom={false}
                           onChange={(value) => handleConfigChange("gardenGeometry", value)}
                         />
                       </div>
@@ -755,7 +750,6 @@ export default function LandscapeStudioPage() {
                           value={landscapeConfig?.advanced?.lens ?? "standard"}
                           options={["standard", "wide", "telephoto", "fisheye", "ultra-wide"]}
                           placeholder="Select lens"
-                          allowCustom={false}
                           onChange={(value) => updateConfig({ 
                             advanced: { 
                               ...(landscapeConfig?.advanced || {}), 

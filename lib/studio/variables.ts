@@ -86,6 +86,7 @@ export const moodOptions: Option[] = [
 ]
 
 export const architects: Option[] = [
+  { label: "None", value: "none", icon: Building },
   { label: "Foster", value: "foster", icon: Building },
   { label: "Hadid", value: "hadid", icon: Building },
   { label: "Gehry", value: "gehry", icon: Building },
