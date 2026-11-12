@@ -33,7 +33,7 @@ A visual proposal keeps every one of those parts and adds one thing: an image of
 
 That image does a job the rest of the document cannot. It turns the scope into something the homeowner can point at.
 
-![An outdoor kitchen with a black granite countertop, stacked limestone base, and a steel pergola with a sand-colored shade.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-17/outdoor-kitchen-pergola-outdoor-tv-orlando-concept-10-abeab0.png)
+![Concept: outdoor kitchen with black granite counters, stacked limestone base and a steel pergola with sand-colored shade](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-17/outdoor-kitchen-pergola-outdoor-tv-orlando-concept-10-abeab0.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/outdoor-kitchen-pergola-outdoor-tv-orlando-concept-10-abeab0)
 
@@ -49,7 +49,7 @@ When they see their own space finished before the quote, they commit sooner. The
 
 ## What software helps contractors create visual proposals?
 
-You have three realistic options.
+Photo-based AI rendering software such as Renderspace turns a site photo into a photorealistic concept in about 30 seconds, which you place in the quote next to the scope and price. You have three realistic options.
 
 **Full 3D design software.** Accurate and detailed, and the right tool once a client is committed. It is also slow to build for every lead, and many of those leads will not buy.
 

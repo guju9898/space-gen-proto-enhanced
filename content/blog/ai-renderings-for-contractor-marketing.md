@@ -58,7 +58,7 @@ Done that way, concepts work like the design boards and sketches contractors hav
 
 You can see the range in the [Renderspace gallery](/gallery).
 
-![Exterior view of a modern home with a covered patio featuring a cedar ceiling, exposed beams and a limestone fireplace.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-16/covered-patio-limestone-fireplace-austin-photo-to-concept-01-bc6e31.png)
+![Concept: covered patio with a cedar ceiling, exposed beams and a limestone fireplace on a modern home](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-16/covered-patio-limestone-fireplace-austin-photo-to-concept-01-bc6e31.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/covered-patio-limestone-fireplace-austin-photo-to-concept-01-bc6e31)
 

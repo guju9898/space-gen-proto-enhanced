@@ -71,7 +71,7 @@ Keep the first round to the choices the homeowner is actually stuck on:
 
 Show two versions. Change only one thing between them. When the homeowner says "that one," your proposal follows it. For the patio, steps and walls around the deck, see the [hardscape visualization guide](/blog/hardscape-visualization-job-site-photo).
 
-![A square hot tub set into a light gray composite deck, with a black horizontal slat fence with planters behind it.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-15/spa-deck-houston-concept-11-34695c.png)
+![Concept: square hot tub set into a light gray composite deck with a black horizontal slat fence and planters](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-15/spa-deck-houston-concept-11-34695c.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/spa-deck-houston-concept-11-34695c)
 

@@ -46,7 +46,7 @@ The concept should answer the questions the homeowner cannot answer by looking a
 
 Then keep the house exactly as it is. If the windows move or the roofline changes, the homeowner stops trusting the picture.
 
-![A two-story house with a bluestone walkway bordered by red brick, flanked by white shrub roses and boxwood.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-19/front-yard-curb-appeal-boxwood-spheres-in-planters-dallas-photo-to-concept-05-0cf523.png)
+![Concept: two-story house with a bluestone walkway bordered by red brick, white shrub roses and boxwood](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-19/front-yard-curb-appeal-boxwood-spheres-in-planters-dallas-photo-to-concept-05-0cf523.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/front-yard-curb-appeal-boxwood-spheres-in-planters-dallas-photo-to-con-0cf523)
 
@@ -58,7 +58,7 @@ Region matters as much as style. In Central Texas that often means limestone, na
 
 One mistake I'd avoid in Texas is designing a front yard as if climate and architecture are secondary concerns. A lush, water-hungry landscape might photograph beautifully, but keeping it alive through an Austin summer is another matter. And a formal Dallas-style planting scheme won't necessarily suit a rugged Hill Country limestone home. I'd start with the house, then work outward. Use native or well-adapted plants, give the walkway proper visual weight, and choose materials that complement the exterior. With Renderspace, you can specify everything from Lueders limestone to red yucca and sculpted boxwood through custom prompts.
 
-![A light green house with a curved paver walkway leading to the front door, surrounded by desert-adapted plants and mulch.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-15/front-yard-curb-appeal-phoenix-photo-to-concept-06-e8214a.png)
+![Concept: light green house with a curved paver walkway, desert-adapted plants and mulch](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-15/front-yard-curb-appeal-phoenix-photo-to-concept-06-e8214a.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/front-yard-curb-appeal-phoenix-photo-to-concept-06-e8214a)
 

@@ -2,7 +2,7 @@
 slug: exterior-renovation-visualization-for-contractors
 title: "Exterior Renovation Visualization: Show Clients the Concept Before Construction"
 seoTitle: Exterior Renovation Visualization for Contractors | Renderspace
-description: How exterior remodeling contractors use photo-to-concept visualization so clients can understand siding, trim, and facade changes before construction starts.
+description: "Exterior home renovation visualizer for contractors: show new siding, trim and facade changes on the client's own house from a photo before work starts."
 excerpt: Exterior renovations are hard to sell from swatches alone — photo-based concepts can help clients understand and react to the proposed direction on their own house.
 category: Use case
 datePublished: 2026-08-11

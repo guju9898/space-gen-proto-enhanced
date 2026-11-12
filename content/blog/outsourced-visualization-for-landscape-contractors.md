@@ -2,7 +2,7 @@
 slug: outsourced-visualization-for-landscape-contractors
 title: "Outsourced Visualization for Landscape Contractors: When It Makes Sense"
 seoTitle: Outsourced Visualization for Landscape Contractors | Human Polish
-description: When landscape contractors should hire in-house, use freelancers, self-serve AI, AI Render Packs, or Build-Ready — and how outsourced visualization differs from engineering.
+description: "Outsourced visualization for landscape contractors: when to hire in-house, use freelancers, self-serve AI, AI Render Packs or Build-Ready."
 excerpt: A practical framework for deciding when to hire, freelance, self-serve, or use Human Polish as your outsourced visualization department.
 category: Human Polish
 datePublished: 2026-08-11
