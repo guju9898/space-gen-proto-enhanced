@@ -65,8 +65,9 @@ function PresetCard({ preset }: { preset: DesignPreset }) {
             />
           </div>
         ) : (
-          <div className="aspect-[4/3] bg-[#191f33] flex items-end p-4">
-            <p className="text-sm text-muted-foreground">Style reference. No project photo is attached.</p>
+          <div className="aspect-[4/3] bg-gradient-to-br from-[#191f33] via-[#1d1430] to-[#2a1608] flex flex-col justify-end gap-2 p-4">
+            <p className="text-lg font-semibold text-white">{preset.style}</p>
+            <p className="text-xs text-muted-foreground">{preset.features.slice(0, 3).join(" · ")}</p>
           </div>
         )}
         <div className="p-4 pb-2">

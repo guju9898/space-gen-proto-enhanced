@@ -55,14 +55,12 @@ export default async function GalleryLookPage({ params }: { params: Params }) {
                 className="object-cover"
               />
             </div>
-            <figcaption className="text-xs text-muted-foreground mt-2">
-              Existing Renderspace concept, shown as a style reference. Not a finished client project.
-            </figcaption>
           </figure>
         ) : (
-          <p className="text-sm text-muted-foreground rounded-xl border border-[#343434] bg-[#191f33]/50 p-5 max-w-3xl">
-            No reference photo is attached. This starting point only sets Studio controls and a design note you can edit.
-          </p>
+          <div className="max-w-3xl aspect-[4/3] rounded-xl border border-[#343434] bg-gradient-to-br from-[#191f33] via-[#1d1430] to-[#2a1608] flex flex-col justify-end gap-2 p-6">
+            <p className="text-2xl font-semibold text-white">{preset.style}</p>
+            <p className="text-sm text-muted-foreground">{preset.features.join(" · ")}</p>
+          </div>
         )}
 
         <section className="mt-10 grid gap-8 md:grid-cols-3">

@@ -267,7 +267,7 @@ export const GALLERY_PRESETS: readonly DesignPreset[] = [
     slug: "slate-pool-desert-planter",
     title: "Slate pool deck with desert planter",
     description:
-      "A backyard pool starting point: rectangular pool with grey slate coping and decking, a raised slate planter with cactus and agave. The photo is a Renderspace concept render.",
+      "A backyard pool starting point: rectangular pool with grey slate coping and decking, a raised slate planter with cactus and agave.",
     category: "landscape",
     style: "Modern",
     materials: ["Slate", "Stone"],
@@ -306,7 +306,7 @@ export const GALLERY_PRESETS: readonly DesignPreset[] = [
     slug: "mediterranean-wisteria-courtyard",
     title: "Mediterranean courtyard with wisteria pergola",
     description:
-      "An outdoor dining courtyard: timber pergola with wisteria over a long table, stone paving, potted citrus and evening lantern light. The photo is a Renderspace concept render.",
+      "An outdoor dining courtyard: timber pergola with wisteria over a long table, stone paving, potted citrus and evening lantern light.",
     category: "landscape",
     style: "Mediterranean",
     materials: ["Travertine", "Timber", "Terracotta"],
@@ -346,7 +346,7 @@ export const GALLERY_PRESETS: readonly DesignPreset[] = [
     slug: "formal-fountain-front-entry",
     title: "Formal front entry with fountain",
     description:
-      "A front-yard starting point: circular fountain on a paver court, clipped boxwood spheres and hydrangeas, path lights at dusk. The photo is a Renderspace concept render.",
+      "A front-yard starting point: circular fountain on a paver court, clipped boxwood spheres and hydrangeas, path lights at dusk.",
     category: "landscape",
     style: "Formal",
     materials: ["Travertine pavers", "Boxwood"],
@@ -457,7 +457,7 @@ export const GALLERY_PRESETS: readonly DesignPreset[] = [
     slug: "classical-dallas-landscape",
     title: "Classical Dallas landscape",
     description:
-      "A formal garden starting point: traditional style, stone hardscape, and a fountain. The photo is an existing Renderspace garden concept, used only as a style reference.",
+      "A formal garden starting point: traditional style, stone hardscape, and a fountain.",
     category: "landscape",
     style: "Classical",
     materials: ["Stone", "Clipped shrubs"],
@@ -481,7 +481,7 @@ export const GALLERY_PRESETS: readonly DesignPreset[] = [
     },
     referenceImage: {
       src: "/gallery/garden-tiered-fountain-hammock-deck-concept.jpg",
-      alt: "Existing Renderspace garden concept with a tiered stone fountain, used as a style reference for a classical landscape.",
+      alt: "Renderspace garden concept with a tiered stone fountain for a classical landscape.",
     },
     tags: ["classical", "fountain", "formal"],
     regions: ["Dallas", "Texas"],
@@ -520,7 +520,7 @@ export const GALLERY_PRESETS: readonly DesignPreset[] = [
     },
     referenceImage: {
       src: "/gallery/backyard-deck-pergola-hammock-concept.jpg",
-      alt: "Existing Renderspace backyard concept with a wood deck and pergola, used as a style reference.",
+      alt: "Renderspace backyard concept with a wood deck and pergola.",
     },
     tags: ["cedar", "pergola", "outdoor kitchen"],
     regions: ["Texas"],
