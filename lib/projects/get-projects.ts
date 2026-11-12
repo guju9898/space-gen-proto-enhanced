@@ -23,6 +23,7 @@ type ProjectRow = {
   is_shared: boolean | null
   created_at: string
   updated_at: string | null
+  presenting_on?: string | null
   project_renders?: { count: number }[] | null
 }
 
@@ -40,6 +41,7 @@ export function mapProjectRow(row: ProjectRow): Project {
     createdAt: row.created_at,
     shareSlug: row.share_slug ?? null,
     isShared: Boolean(row.is_shared),
+    presentingOn: row.presenting_on ?? null,
   }
 }
 
@@ -53,7 +55,7 @@ export async function getProjects(options: GetProjectsOptions): Promise<Project[
   const supabase = createClient()
   let query = supabase
     .from("projects")
-    .select("id, user_id, name, project_type, cover_image, share_slug, is_shared, created_at, updated_at, project_renders(count)")
+    .select("id, user_id, name, project_type, cover_image, share_slug, is_shared, created_at, updated_at, presenting_on, project_renders(count)")
     .eq("user_id", userId)
 
   if (search.trim()) query = query.ilike("name", likePattern(search))
@@ -104,7 +106,7 @@ export async function getProjectWithRenders(projectId: string): Promise<{ projec
   const supabase = createClient()
   const { data: row, error } = await supabase
     .from("projects")
-    .select("id, user_id, name, project_type, cover_image, share_slug, is_shared, created_at, updated_at, project_renders(count)")
+    .select("id, user_id, name, project_type, cover_image, share_slug, is_shared, created_at, updated_at, presenting_on, project_renders(count)")
     .eq("id", projectId)
     .maybeSingle()
   if (error || !row) return null

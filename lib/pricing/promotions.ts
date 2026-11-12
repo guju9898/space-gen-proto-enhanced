@@ -21,6 +21,20 @@ export type PricingCampaign = {
 }
 
 /**
+ * Black Friday 2026: the Intro Plan's first week for $10 ($9.99 off $19.99), through
+ * Nov 30, 2026 at 11:59pm Central (Dec 1 06:00 UTC). Advertised only when
+ * NEXT_PUBLIC_PROMO_BLACK_FRIDAY_2026=on, and applied at checkout only when
+ * STRIPE_COUPON_BLACK_FRIDAY_2026 holds the Stripe coupon id. Turn both on together.
+ */
+export const BLACK_FRIDAY_2026_ID = "black-friday-2026"
+export const BLACK_FRIDAY_2026_FLAG = "NEXT_PUBLIC_PROMO_BLACK_FRIDAY_2026"
+
+/** Read with a literal key so Next inlines it in the browser bundle. */
+function blackFridayFlagOn(): boolean {
+  return process.env.NEXT_PUBLIC_PROMO_BLACK_FRIDAY_2026 === "on"
+}
+
+/**
  * Candidate experiments. Every campaign stays disabled until a Stripe coupon
  * exists and the business turns `enabled` on. Dates are real, not a reset timer.
  */
@@ -52,6 +66,21 @@ export const PRICING_CAMPAIGNS: readonly PricingCampaign[] = [
     maxRedemptions: 50,
     stripeCouponEnv: null,
     enabled: false,
+    stacksWithHumanPolish: false,
+    stacksWithAffiliate: false,
+  },
+  {
+    id: BLACK_FRIDAY_2026_ID,
+    planCodes: ["intro"],
+    intervals: ["week"],
+    percentOff: null,
+    amountOffCents: 999,
+    duration: "once",
+    startsAt: "2026-11-12T06:00:00.000Z",
+    endsAt: "2026-12-01T06:00:00.000Z",
+    maxRedemptions: null,
+    stripeCouponEnv: "STRIPE_COUPON_BLACK_FRIDAY_2026",
+    enabled: blackFridayFlagOn(),
     stacksWithHumanPolish: false,
     stacksWithAffiliate: false,
   },
@@ -162,4 +191,30 @@ export function advertisedIntroCampaign(
       )
     }) ?? null
   )
+}
+
+/**
+ * Preview builds only (never production): `?promo_preview=1` shows a campaign's banner
+ * as if it were switched on, so the page can be checked before the coupon exists.
+ */
+export function promoPreviewAllowed(search: string | null | undefined, vercelEnv = process.env.NEXT_PUBLIC_VERCEL_ENV): boolean {
+  return (vercelEnv === "preview" || vercelEnv === "development") && new URLSearchParams(search ?? "").get("promo_preview") === "1"
+}
+
+/** The Intro Plan campaign to show, honouring the preview switch on non-production builds. */
+export function introCampaignToShow(now: Date, preview: boolean): PricingCampaign | null {
+  if (!preview) return advertisedIntroCampaign(now)
+  return advertisedIntroCampaign(now, PRICING_CAMPAIGNS.map((c) => ({ ...c, enabled: true })))
+}
+
+/** Price of the first charge after the campaign discount, in cents (never below zero). */
+export function campaignFirstChargeCents(campaign: PricingCampaign, baseCents: number): number {
+  if (campaign.amountOffCents !== null) return Math.max(0, baseCents - campaign.amountOffCents)
+  if (campaign.percentOff !== null) return Math.max(0, Math.round(baseCents * (1 - campaign.percentOff / 100)))
+  return baseCents
+}
+
+/** Stripe coupon ids are dashboard ids (e.g. "Z4OV52SU") or custom ids; never empty, no spaces. */
+export function isStripeCouponId(value: unknown): value is string {
+  return typeof value === "string" && /^[A-Za-z0-9_-]{3,64}$/.test(value)
 }

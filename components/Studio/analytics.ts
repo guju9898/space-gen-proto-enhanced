@@ -25,6 +25,8 @@ export type StudioEventName =
   | "share_link_created"
   | "compare_opened"
   | "render_feedback"
+  | "meeting_answered"
+  | "presenting_date_set"
 
 const PARAM_KEYS = new Set(["studio", "mode", "device", "field", "has_photo", "version", "studio_version", "trade", "hint", "warning", "count", "rating"])
 

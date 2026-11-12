@@ -264,3 +264,22 @@ export async function saveRenderToProject(
   revalidatePath("/studio/projects")
   return { projectId: project.id, renderId: render.id }
 }
+
+/** Set or clear the day the contractor is presenting this project (YYYY-MM-DD or null). */
+export async function setPresentingOn(projectId: string, day: string | null): Promise<{ error?: string }> {
+  if (day !== null && !/^\d{4}-\d{2}-\d{2}$/.test(day)) return { error: "Invalid date" }
+  const supabase = await createSupabaseServerClient()
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
+  if (authError || !user) return { error: "Unauthorized" }
+  const { error } = await supabase
+    .from("projects")
+    .update({ presenting_on: day, updated_at: new Date().toISOString() })
+    .eq("id", projectId)
+    .eq("user_id", user.id)
+  if (error) return { error: error.message }
+  revalidatePath("/studio/projects")
+  return {}
+}

@@ -52,6 +52,10 @@ export function HomeCtaLink({
   )
 }
 
+/**
+ * Hero buttons (Nov 2026 decision, both headline variants): free demo first, real
+ * projects second, the paid plan as a quiet text link. The variant still tracks the headline.
+ */
 export function HomeHeroActions({
   variant,
   paidLabel,
@@ -59,30 +63,22 @@ export function HomeHeroActions({
   variant: HomeVariant
   paidLabel: string
 }) {
-  if (variant === "b") {
-    return (
-      <div className="flex flex-col items-center gap-3">
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <HomeCtaLink href={GUEST_STUDIO_HREF} variant={variant} destination="guest_studio" className={primaryClass}>
-            Visualize My Next Project <ChevronRight className="w-4 h-4" aria-hidden="true" />
-          </HomeCtaLink>
-          <HomeCtaLink href={PAID_PLAN_HREF} variant={variant} destination="paid_plan" className={secondaryClass}>
-            {paidLabel}
-          </HomeCtaLink>
-        </div>
-        <p className="text-sm text-muted-foreground">Try up to 5 renders. No credit card required.</p>
-      </div>
-    )
-  }
-
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-      <HomeCtaLink href={PAID_PLAN_HREF} variant={variant} destination="paid_plan" className={primaryClass}>
-        {paidLabel} <ChevronRight className="w-4 h-4" aria-hidden="true" />
-      </HomeCtaLink>
-      <HomeCtaLink href="/gallery" variant={variant} destination="gallery" className={secondaryClass}>
-        See Real Examples
-      </HomeCtaLink>
+    <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <HomeCtaLink href={GUEST_STUDIO_HREF} variant={variant} destination="guest_studio" className={primaryClass}>
+          Try it on your photo: 5 free renders <ChevronRight className="w-4 h-4" aria-hidden="true" />
+        </HomeCtaLink>
+        <HomeCtaLink href="/gallery" variant={variant} destination="gallery" className={secondaryClass}>
+          See real projects
+        </HomeCtaLink>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        No credit card for the demo.{" "}
+        <HomeCtaLink href={PAID_PLAN_HREF} variant={variant} destination="paid_plan" className="text-white underline underline-offset-2 hover:text-primary">
+          {paidLabel}
+        </HomeCtaLink>
+      </p>
     </div>
   )
 }

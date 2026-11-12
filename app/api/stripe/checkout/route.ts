@@ -5,7 +5,7 @@ import { createClient } from "@supabase/supabase-js"
 import Stripe from "stripe"
 import { isObject, isString } from "@/lib/types/typeGuards"
 import { CATALOG } from "@/lib/pricing/catalog"
-import { evaluatePromotion, findCampaign } from "@/lib/pricing/promotions"
+import { evaluatePromotion, findCampaign, isStripeCouponId } from "@/lib/pricing/promotions"
 import { AFFILIATE_COOKIE, readCustomerCouponId } from "@/lib/affiliates/config"
 import { decideReferralDiscount } from "@/lib/affiliates/discount"
 import { resolveCheckoutAffiliate } from "@/lib/affiliates/service"
@@ -167,7 +167,7 @@ export async function POST(request: Request) {
 
     const campaign = findCampaign(promotionId)
     const couponId = campaign?.stripeCouponEnv ? process.env[campaign.stripeCouponEnv] : undefined
-    const couponConfigured = typeof couponId === "string" && couponId.startsWith("coupon_")
+    const couponConfigured = isStripeCouponId(couponId)
     const affiliateService = getSupabaseService()
     const cookieStore = await cookies()
     const affiliate = affiliateService

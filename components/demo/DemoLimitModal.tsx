@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { CATALOG, moneyFromCents } from "@/lib/pricing/catalog"
 import { trackStudioEvent } from "@/components/Studio/analytics"
+import { IntroOfferLine, IntroPlanLink } from "@/components/marketing/IntroOfferInline"
 
 export interface DemoLimitModalProps {
   open: boolean
@@ -39,10 +40,10 @@ export function DemoLimitModal({ open, onClose, renders = [] }: DemoLimitModalPr
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>You&apos;ve used your 5 demo renders</DialogTitle>
+          <DialogTitle>Keep this job and send the link</DialogTitle>
           <DialogDescription>
             {shown.length
-              ? "These come with you. When you start a plan from this browser, they're saved to your account as a project."
+              ? "You've used your 5 demo renders. These come with you: start a plan from this browser and they're saved to your account as a project, ready to send to the client."
               : "Start a plan to keep rendering. Demo renders made in this browser are saved to your account when you sign up."}
           </DialogDescription>
         </DialogHeader>
@@ -84,11 +85,12 @@ export function DemoLimitModal({ open, onClose, renders = [] }: DemoLimitModalPr
               Credits are only used when a render succeeds
             </li>
           </ul>
+          <IntroOfferLine className="mt-3 text-sm font-medium text-orange-300" />
         </div>
 
         <div className="mt-1 flex flex-col gap-3 sm:flex-row">
           <Button asChild className="flex-1 bg-gradient-to-r from-orange-500 to-violet-700 text-white hover:opacity-90">
-            <Link href="/onboarding?plan=intro">Start {intro.name}</Link>
+            <IntroPlanLink base="/onboarding?plan=intro">Start {intro.name}</IntroPlanLink>
           </Button>
           <Button asChild variant="outline" className="flex-1">
             <Link href="/pricing">Compare plans</Link>

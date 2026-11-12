@@ -7,7 +7,7 @@ import { LoginModalWrapper } from "@/components/auth/LoginModalWrapper"
 import { CheckoutResume } from "@/components/auth/CheckoutResume"
 import { AffiliateRefCapture } from "@/components/conversion/group-6/AffiliateRefCapture"
 import { IntroModal } from "@/components/marketing/IntroModal"
-import { IntroPlanPromo } from "@/components/marketing/IntroPlanPromo"
+import { PromoBanner } from "@/components/marketing/PromoBanner"
 import { Inter } from "next/font/google"
 import type React from "react"
 import { Suspense } from "react"
@@ -67,6 +67,9 @@ export default function RootLayout({
           <SessionAuthProvider>
             <AuthProvider>
               <DesignConfigProvider>
+                <Suspense fallback={null}>
+                  <PromoBanner />
+                </Suspense>
                 {children}
                 <Suspense fallback={null}>
                   <LoginModalWrapper />
@@ -74,9 +77,6 @@ export default function RootLayout({
                 <CheckoutResume />
                 <Suspense fallback={null}>
                   <IntroModal />
-                </Suspense>
-                <Suspense fallback={null}>
-                  <IntroPlanPromo />
                 </Suspense>
                 <Suspense fallback={null}>
                   <AffiliateRefCapture />

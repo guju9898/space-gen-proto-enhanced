@@ -15,6 +15,11 @@ import { RenderspaceBeforeAfterSlider } from "@/components/RenderspaceBeforeAfte
 import RoiCalculator from "@/components/RoiCalculator"
 import { HomepageFAQ } from "@/components/HomepageFAQ"
 import { SiteFooter } from "@/components/site/SiteFooter"
+import { RecreateCards } from "@/components/marketing/RecreateCards"
+import { PhotoToProposal } from "@/components/marketing/PhotoToProposal"
+import { MobileTryBar } from "@/components/marketing/MobileTryBar"
+import { IntroOfferLine, IntroPlanLink } from "@/components/marketing/IntroOfferInline"
+import { CATALOG, perRenderLabel } from "@/lib/pricing/catalog"
 import {
   HOME_EXPERIMENT_COOKIE,
   HOME_EXPERIMENT_HEADER,
@@ -45,7 +50,7 @@ export default async function Home() {
   const paidDetail = `${PLANS.starter.credits} credits each week for ${usd(PLANS.starter.priceUsd)}, billed weekly`
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground pb-24 md:pb-0">
       <JsonLd data={softwareApplicationLd()} />
       <Suspense fallback={null}>
         <RedirectIfAuthenticated />
@@ -95,53 +100,22 @@ export default async function Home() {
             <span className="font-semibold text-white">~{PROOF.secondsPerConcept.typical} sec</span> from photo to concept
           </li>
           <li>Works from a phone photo</li>
+          <li>
+            Plans from <span className="font-semibold text-white">{usd(PLANS.starter.priceUsd)}</span>/week
+          </li>
         </ul>
+        <IntroOfferLine className="mt-3 text-sm font-medium text-orange-300" />
 
-        {/* Featured Renders */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12 max-w-6xl mx-auto">
-          <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-[#191f33]">
-            <Image
-              src="/landing/renders/exterior-hero-01.jpg"
-              alt="AI rendering of a limestone home with a lap pool and stone pool deck, generated in Renderspace"
-              fill
-              priority
-              sizes="(min-width: 768px) 33vw, 100vw"
-              className="object-cover"
-            />
-          </div>
-          <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-[#191f33]">
-            <Image
-              src="/landing/renders/landscape-hero-01.jpg"
-              alt="AI landscape rendering of a modern home with a curving flagstone path and native planting"
-              fill
-              sizes="(min-width: 768px) 33vw, 100vw"
-              className="object-cover"
-            />
-          </div>
-          <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-[#191f33]">
-            <Image
-              src="/landing/renders/interior-hero-01.jpg"
-              alt="AI interior rendering of a bright open-plan living room and kitchen"
-              fill
-              sizes="(min-width: 768px) 33vw, 100vw"
-              className="object-cover"
-            />
-          </div>
+        {/* Before/after first: each tab is one real photo and its Renderspace concept */}
+        <div className="mt-10">
+          <RenderspaceBeforeAfterSlider className="max-w-5xl" />
         </div>
         <p className="text-xs text-muted-foreground mt-4 text-center">All images generated in Renderspace</p>
       </section>
 
-      {/* Space Gen Section */}
-      <section className="container mx-auto px-4 py-16 text-center">
-        <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white">One photo in, a client-ready concept out</h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-          Drag the slider. Each pair was generated from a single photo.
-        </p>
+      <RecreateCards />
 
-        <div className="mb-8">
-          <RenderspaceBeforeAfterSlider className="max-w-6xl" />
-        </div>
-      </section>
+      <PhotoToProposal />
 
       {/* How It Works */}
       <section className="container mx-auto px-4 py-16">
@@ -292,14 +266,17 @@ export default async function Home() {
           <p className="text-sm text-muted-foreground">
             New here? Try Renderspace on a real job for <span className="font-semibold text-white">{usd(PLANS.starter.priceUsd)}</span>
           </p>
-          <p className="text-sm text-muted-foreground mt-1">{PLANS.starter.credits} credits each week. Billed weekly until you cancel.</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {PLANS.starter.credits} credits each week ({perRenderLabel(CATALOG.intro.amountCents, CATALOG.intro.credits)}). Billed weekly until you cancel.
+          </p>
+          <IntroOfferLine className="mt-2 text-sm font-medium text-orange-300" />
           <p className="text-xs text-muted-foreground mt-2">This is a recurring subscription, not a one-time purchase. Cancel in billing settings before the next week.</p>
-          <Link
-            href="/onboarding?plan=starter"
+          <IntroPlanLink
+            base="/onboarding?plan=starter"
             className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-4 py-2 rounded-md text-sm font-medium"
           >
             Try {PLANS.starter.credits} Credits for {usd(PLANS.starter.priceUsd)}
-          </Link>
+          </IntroPlanLink>
         </div>
 
         {/* Value Anchor Block */}
@@ -323,7 +300,10 @@ export default async function Home() {
 
         <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
           {/* Professional Plan */}
-          <div className="bg-[#191f33]/50 rounded-xl p-6 border border-[#343434]">
+          <div className="relative bg-[#191f33]/50 rounded-xl p-6 border border-orange-500/70 shadow-lg shadow-orange-500/10">
+            <span className="absolute -top-2.5 left-6 rounded-full bg-gradient-to-r from-orange-500 to-violet-700 px-2.5 py-0.5 text-xs font-semibold text-white">
+              Most popular
+            </span>
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-white font-bold">Professional</h3>
@@ -334,7 +314,9 @@ export default async function Home() {
               <span className="text-3xl font-bold text-white">{usd(PLANS.professional.priceUsd)}</span>
             </div>
             <ul className="space-y-2 mb-6">
-              <li className="text-sm text-muted-foreground">{count(PLANS.professional.credits)} credits per month</li>
+              <li className="text-sm text-muted-foreground">
+                {count(PLANS.professional.credits)} credits per month ({perRenderLabel(CATALOG.professional.amountCents, CATALOG.professional.credits)})
+              </li>
               <li className="text-sm text-muted-foreground">Full-size PNG downloads</li>
               <li className="text-sm text-muted-foreground">All style options</li>
               <li className="text-sm text-muted-foreground">Use renders in proposals, marketing &amp; ads</li>
@@ -359,7 +341,9 @@ export default async function Home() {
               <span className="text-3xl font-bold text-white">{usd(PLANS.business.priceUsd)}</span>
             </div>
             <ul className="space-y-2 mb-6">
-              <li className="text-sm text-muted-foreground">{count(PLANS.business.credits)} credits per month</li>
+              <li className="text-sm text-muted-foreground">
+                {count(PLANS.business.credits)} credits per month ({perRenderLabel(CATALOG.business.amountCents, CATALOG.business.credits)})
+              </li>
               <li className="text-sm text-muted-foreground">Full-size PNG downloads</li>
               <li className="text-sm text-muted-foreground">All style options</li>
               <li className="text-sm text-muted-foreground">Use renders in proposals, marketing &amp; ads</li>
@@ -466,6 +450,7 @@ export default async function Home() {
 
       {/* Footer */}
       <SiteFooter />
+      <MobileTryBar />
     </div>
   )
 }

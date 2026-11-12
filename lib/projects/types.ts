@@ -18,6 +18,8 @@ export interface Project {
   shareSlug?: string | null
   /** Whether the project is publicly shared */
   isShared?: boolean
+  /** Day the contractor shows the client (YYYY-MM-DD), if set */
+  presentingOn?: string | null
 }
 
 export interface ProjectRender {

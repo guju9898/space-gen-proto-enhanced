@@ -115,3 +115,14 @@ export function introDisclosure(rollsIntoProfessional: boolean): IntroDisclosure
     notOneTime: "This is a recurring subscription, not a one-time purchase.",
   }
 }
+
+/** "about $0.20 per render": plan price divided by its credits (1 credit = 1 Studio render). */
+export function perRenderLabel(amountCents: number, credits: number): string {
+  if (!credits) return ""
+  const cents = amountCents / credits
+  if (cents < 10) return `about ${Math.round(cents)}¢ per render`
+  return `about $${(cents / 100).toFixed(2)} per render`
+}
+
+/** The plan carrying the "Most popular" badge (business decision, Nov 2026). */
+export const MOST_POPULAR_PLAN: PlanCode = "professional"

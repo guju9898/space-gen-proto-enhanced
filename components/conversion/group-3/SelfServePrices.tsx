@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { CATALOG, introDisclosure, moneyFromCents, savingsCents } from "@/lib/pricing/catalog"
+import { CATALOG, MOST_POPULAR_PLAN, introDisclosure, moneyFromCents, perRenderLabel, savingsCents } from "@/lib/pricing/catalog"
+import { campaignFirstChargeCents } from "@/lib/pricing/promotions"
+import { useIntroCampaign } from "@/components/marketing/PromoBanner"
+import { Countdown } from "@/components/marketing/Countdown"
 import { BillingIntervalToggle } from "@/components/conversion/group-3/BillingIntervalToggle"
-import { PlanRecommender } from "@/components/conversion/group-3/PlanRecommender"
+import { PlanQuiz } from "@/components/conversion/group-3/PlanQuiz"
 import { trackPricingEvent } from "@/components/conversion/group-3/analytics"
 
 export function SelfServePrices() {
@@ -16,6 +19,8 @@ export function SelfServePrices() {
   const [rollsIntoProfessional, setRollsIntoProfessional] = useState(false)
   const intro = CATALOG.intro
   const disclosure = introDisclosure(rollsIntoProfessional)
+  const campaign = useIntroCampaign()
+  const offerCents = campaign ? campaignFirstChargeCents(campaign, intro.amountCents) : null
 
   useEffect(() => {
     let cancelled = false
@@ -59,20 +64,28 @@ export function SelfServePrices() {
         <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-amber-600 text-white text-xs px-2.5 py-0.5 rounded-full font-medium">
           {intro.name}
         </span>
-        <p className="text-sm text-muted-foreground">
-          Charged today: <span className="font-semibold text-white">{moneyFromCents(disclosure.chargedTodayCents)}</span>
-        </p>
+        {campaign && offerCents !== null ? (
+          <p className="text-sm text-muted-foreground">
+            Black Friday: first week <span className="font-semibold text-white">{moneyFromCents(offerCents)}</span>{" "}
+            <s className="text-muted-foreground/70">{moneyFromCents(intro.amountCents)}</s>, then {moneyFromCents(intro.amountCents)}/week.{" "}
+            <span className="text-white">Ends in <Countdown endsAt={campaign.endsAt} className="font-mono tabular-nums" /></span>
+          </p>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Charged today: <span className="font-semibold text-white">{moneyFromCents(disclosure.chargedTodayCents)}</span>
+          </p>
+        )}
         <p className="text-sm text-muted-foreground mt-1">
-          {intro.credits} credits each week. Renews every week.
+          {intro.credits} credits each week ({perRenderLabel(intro.amountCents, intro.credits)}). Renews every week.
         </p>
         <p className="text-xs text-muted-foreground mt-2">{disclosure.renewal}</p>
         <p className="text-xs text-muted-foreground mt-1">{disclosure.cancellation} {disclosure.notOneTime}</p>
         <Link
-          href="/onboarding?plan=intro&step=3"
+          href={campaign ? `/onboarding?plan=intro&step=3&promotion=${encodeURIComponent(campaign.id)}` : "/onboarding?plan=intro&step=3"}
           onClick={() => trackPricingEvent("plan_selected", { plan: "intro", interval: "week" })}
           className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-4 py-2 rounded-md text-sm font-medium"
         >
-          Start weekly for {moneyFromCents(intro.amountCents)}
+          {offerCents !== null ? `Start your ${moneyFromCents(offerCents)} first week` : `Start weekly for ${moneyFromCents(intro.amountCents)}`}
         </Link>
       </div>
 
@@ -85,7 +98,15 @@ export function SelfServePrices() {
           const yearlySelected = interval === "year" && yearly !== null
           const saved = yearlySelected ? savingsCents(plan.amountCents, yearly) : 0
           return (
-            <div key={code} className="bg-[#191f33]/50 rounded-xl p-6 border border-[#343434]">
+            <div
+              key={code}
+              className={`relative bg-[#191f33]/50 rounded-xl p-6 border ${code === MOST_POPULAR_PLAN ? "border-orange-500/70 shadow-lg shadow-orange-500/10" : "border-[#343434]"}`}
+            >
+              {code === MOST_POPULAR_PLAN && (
+                <span className="absolute -top-2.5 left-6 rounded-full bg-gradient-to-r from-orange-500 to-violet-700 px-2.5 py-0.5 text-xs font-semibold text-white">
+                  Most popular
+                </span>
+              )}
               <h3 className="text-white font-bold">{plan.name}</h3>
               <p className="text-xs text-muted-foreground mb-4">
                 {yearlySelected ? "Annual subscription" : "Monthly subscription"}
@@ -99,7 +120,9 @@ export function SelfServePrices() {
                 )}
               </div>
               <ul className="space-y-2 mb-6">
-                <li className="text-sm text-muted-foreground">{plan.credits.toLocaleString("en-US")} credits per month</li>
+                <li className="text-sm text-muted-foreground">
+                  {plan.credits.toLocaleString("en-US")} credits per month ({perRenderLabel(plan.amountCents, plan.credits)})
+                </li>
                 <li className="text-sm text-muted-foreground">Full-size PNG downloads</li>
                 <li className="text-sm text-muted-foreground">All style options</li>
                 <li className="text-sm text-muted-foreground">Use renders in proposals, marketing &amp; ads</li>
@@ -116,7 +139,7 @@ export function SelfServePrices() {
         })}
       </div>
 
-      <PlanRecommender />
+      <PlanQuiz />
     </>
   )
 }

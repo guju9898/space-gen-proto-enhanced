@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import type { Project } from "@/lib/projects/types"
 import { formatProjectType, formatRelativeDate } from "@/lib/projects/utils"
+import { localToday, presentingLabel } from "@/lib/projects/presenting"
 
 export interface ProjectCardProps {
   project: Project
@@ -58,6 +59,9 @@ export function ProjectCard({ project, onRename, onDelete, onDownloadLatest }: P
               <span>·</span>
               <span>{formatRelativeDate(project.updatedAt)}</span>
             </div>
+            {presentingLabel(project.presentingOn, localToday()) && (
+              <p className="mt-1.5 text-xs font-medium text-orange-400">{presentingLabel(project.presentingOn, localToday())}</p>
+            )}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

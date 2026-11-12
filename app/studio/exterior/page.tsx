@@ -60,6 +60,7 @@ import { useStudioV2Flag } from "@/components/Studio/StudioV2Context"
 import { CameraControlsGate, PhotoStepFooter } from "@/components/Studio/StudioV2Bits"
 import { DemoRendersLeft, RenderCostLine } from "@/components/Studio/OnboardingBits"
 import { ResultActionsV2 } from "@/components/Studio/ResultActionsV2"
+import { DemoResultBar } from "@/components/demo/DemoResultBar"
 import { trackStudioEvent } from "@/components/Studio/analytics"
 
 const architecturalStyleOptions = [
@@ -932,6 +933,13 @@ export default function ExteriorStudioPage() {
         onThumbnailClick={handleThumbnailClick}
         demoMode={demoMode}
       />
+      {demoMode && (
+        <DemoResultBar
+          currentRender={currentRender}
+          sourceImageUrl={imageState?.uploadedUrl ?? null}
+          rendersRemaining={rendersRemaining}
+        />
+      )}
       {!demoMode && studioV2 && (
         <ResultActionsV2
           studio="exterior"

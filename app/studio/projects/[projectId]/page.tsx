@@ -14,7 +14,9 @@ import { useAuth } from "@/components/auth/AuthContext"
 import { createClient } from "@/lib/supabase/client"
 import { getProjectWithRenders } from "@/lib/projects/get-projects"
 import { downloadImage, formatProjectType, formatRelativeDate } from "@/lib/projects/utils"
-import { renameProject, enableProjectShare, disableProjectShare } from "@/app/studio/projects/actions"
+import { renameProject, enableProjectShare, disableProjectShare, setPresentingOn } from "@/app/studio/projects/actions"
+import { localToday, presentingLabel } from "@/lib/projects/presenting"
+import { trackStudioEvent } from "@/components/Studio/analytics"
 import type { Project, ProjectRender } from "@/lib/projects/types"
 import { cn } from "@/lib/utils"
 
@@ -107,6 +109,23 @@ export default function ProjectDetailPage() {
               {formatRelativeDate(project.updatedAt)}
               {project.isShared ? " · client link on" : ""}
             </p>
+            <label className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+              <span className="text-muted-foreground">Presenting on</span>
+              <input
+                type="date"
+                value={project.presentingOn ?? ""}
+                onChange={async (e) => {
+                  const day = e.target.value || null
+                  setState({ kind: "ready", project: { ...project, presentingOn: day }, renders })
+                  const result = await setPresentingOn(project.id, day)
+                  if (!result.error && day) trackStudioEvent("presenting_date_set")
+                }}
+                className="h-9 rounded-md border border-input bg-background px-2 text-base sm:text-sm"
+              />
+              {presentingLabel(project.presentingOn, localToday()) && (
+                <span className="text-xs font-medium text-orange-400">{presentingLabel(project.presentingOn, localToday())}</span>
+              )}
+            </label>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" className="gap-2" onClick={() => setRenaming(true)}>
