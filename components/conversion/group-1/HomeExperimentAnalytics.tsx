@@ -4,6 +4,7 @@ import { useEffect, type ReactNode } from "react"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
 import { trackHomepageEvent } from "./analytics"
+import { useIntroCampaign } from "@/components/marketing/PromoBanner"
 import { CATALOG } from "@/lib/pricing/catalog"
 import {
   GUEST_STUDIO_HREF,
@@ -36,9 +37,13 @@ export function HomeCtaLink({
   className: string
   children: ReactNode
 }) {
+  // Paid-plan links carry a live Intro Plan campaign (e.g. Black Friday) so checkout applies it.
+  const campaign = useIntroCampaign()
+  const finalHref =
+    destination === "paid_plan" && campaign ? `${href}${href.includes("?") ? "&" : "?"}promotion=${encodeURIComponent(campaign.id)}` : href
   return (
     <Link
-      href={href}
+      href={finalHref}
       className={className}
       onClick={() => {
         trackHomepageEvent("hero_cta_clicked", { variant, destination })

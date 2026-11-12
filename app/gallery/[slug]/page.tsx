@@ -12,6 +12,7 @@ import { presetForPublishedRender } from "@/lib/gallery/presets"
 import { pageMetadata } from "@/lib/seo/metadata"
 import { ORG_ID } from "@/lib/seo/schema"
 import { PLANS, SITE, usd } from "@/lib/seo/facts"
+import { IntroPlanLink } from "@/components/marketing/IntroOfferInline"
 
 export const revalidate = 3600
 
@@ -153,12 +154,12 @@ export default async function GalleryRenderPage({ params }: { params: Params }) 
             <p className="text-sm text-muted-foreground mb-4">
               Snap a photo of your client&apos;s space and get concepts like this in about 30 seconds, before you quote.
             </p>
-            <Link
-              href="/onboarding?plan=starter"
+            <IntroPlanLink
+              base="/onboarding?plan=starter"
               className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 text-white px-4 py-2 rounded-md text-sm font-medium"
             >
               Try 40 credits for {usd(PLANS.starter.priceUsd)} <ChevronRight className="w-4 h-4" />
-            </Link>
+            </IntroPlanLink>
             <p className="text-xs text-muted-foreground mt-3">
               Rather have it done for you? <Link href="/human-polish" className="underline">Human Polish</Link>.
             </p>
