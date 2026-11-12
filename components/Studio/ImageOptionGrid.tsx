@@ -158,7 +158,7 @@ export function ImageOptionGrid({
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder={`Type your own${pres.label ? ` ${pres.label.toLowerCase()}` : ""}${pres.hint ? "" : ", e.g. something not shown below"}`}
                 maxLength={200}
-                className="h-10 flex-1 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                className="h-10 min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
               <Button type="submit" disabled={!draft.trim()} className="h-10">
                 Use

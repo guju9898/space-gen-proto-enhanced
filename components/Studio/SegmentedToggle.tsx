@@ -44,7 +44,7 @@ export function SegmentedToggle({ label, value, options, onChange, className, al
 
   const segmentClass = (selected: boolean) =>
     cn(
-      "flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all min-h-[40px]",
+      "flex-1 min-w-fit flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all min-h-[40px]",
       "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
       selected ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
     )
@@ -55,7 +55,7 @@ export function SegmentedToggle({ label, value, options, onChange, className, al
     <div className={cn("w-full", className)}>
       {pres.label && <label className="text-sm font-medium mb-2 block">{pres.label}</label>}
       <FieldHint>{hint ?? pres.hint}</FieldHint>
-      <div role="group" aria-label={pres.label} className="flex gap-1 p-1 bg-muted rounded-lg">
+      <div role="group" aria-label={pres.label} className="flex flex-wrap gap-1 p-1 bg-muted rounded-lg">
         {options.map((option) => {
           const Icon = option.icon
           const selected = !custom && !editing && value === option.value
@@ -109,7 +109,7 @@ export function SegmentedToggle({ label, value, options, onChange, className, al
             onBlur={() => draft.trim() && save()}
             placeholder="e.g. golden hour, blue hour dusk"
             maxLength={200}
-            className="h-10 flex-1 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="h-10 min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <button
             type="submit"
