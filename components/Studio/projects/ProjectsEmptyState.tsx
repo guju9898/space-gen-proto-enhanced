@@ -13,7 +13,7 @@ export function ProjectsEmptyState() {
         Save your renders into projects to keep job assets organized and easy to reuse for estimates.
       </p>
       <Button asChild className="mt-6">
-        <Link href="/studio/interior" className="inline-flex items-center gap-2">
+        <Link href="/studio" className="inline-flex items-center gap-2">
           Go to Studio
           <ChevronRight className="h-4 w-4" />
         </Link>

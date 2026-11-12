@@ -26,10 +26,12 @@ export default function StudioProjectsPage() {
   const [renameProjectState, setRenameProjectState] = useState<Project | null>(null)
   const [deleteProjectState, setDeleteProjectState] = useState<Project | null>(null)
   const [shareProject, setShareProject] = useState<Project | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   const loadProjects = useCallback(
     async (uid: string) => {
       setLoading(true)
+      setLoadError(null)
       try {
         const list = await getProjects({
           userId: uid,
@@ -38,6 +40,8 @@ export default function StudioProjectsPage() {
           sort,
         })
         setProjects(list)
+      } catch (e) {
+        setLoadError(e instanceof Error ? e.message : "Couldn't load your projects.")
       } finally {
         setLoading(false)
       }
@@ -106,9 +110,8 @@ export default function StudioProjectsPage() {
   }
 
   function handleDownloadLatest(project: Project) {
-    const url =
-      project.coverImageUrl ||
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&fit=crop"
+    const url = project.coverImageUrl
+    if (!url) return
     const filename = `${project.name.replace(/[^a-z0-9-_]/gi, "_")}.png`
     downloadImage(url, filename)
   }
@@ -128,6 +131,8 @@ export default function StudioProjectsPage() {
         />
         {loading ? (
           <ProjectsSkeleton />
+        ) : loadError ? (
+          <p className="py-12 text-center text-sm text-destructive">{loadError}</p>
         ) : projects.length === 0 ? (
           <ProjectsEmptyState />
         ) : (

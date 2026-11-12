@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { MoreHorizontal, Pencil, Download, Trash2, ExternalLink } from "lucide-react"
+import { MoreHorizontal, Pencil, Download, Trash2, ExternalLink, ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -20,23 +20,26 @@ export interface ProjectCardProps {
   onDownloadLatest: (project: Project) => void
 }
 
-const DEFAULT_COVER =
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=300&fit=crop"
-
 export function ProjectCard({ project, onRename, onDelete, onDownloadLatest }: ProjectCardProps) {
-  const coverUrl = project.coverImageUrl || DEFAULT_COVER
+  const coverUrl = project.coverImageUrl
 
   return (
     <article className="group rounded-lg border border-border bg-card overflow-hidden transition-shadow hover:shadow-md">
       <Link href={`/studio/projects/${project.id}`} className="block">
         <div className="relative aspect-[4/3] bg-muted overflow-hidden">
-          <Image
-            src={coverUrl}
-            alt={project.name}
-            fill
-            className="object-cover transition-transform group-hover:scale-[1.02]"
-            sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-          />
+          {coverUrl ? (
+            <Image
+              src={coverUrl}
+              alt={project.name}
+              fill
+              className="object-cover transition-transform group-hover:scale-[1.02]"
+              sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+              <ImageIcon className="h-8 w-8" aria-hidden="true" />
+            </div>
+          )}
         </div>
       </Link>
       <div className="p-4">
@@ -74,7 +77,7 @@ export function ProjectCard({ project, onRename, onDelete, onDownloadLatest }: P
                 <Pencil className="h-4 w-4 mr-2" />
                 Rename
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onDownloadLatest(project)}>
+              <DropdownMenuItem disabled={!project.coverImageUrl} onClick={() => onDownloadLatest(project)}>
                 <Download className="h-4 w-4 mr-2" />
                 Download latest
               </DropdownMenuItem>
