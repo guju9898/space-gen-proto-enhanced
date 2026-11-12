@@ -5,7 +5,7 @@ import { Check, ChevronDown, PenLine, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer"
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet"
 import { isCustomValue, resolveTypedValue } from "@/lib/studio/customValue"
 import { joinMulti, splitMulti } from "@/lib/studio/fields"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -251,13 +251,15 @@ export function VariableSelect({
         <button id={id} type="button" aria-haspopup="dialog" aria-expanded={open} className={triggerClass} onClick={() => setOpen(true)}>
           {triggerContent}
         </button>
-        <Drawer open={open} onOpenChange={setOpenState} shouldScaleBackground={false}>
-          <DrawerContent className="max-h-[85vh] [&_[cmdk-item]]:py-3">
-            <DrawerTitle className="px-4 pt-3 text-base font-semibold">{pres.label ?? "Choose"}</DrawerTitle>
-            {pres.hint && <p className="px-4 pb-1 text-xs text-muted-foreground">{pres.hint}</p>}
-            <div className="px-2 pb-4">{list}</div>
-          </DrawerContent>
-        </Drawer>
+        <Sheet open={open} onOpenChange={setOpenState}>
+          <SheetContent side="bottom" className="max-h-[85vh] rounded-t-xl px-2 pb-4 pt-4 [&_[cmdk-item]]:py-3">
+            <SheetTitle className="px-2 text-base font-semibold">{pres.label ?? "Choose"}</SheetTitle>
+            <SheetDescription className={cn("px-2 text-xs", !pres.hint && "sr-only")}>
+              {pres.hint ?? "Pick an option or type your own."}
+            </SheetDescription>
+            <div className="mt-2">{list}</div>
+          </SheetContent>
+        </Sheet>
       </div>
     )
   }
