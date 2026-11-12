@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   if (!rating || !isString(b.renderUrl) || !b.renderUrl.startsWith("https://") || !["interior", "exterior", "landscape"].includes(String(studio))) {
     return NextResponse.json({ error: "Invalid feedback" }, { status: 400 })
   }
-  const allowed = new Set(FEEDBACK_REASONS.map((r) => r.id))
+  const allowed = new Set<string>(FEEDBACK_REASONS.map((r) => r.id))
   const reasons = Array.isArray(b.reasons) ? b.reasons.filter((r): r is string => isString(r) && allowed.has(r)) : []
 
   const { error } = await supabase.from("render_feedback").upsert(
