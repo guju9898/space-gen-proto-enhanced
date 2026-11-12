@@ -78,7 +78,8 @@ export async function getSharedProjectWithRenders(
     .from("project_renders")
     .select("*")
     .eq("project_id", project.id)
-    .order("created_at", { ascending: true })
+    // Newest first: the hero on /view/[slug] is the latest version the contractor sent.
+    .order("created_at", { ascending: false })
 
   if (rendersError) return { project, renders: [] }
 

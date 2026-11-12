@@ -53,6 +53,7 @@ import { PhotoDropArea } from "@/components/Studio/PhotoDropArea"
 import { useStudioV2Flag } from "@/components/Studio/StudioV2Context"
 import { CameraControlsGate, PhotoStepFooter } from "@/components/Studio/StudioV2Bits"
 import { DemoRendersLeft, RenderCostLine } from "@/components/Studio/OnboardingBits"
+import { ResultActionsV2 } from "@/components/Studio/ResultActionsV2"
 import { trackStudioEvent } from "@/components/Studio/analytics"
 
 const gardenTypeOptions = [
@@ -1012,7 +1013,15 @@ export default function LandscapeStudioPage() {
         onThumbnailClick={handleThumbnailClick}
         demoMode={demoMode}
       />
-      {!demoMode && (
+      {!demoMode && studioV2 && (
+        <ResultActionsV2
+          studio="landscape"
+          currentRender={currentRender}
+          isRendering={isRendering}
+          sourceImageUrl={imageState?.uploadedUrl ?? null}
+        />
+      )}
+      {!demoMode && !studioV2 && (
         <RenderActionsBar
           currentRenderUrl={currentRender}
           projectType="landscape"

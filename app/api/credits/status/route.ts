@@ -29,8 +29,19 @@ export async function GET(request: Request) {
     // Get credit status (read-only, no enforcement)
     const creditCheck = await enforceCredits(user.id)
 
+    // When the current credit window ends (user_usage.period_end), for the Studio credit pill.
+    const { data: windowRow } = await supabase
+      .from("user_usage")
+      .select("period_end")
+      .eq("user_id", user.id)
+      .gt("period_end", new Date().toISOString())
+      .order("period_end", { ascending: true })
+      .limit(1)
+      .maybeSingle()
+
     // Return only the read-only fields
     return NextResponse.json({
+      resetsAt: (windowRow?.period_end as string | undefined) ?? null,
       creditsRemaining: creditCheck.creditsRemaining,
       monthlyLimit: creditCheck.monthlyLimit,
       planId: creditCheck.planId,

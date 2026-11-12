@@ -1,6 +1,8 @@
 import { createHash, randomBytes } from "node:crypto"
 import type { SupabaseClient } from "@supabase/supabase-js"
-import { uploadBase64ToSupabase } from "@/lib/api/uploadBase64ToSupabase"
+import { isOwnStorageUrl, keepImage } from "@/lib/storage/keepImage"
+
+export { isOwnStorageUrl }
 
 /**
  * Demo renders that move into the account when a demo user signs up (spec R12).
@@ -31,18 +33,6 @@ export interface GuestRenderRow {
   created_at: string
 }
 
-/** True for URLs already in this project's public storage (they never expire). */
-export function isOwnStorageUrl(url: string, supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || ""): boolean {
-  if (!supabaseUrl) return false
-  try {
-    const host = new URL(supabaseUrl).host
-    const u = new URL(url)
-    return u.host === host && u.pathname.startsWith("/storage/v1/object/public/")
-  } catch {
-    return false
-  }
-}
-
 /** Storage path for a kept demo render. The cookie id is hashed so it never appears in a public URL. */
 export function demoImageStoragePath(cookieId: string, now = Date.now()): string {
   const key = createHash("sha256").update(cookieId).digest("hex").slice(0, 16)
@@ -65,26 +55,9 @@ export function compactSettings(settings: Record<string, unknown> | undefined): 
   return out
 }
 
-/**
- * Copies a render into our storage when it would otherwise vanish: data: URLs, and
- * provider URLs (Replicate's expire after about an hour). Returns null if it can't.
- */
+/** Copies a demo render into our storage so it outlives the provider URL. */
 export async function persistRenderImage(imageUrl: string, cookieId: string): Promise<string | null> {
-  if (isOwnStorageUrl(imageUrl)) return imageUrl
-  const path = demoImageStoragePath(cookieId)
-  if (imageUrl.startsWith("data:image")) {
-    return uploadBase64ToSupabase({ base64DataUrl: imageUrl, filePath: path })
-  }
-  if (!/^https:\/\//.test(imageUrl)) return null
-  try {
-    const res = await fetch(imageUrl)
-    if (!res.ok) return null
-    const bytes = Buffer.from(await res.arrayBuffer())
-    if (bytes.length === 0 || bytes.length > 20 * 1024 * 1024) return null
-    return uploadBase64ToSupabase({ base64DataUrl: `data:image/png;base64,${bytes.toString("base64")}`, filePath: path })
-  } catch {
-    return null
-  }
+  return keepImage(imageUrl, demoImageStoragePath(cookieId))
 }
 
 /** Records one demo render so it can move into the account later. Never throws. */

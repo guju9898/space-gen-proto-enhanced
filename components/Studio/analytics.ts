@@ -21,8 +21,12 @@ export type StudioEventName =
   | "photo_check_warning"
   | "demo_limit_viewed"
   | "demo_renders_claimed"
+  | "render_autosaved"
+  | "share_link_created"
+  | "compare_opened"
+  | "render_feedback"
 
-const PARAM_KEYS = new Set(["studio", "mode", "device", "field", "has_photo", "version", "studio_version", "trade", "hint", "warning", "count"])
+const PARAM_KEYS = new Set(["studio", "mode", "device", "field", "has_photo", "version", "studio_version", "trade", "hint", "warning", "count", "rating"])
 
 export function trackStudioEvent(eventName: StudioEventName, params?: Record<string, string | number | boolean | undefined>): void {
   if (typeof window === "undefined") return

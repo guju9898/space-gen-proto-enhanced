@@ -11,6 +11,7 @@ import { DemoRendersClaim } from '@/components/demo/DemoRendersClaim';
 import { StudioV2Provider, useStudioV2 } from './StudioV2Context';
 import { trackStudioEvent } from './analytics';
 import { GuideButton, TradeQuestion } from './OnboardingBits';
+import { StudioCreditPill } from './StudioCreditPill';
 import { Camera } from 'lucide-react';
 
 interface StudioLayoutProps {
@@ -109,7 +110,8 @@ export function StudioLayout({ formContent, previewContent, requestContent, demo
             <div className="mx-auto w-full max-w-[1400px] px-4 py-4 sm:px-6 lg:h-full lg:py-6">
               <div className="flex flex-col gap-6 lg:grid lg:h-full lg:grid-cols-[minmax(360px,420px)_minmax(0,1fr)]">
                 <div className="lg:overflow-y-auto lg:overscroll-contain lg:pr-2" data-studio-form>
-                  <div className="mb-2 flex justify-end">
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    {!demoMode ? <StudioCreditPill /> : <span />}
                     <GuideButton />
                   </div>
                   <TradeQuestion />
