@@ -21,10 +21,26 @@ export type PricingCampaign = {
 }
 
 /**
- * Candidate experiments. Every campaign stays disabled until a Stripe coupon
- * exists and the business turns `enabled` on. Dates are real, not a reset timer.
+ * Campaigns. Black Friday is enabled for checkout when its Stripe coupon env is set;
+ * site advertising is gated separately by NEXT_PUBLIC_PROMO_BLACK_FRIDAY_2026=on.
+ * Dates are real end times (America/Chicago end of Nov 30 = 2026-12-01T06:00:00Z).
  */
 export const PRICING_CAMPAIGNS: readonly PricingCampaign[] = [
+  {
+    id: "black-friday-2026",
+    planCodes: ["intro"],
+    intervals: ["week"],
+    percentOff: null,
+    amountOffCents: 999,
+    duration: "once",
+    startsAt: "2026-11-12T06:00:00.000Z",
+    endsAt: "2026-12-01T06:00:00.000Z",
+    maxRedemptions: null,
+    stripeCouponEnv: "STRIPE_COUPON_BLACK_FRIDAY_2026",
+    enabled: true,
+    stacksWithHumanPolish: false,
+    stacksWithAffiliate: false,
+  },
   {
     id: "candidate-initial-20",
     planCodes: ["professional", "business"],
@@ -56,6 +72,28 @@ export const PRICING_CAMPAIGNS: readonly PricingCampaign[] = [
     stacksWithAffiliate: false,
   },
 ]
+
+/** Public advertising switch for Black Friday (client + server). */
+export function isBlackFridayAdvertisingOn(
+  envValue = process.env.NEXT_PUBLIC_PROMO_BLACK_FRIDAY_2026
+): boolean {
+  return envValue === "on"
+}
+
+/**
+ * `?promo_preview=1` may force the BF banner on preview/dev only.
+ * Ignored when Vercel env is production (or NODE_ENV production without a preview env).
+ */
+export function canUsePromoPreview(env: {
+  vercelEnv?: string | null
+  nodeEnv?: string | null
+} = {}): boolean {
+  const vercel = env.vercelEnv ?? process.env.NEXT_PUBLIC_VERCEL_ENV ?? process.env.VERCEL_ENV
+  if (vercel === "production") return false
+  if (vercel === "preview" || vercel === "development") return true
+  const node = env.nodeEnv ?? process.env.NODE_ENV
+  return node !== "production"
+}
 
 export type PromoDecision = {
   eligible: boolean
@@ -137,18 +175,21 @@ export function evaluatePromotion(input: {
 
 /**
  * The one promotion the site may advertise for the Intro Plan right now, or null.
- * Shown only when a campaign is enabled, covers the Intro Plan, names a Stripe
- * coupon, and `now` is inside its real start and end dates. No campaign → no banner.
+ * Black Friday also requires NEXT_PUBLIC_PROMO_BLACK_FRIDAY_2026=on.
+ * Checkout still uses evaluatePromotion + the Stripe coupon env (separate gate).
  */
 export function advertisedIntroCampaign(
   now: Date,
-  campaigns: readonly PricingCampaign[] = PRICING_CAMPAIGNS
+  campaigns: readonly PricingCampaign[] = PRICING_CAMPAIGNS,
+  opts: { advertiseBlackFriday?: boolean } = {}
 ): PricingCampaign | null {
+  const advertiseBf = opts.advertiseBlackFriday ?? isBlackFridayAdvertisingOn()
   const t = now.getTime()
   return (
     campaigns.find((c) => {
       const start = Date.parse(c.startsAt)
       const end = Date.parse(c.endsAt)
+      if (c.id === "black-friday-2026" && !advertiseBf) return false
       return (
         c.enabled &&
         c.duration !== "forever" &&
@@ -162,4 +203,11 @@ export function advertisedIntroCampaign(
       )
     }) ?? null
   )
+}
+
+/** Campaign used when `?promo_preview=1` is allowed (preview/dev only). */
+export function previewIntroCampaign(
+  campaigns: readonly PricingCampaign[] = PRICING_CAMPAIGNS
+): PricingCampaign | null {
+  return campaigns.find((c) => c.id === "black-friday-2026") ?? null
 }

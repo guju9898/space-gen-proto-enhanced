@@ -41,6 +41,7 @@ import { usePathname, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { DemoEmailGate } from "@/components/demo/DemoEmailGate"
 import { DemoLimitModal } from "@/components/demo/DemoLimitModal"
+import { DemoResultBar } from "@/components/demo/DemoResultBar"
 import { COOKIE_NAME, DEMO_EMAIL_COOKIE } from "@/lib/demo/usage"
 import { RenderActionsBar } from "@/components/Studio/RenderActionsBar"
 import { SaveToProjectDialog } from "@/components/Studio/projects/SaveToProjectDialog"
@@ -118,6 +119,7 @@ export default function LandscapeStudioPage() {
   const [showEmailGate, setShowEmailGate] = useState(false)
   const [rendersRemaining, setRendersRemaining] = useState<number>(5)
   const [showLimitModal, setShowLimitModal] = useState(false)
+  const [limitReason, setLimitReason] = useState<string | null>(null)
   const [lastSavedProject, setLastSavedProject] = useState<Project | null>(null)
   const [lastSavedRenderId, setLastSavedRenderId] = useState<string | null>(null)
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
@@ -1014,6 +1016,18 @@ export default function LandscapeStudioPage() {
         onThumbnailClick={handleThumbnailClick}
         demoMode={demoMode}
       />
+      {demoMode && currentRender && (
+        <DemoResultBar
+          rendersRemaining={rendersRemaining}
+          hasPhoto={hasSitePhoto}
+          sourceImageUrl={imageState?.uploadedUrl ?? imageState?.previewUrl ?? null}
+          resultImageUrl={currentRender}
+          onUpgrade={(reason) => {
+            setLimitReason(reason ?? null)
+            setShowLimitModal(true)
+          }}
+        />
+      )}
       {!demoMode && studioV2 && (
         <ResultActionsV2
           studio="landscape"
@@ -1134,7 +1148,11 @@ export default function LandscapeStudioPage() {
           />
           <DemoLimitModal
             open={showLimitModal}
-            onClose={() => setShowLimitModal(false)}
+            onClose={() => {
+              setShowLimitModal(false)
+              setLimitReason(null)
+            }}
+            reason={limitReason}
             renders={[currentRender, ...latestRenders].filter((r): r is string => Boolean(r))}
           />
         </>

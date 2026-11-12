@@ -126,9 +126,18 @@ describe("promotions", () => {
     couponConfigured: true,
   }
 
-  it("ships every candidate campaign disabled", () => {
-    assert.ok(PRICING_CAMPAIGNS.length > 0)
-    assert.ok(PRICING_CAMPAIGNS.every((campaign) => campaign.enabled === false))
+  it("includes Black Friday 2026 for Intro first week", () => {
+    const bf = PRICING_CAMPAIGNS.find((c) => c.id === "black-friday-2026")
+    assert.ok(bf)
+    assert.equal(bf?.amountOffCents, 999)
+    assert.equal(bf?.duration, "once")
+    assert.equal(bf?.endsAt, "2026-12-01T06:00:00.000Z")
+    assert.deepEqual(bf?.planCodes, ["intro"])
+    assert.equal(bf?.stripeCouponEnv, "STRIPE_COUPON_BLACK_FRIDAY_2026")
+  })
+
+  it("keeps non-BF candidate campaigns disabled", () => {
+    assert.ok(PRICING_CAMPAIGNS.filter((c) => c.id !== "black-friday-2026").every((c) => c.enabled === false))
   })
 
   it("rejects a disabled campaign inside its window", () => {
@@ -139,7 +148,7 @@ describe("promotions", () => {
 
   it("rejects expiry, stacking, forever duration, and a missing coupon", () => {
     const campaign = {
-      ...PRICING_CAMPAIGNS[0],
+      ...PRICING_CAMPAIGNS.find((c) => c.id === "candidate-initial-20")!,
       enabled: true,
       stripeCouponEnv: "STRIPE_COUPON_TEST",
     }
@@ -151,23 +160,56 @@ describe("promotions", () => {
     assert.equal(decideCampaign(campaign, { ...base, couponConfigured: false }).reason, "missing_coupon")
     assert.equal(decideCampaign(campaign, base).reason, "ok")
   })
+
+  it("applies Black Friday at checkout when the coupon is configured", () => {
+    const decision = evaluatePromotion({
+      campaignId: "black-friday-2026",
+      plan: "intro",
+      interval: "week",
+      now: new Date("2026-11-20T12:00:00.000Z"),
+      redeemedCount: 0,
+      surface: "subscription",
+      hasAffiliate: false,
+      couponConfigured: true,
+    })
+    assert.equal(decision.eligible, true)
+    assert.equal(decision.campaignId, "black-friday-2026")
+  })
 })
 
 describe("advertised Intro Plan promotion", () => {
-  const base = PRICING_CAMPAIGNS[0]
   const intro = {
-    ...base,
     id: "intro-test",
     planCodes: ["intro"] as const,
     intervals: ["week"] as const,
+    percentOff: 20,
+    amountOffCents: null,
+    duration: "once" as const,
     enabled: true,
     stripeCouponEnv: "STRIPE_COUPON_INTRO_TEST",
     startsAt: "2026-12-01T00:00:00.000Z",
     endsAt: "2026-12-08T00:00:00.000Z",
+    maxRedemptions: null,
+    stacksWithHumanPolish: false as const,
+    stacksWithAffiliate: false as const,
   }
 
-  it("shows nothing with today's shipped campaigns", () => {
-    assert.equal(advertisedIntroCampaign(new Date("2026-11-11T12:00:00Z")), null)
+  it("hides Black Friday when the public advertising flag is off", () => {
+    assert.equal(
+      advertisedIntroCampaign(new Date("2026-11-20T12:00:00Z"), PRICING_CAMPAIGNS, {
+        advertiseBlackFriday: false,
+      }),
+      null
+    )
+  })
+
+  it("shows Black Friday inside its window when advertising is on", () => {
+    assert.equal(
+      advertisedIntroCampaign(new Date("2026-11-20T12:00:00Z"), PRICING_CAMPAIGNS, {
+        advertiseBlackFriday: true,
+      })?.id,
+      "black-friday-2026"
+    )
   })
 
   it("shows a real campaign only inside its dates", () => {

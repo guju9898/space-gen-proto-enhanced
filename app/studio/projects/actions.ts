@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { generateSlug } from "@/lib/projects/generateSlug"
+import { isValidDateOnly } from "@/lib/projects/presenting"
 
 export async function renameProject(projectId: string, name: string): Promise<{ error?: string }> {
   const supabase = await createSupabaseServerClient()
@@ -20,6 +21,37 @@ export async function renameProject(projectId: string, name: string): Promise<{ 
 
   if (error) return { error: error.message }
   revalidatePath("/studio/projects")
+  return {}
+}
+
+/**
+ * Set (or clear with null) the date the owner presents this project to a client.
+ * `date` is a calendar date, YYYY-MM-DD. Owner only.
+ */
+export async function setProjectPresentingOn(
+  projectId: string,
+  date: string | null
+): Promise<{ error?: string }> {
+  if (date !== null && !isValidDateOnly(date)) return { error: "Enter a valid date" }
+
+  const supabase = await createSupabaseServerClient()
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
+  if (authError || !user) return { error: "Unauthorized" }
+
+  const { data, error } = await supabase
+    .from("projects")
+    .update({ presenting_on: date, updated_at: new Date().toISOString() })
+    .eq("id", projectId)
+    .eq("user_id", user.id)
+    .select("id")
+
+  if (error) return { error: error.message }
+  if (!data || data.length === 0) return { error: "Project not found" }
+  revalidatePath("/studio/projects")
+  revalidatePath(`/studio/projects/${projectId}`)
   return {}
 }
 

@@ -19,6 +19,8 @@ export interface DemoLimitModalProps {
   onClose: () => void
   /** The demo renders made in this browser, newest first. Shown next to the plan. */
   renders?: string[]
+  /** Opened from a locked feature (e.g. Send to client) rather than the render limit. */
+  reason?: string | null
 }
 
 /**
@@ -26,7 +28,7 @@ export interface DemoLimitModalProps {
  * Everything stated here is true today: demo renders move into the account at signup
  * (/api/demo/claim), and the plan figures come from the pricing catalog.
  */
-export function DemoLimitModal({ open, onClose, renders = [] }: DemoLimitModalProps) {
+export function DemoLimitModal({ open, onClose, renders = [], reason = null }: DemoLimitModalProps) {
   const intro = CATALOG.intro
   const shown = Array.from(new Set(renders.filter(Boolean))).slice(0, 4)
 
@@ -39,8 +41,9 @@ export function DemoLimitModal({ open, onClose, renders = [] }: DemoLimitModalPr
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>You&apos;ve used your 5 demo renders</DialogTitle>
+          <DialogTitle>{reason ? "Start a plan to send this to your client" : "You've used your 5 demo renders"}</DialogTitle>
           <DialogDescription>
+            {reason ? `${reason}. ` : ""}
             {shown.length
               ? "These come with you. When you start a plan from this browser, they're saved to your account as a project."
               : "Start a plan to keep rendering. Demo renders made in this browser are saved to your account when you sign up."}

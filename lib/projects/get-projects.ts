@@ -20,6 +20,7 @@ type ProjectRow = {
   cover_image: string | null
   share_slug: string | null
   is_shared: boolean | null
+  presenting_on?: string | null
   created_at: string
   updated_at: string
   project_renders?: { count: number }[] | null
@@ -38,6 +39,7 @@ function mapRow(row: ProjectRow): Project {
     createdAt: row.created_at,
     shareSlug: row.share_slug,
     isShared: Boolean(row.is_shared),
+    presentingOn: row.presenting_on ?? null,
   }
 }
 
@@ -50,7 +52,7 @@ export async function getProjects(options: GetProjectsOptions): Promise<Project[
 
   let query = supabase
     .from("projects")
-    .select("id, user_id, name, project_type, cover_image, share_slug, is_shared, created_at, updated_at, project_renders(count)")
+    .select("id, user_id, name, project_type, cover_image, share_slug, is_shared, presenting_on, created_at, updated_at, project_renders(count)")
     .eq("user_id", userId)
 
   if (projectType && projectType !== "all") {

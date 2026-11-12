@@ -3,7 +3,7 @@ import { cookies, headers } from "next/headers"
 import { pageMetadata } from "@/lib/seo/metadata"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { softwareApplicationLd } from "@/lib/seo/schema"
-import { PLANS, PROOF, count, usd } from "@/lib/seo/facts"
+import { PLANS, usd } from "@/lib/seo/facts"
 import Image from "next/image"
 import Link from "next/link"
 import { SiteHeader } from "@/components/site/SiteHeader"
@@ -11,7 +11,6 @@ import { Suspense } from "react"
 import { LoginRedirectHandler } from "@/components/auth/LoginRedirectHandler"
 import { RedirectIfAuthenticated } from "@/components/auth/RedirectIfAuthenticated"
 import ComparisonTable from "@/components/ComparisonTable"
-import { RenderspaceBeforeAfterSlider } from "@/components/RenderspaceBeforeAfterSlider"
 import RoiCalculator from "@/components/RoiCalculator"
 import { HomepageFAQ } from "@/components/HomepageFAQ"
 import { SiteFooter } from "@/components/site/SiteFooter"
@@ -23,8 +22,16 @@ import {
 import {
   HomeClosingCta,
   HomeExperimentBeacon,
-  HomeHeroActions,
 } from "@/components/conversion/group-1/HomeExperimentAnalytics"
+import {
+  HomeHeroWithSlider,
+  HomePhoneBottomBar,
+  HomePhotoToProposal,
+  HomePlanCards,
+  HomeRecreateCards,
+} from "@/components/conversion/group-1/HomeWave5"
+import { IntroPlanLink } from "@/components/marketing/IntroPlanLink"
+import { CATALOG, moneyFromCents, perRenderLabel } from "@/lib/pricing/catalog"
 
 export const metadata: Metadata = pageMetadata({
   path: "/",
@@ -45,7 +52,7 @@ export default async function Home() {
   const paidDetail = `${PLANS.starter.credits} credits each week for ${usd(PLANS.starter.priceUsd)}, billed weekly`
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground pb-16 md:pb-0">
       <JsonLd data={softwareApplicationLd()} />
       <Suspense fallback={null}>
         <RedirectIfAuthenticated />
@@ -56,92 +63,9 @@ export default async function Home() {
       <SiteHeader active="home" />
       <HomeExperimentBeacon variant={variant} />
 
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-12 md:py-20 text-center">
-        <p className="text-sm font-medium text-primary mb-4">
-          For pool builders, landscape and outdoor-living contractors, remodelers and designers
-        </p>
-        {variant === "b" ? (
-          <>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white text-balance">
-              Show the Finished Job. Before You Quote It.
-            </h1>
-            <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-              Turn a real job-site photo into a photorealistic concept, customize the design details, and use the
-              result to explain the project you are proposing.
-            </p>
-          </>
-        ) : (
-          <>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white text-balance">
-              Show Clients the Finished Project Before You Quote
-              <span className="block mt-2 text-2xl md:text-3xl font-semibold text-white/90">
-                AI renderings from a job-site photo in about {PROOF.secondsPerConcept.typical} seconds
-              </span>
-            </h1>
-            <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-              Renderspace turns a photo of your client&apos;s yard, home or room into a photorealistic concept: a new
-              pool, patio, outdoor kitchen, facade or interior. Show it on the spot and lock in the direction before
-              anyone prices the job.
-            </p>
-          </>
-        )}
-        <HomeHeroActions variant={variant} paidLabel={paidLabel} />
-        <ul className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-          <li>
-            <span className="font-semibold text-white">{PROOF.rendersGenerated}+</span> renders generated
-          </li>
-          <li>
-            <span className="font-semibold text-white">~{PROOF.secondsPerConcept.typical} sec</span> from photo to concept
-          </li>
-          <li>Works from a phone photo</li>
-        </ul>
-
-        {/* Featured Renders */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12 max-w-6xl mx-auto">
-          <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-[#191f33]">
-            <Image
-              src="/landing/renders/exterior-hero-01.jpg"
-              alt="AI rendering of a limestone home with a lap pool and stone pool deck, generated in Renderspace"
-              fill
-              priority
-              sizes="(min-width: 768px) 33vw, 100vw"
-              className="object-cover"
-            />
-          </div>
-          <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-[#191f33]">
-            <Image
-              src="/landing/renders/landscape-hero-01.jpg"
-              alt="AI landscape rendering of a modern home with a curving flagstone path and native planting"
-              fill
-              sizes="(min-width: 768px) 33vw, 100vw"
-              className="object-cover"
-            />
-          </div>
-          <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-[#191f33]">
-            <Image
-              src="/landing/renders/interior-hero-01.jpg"
-              alt="AI interior rendering of a bright open-plan living room and kitchen"
-              fill
-              sizes="(min-width: 768px) 33vw, 100vw"
-              className="object-cover"
-            />
-          </div>
-        </div>
-        <p className="text-xs text-muted-foreground mt-4 text-center">All images generated in Renderspace</p>
-      </section>
-
-      {/* Space Gen Section */}
-      <section className="container mx-auto px-4 py-16 text-center">
-        <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white">One photo in, a client-ready concept out</h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-          Drag the slider. Each pair was generated from a single photo.
-        </p>
-
-        <div className="mb-8">
-          <RenderspaceBeforeAfterSlider className="max-w-6xl" />
-        </div>
-      </section>
+      <HomeHeroWithSlider variant={variant} />
+      <HomeRecreateCards />
+      <HomePhotoToProposal />
 
       {/* How It Works */}
       <section className="container mx-auto px-4 py-16">
@@ -287,19 +211,21 @@ export default async function Home() {
         {/* Tripwire Banner */}
         <div className="max-w-3xl mx-auto rounded-xl border border-[#343434] bg-[#191f33]/60 p-5 mb-6 text-center relative">
           <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-amber-600 text-white text-xs px-2.5 py-0.5 rounded-full font-medium">
-            {PLANS.starter.name}
+            {CATALOG.intro.name}
           </span>
           <p className="text-sm text-muted-foreground">
-            New here? Try Renderspace on a real job for <span className="font-semibold text-white">{usd(PLANS.starter.priceUsd)}</span>
+            New here? Try Renderspace on a real job for{" "}
+            <span className="font-semibold text-white">{moneyFromCents(CATALOG.intro.amountCents)}</span>
           </p>
-          <p className="text-sm text-muted-foreground mt-1">{PLANS.starter.credits} credits each week. Billed weekly until you cancel.</p>
-          <p className="text-xs text-muted-foreground mt-2">This is a recurring subscription, not a one-time purchase. Cancel in billing settings before the next week.</p>
-          <Link
-            href="/onboarding?plan=starter"
-            className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            Try {PLANS.starter.credits} Credits for {usd(PLANS.starter.priceUsd)}
-          </Link>
+          <p className="text-sm text-muted-foreground mt-1">
+            {CATALOG.intro.credits} credits each week. {perRenderLabel("intro")}. Billed weekly until you cancel.
+          </p>
+          <p className="text-xs text-muted-foreground mt-2">
+            This is a recurring subscription, not a one-time purchase. Cancel in billing settings before the next week.
+          </p>
+          <IntroPlanLink className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-4 py-2 rounded-md text-sm font-medium">
+            Try {CATALOG.intro.credits} Credits for {moneyFromCents(CATALOG.intro.amountCents)}
+          </IntroPlanLink>
         </div>
 
         {/* Value Anchor Block */}
@@ -321,57 +247,7 @@ export default async function Home() {
         </p>
         <RoiCalculator ctaHref="/onboarding?plan=starter" ctaLabel={`Try ${PLANS.starter.credits} Credits for ${usd(PLANS.starter.priceUsd)}`} />
 
-        <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-          {/* Professional Plan */}
-          <div className="bg-[#191f33]/50 rounded-xl p-6 border border-[#343434]">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-white font-bold">Professional</h3>
-                <p className="text-xs text-muted-foreground">Monthly subscription</p>
-              </div>
-            </div>
-            <div className="mb-6">
-              <span className="text-3xl font-bold text-white">{usd(PLANS.professional.priceUsd)}</span>
-            </div>
-            <ul className="space-y-2 mb-6">
-              <li className="text-sm text-muted-foreground">{count(PLANS.professional.credits)} credits per month</li>
-              <li className="text-sm text-muted-foreground">Full-size PNG downloads</li>
-              <li className="text-sm text-muted-foreground">All style options</li>
-              <li className="text-sm text-muted-foreground">Use renders in proposals, marketing &amp; ads</li>
-            </ul>
-            <Link
-              href="/onboarding?plan=professional&step=3"
-              className="block text-center py-2 bg-gradient-to-r from-orange-500 to-violet-700 rounded-md text-white hover:opacity-90 transition-all"
-            >
-              Start with Professional
-            </Link>
-          </div>
-
-          {/* Business Plan */}
-          <div className="bg-[#191f33]/50 rounded-xl p-6 border border-[#343434]">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-white font-bold">Business</h3>
-                <p className="text-xs text-muted-foreground">Monthly subscription</p>
-              </div>
-            </div>
-            <div className="mb-6">
-              <span className="text-3xl font-bold text-white">{usd(PLANS.business.priceUsd)}</span>
-            </div>
-            <ul className="space-y-2 mb-6">
-              <li className="text-sm text-muted-foreground">{count(PLANS.business.credits)} credits per month</li>
-              <li className="text-sm text-muted-foreground">Full-size PNG downloads</li>
-              <li className="text-sm text-muted-foreground">All style options</li>
-              <li className="text-sm text-muted-foreground">Use renders in proposals, marketing &amp; ads</li>
-            </ul>
-            <Link
-              href="/onboarding?plan=business&step=3"
-              className="block text-center py-2 bg-gradient-to-r from-orange-500 to-violet-700 rounded-md text-white hover:opacity-90 transition-all"
-            >
-              Start with Business
-            </Link>
-          </div>
-        </div>
+        <HomePlanCards />
       </section>
 
       {/* Testimonials Section */}
@@ -466,6 +342,7 @@ export default async function Home() {
 
       {/* Footer */}
       <SiteFooter />
+      <HomePhoneBottomBar variant={variant} />
     </div>
   )
 }

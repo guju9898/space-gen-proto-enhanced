@@ -6,7 +6,14 @@ import { Coins } from "lucide-react"
 import { useAuth } from "@/components/auth/AuthContext"
 import { cn } from "@/lib/utils"
 
-type Status = { creditsRemaining: number | null; monthlyLimit: number | null; resetsAt: string | null; reason?: string | null }
+type Status = {
+  creditsRemaining: number | null
+  monthlyLimit: number | null
+  resetsAt: string | null
+  planId?: string | null
+  planName?: string | null
+  reason?: string | null
+}
 
 function fmt(n: number) {
   return Number.isInteger(n) ? String(n) : n.toFixed(1)
@@ -45,8 +52,13 @@ export function StudioCreditPill({ className }: { className?: string }) {
 
   if (auth !== "authenticated" || !status) return null
 
-  // Business (and other unmetered plans) report null remaining — show the plan label, not a blank pill.
+  // Unmetered plans (Business / owner unlimited) report null remaining — show plan name from API.
   if (status.creditsRemaining === null && !status.reason) {
+    const raw =
+      status.planName ||
+      (status.planId === "business" ? "Business" : null) ||
+      "Plan"
+    const label = /plan$/i.test(raw) ? raw : `${raw} plan`
     return (
       <Link
         href="/profile"
@@ -56,14 +68,17 @@ export function StudioCreditPill({ className }: { className?: string }) {
         )}
       >
         <Coins className="h-3.5 w-3.5" aria-hidden="true" />
-        <span className="font-medium text-foreground">Business plan</span>
+        <span className="font-medium text-foreground">{label}</span>
       </Link>
     )
   }
 
   if (status.creditsRemaining === null) return null
 
-  const out = status.reason === "credits_exhausted" || status.reason === "intro_period_ended" || status.creditsRemaining <= 0
+  const out =
+    status.reason === "credits_exhausted" ||
+    status.reason === "intro_period_ended" ||
+    status.creditsRemaining <= 0
   const resets = status.resetsAt
     ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(status.resetsAt))
     : null

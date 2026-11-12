@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { planDisplayName } from "@/lib/pricing/catalog"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { enforceCredits } from "@/lib/usage/enforceCredits"
 
@@ -45,6 +46,7 @@ export async function GET(request: Request) {
       creditsRemaining: creditCheck.creditsRemaining,
       monthlyLimit: creditCheck.monthlyLimit,
       planId: creditCheck.planId,
+      planName: planDisplayName(creditCheck.planId),
       reason: creditCheck.reason ?? null,
     })
   } catch (error) {

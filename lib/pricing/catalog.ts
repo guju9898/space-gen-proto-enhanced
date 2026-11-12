@@ -88,6 +88,30 @@ export function moneyFromCents(cents: number): string {
   })}`
 }
 
+/** Plan shown with the "Most popular" badge on pricing surfaces. */
+export const MOST_POPULAR_PLAN: PlanCode = "professional"
+
+/**
+ * Approximate cost per render from catalog price ÷ credits.
+ * Intro ≈ $0.50, Professional ≈ $0.20, Business ≈ 6¢.
+ */
+export function perRenderLabel(code: PlanCode): string {
+  const plan = CATALOG[code]
+  const cents = plan.amountCents / plan.credits
+  if (cents < 10) return `~${Math.round(cents)}¢ per render`
+  const dollars = cents / 100
+  const rounded = Math.round(dollars * 100) / 100
+  return `~$${rounded.toFixed(2)} per render`
+}
+
+/** Display name for a stored plan id (credits status, pills). */
+export function planDisplayName(planId: string | null | undefined): string | null {
+  if (planId === "intro" || planId === "professional" || planId === "business") {
+    return CATALOG[planId].name
+  }
+  return null
+}
+
 export function intervalLabel(interval: BillingInterval): string {
   if (interval === "week") return "week"
   if (interval === "year") return "year"
