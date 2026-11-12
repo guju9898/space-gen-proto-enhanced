@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { ChevronRight } from "lucide-react"
 import { RenderspaceBeforeAfterSlider } from "@/components/RenderspaceBeforeAfterSlider"
 import { IntroPlanLink } from "@/components/marketing/IntroPlanLink"
+import { IntroOfferSwitch } from "@/components/marketing/IntroOffer"
 import { HomeCtaLink } from "@/components/conversion/group-1/HomeExperimentAnalytics"
 import { GUEST_STUDIO_HREF, type HomeVariant } from "@/components/conversion/group-1/experiment"
 import { CATALOG, MOST_POPULAR_PLAN, moneyFromCents, perRenderLabel } from "@/lib/pricing/catalog"
@@ -35,7 +36,18 @@ export function HomeWave5HeroActions({ variant }: { variant: HomeVariant }) {
           // Paid plan as a text link; homepage analytics still fire via HomeCtaLink destinations above.
         }}
       >
-        Or start the {CATALOG.intro.name} for {moneyFromCents(CATALOG.intro.amountCents)}/week
+        <IntroOfferSwitch
+          live={(offer) => (
+            <>
+              {offer.name}: start the {CATALOG.intro.name} for {moneyFromCents(offer.firstCents)} your first week
+            </>
+          )}
+          otherwise={
+            <>
+              Or start the {CATALOG.intro.name} for {moneyFromCents(CATALOG.intro.amountCents)}/week
+            </>
+          }
+        />
       </IntroPlanLink>
     </div>
   )
@@ -97,51 +109,44 @@ export function HomeHeroWithSlider({ variant }: { variant: HomeVariant }) {
   )
 }
 
-const FALLBACK_COVERS = [
-  "/landing/renders/landscape-hero-01.jpg",
-  "/landing/renders/exterior-hero-01.jpg",
-  "/landing/renders/interior-hero-01.jpg",
-  "/landing/renders/cta-render-01.jpg",
-]
-
-const RECREATE = GALLERY_PRESETS.slice(0, 6)
+/**
+ * Only presets with their own Renderspace render as the cover, so the photo always
+ * matches the design the button opens. Each card opens that preset in the demo Studio.
+ */
+const RECREATE = GALLERY_PRESETS.filter((preset) => preset.referenceImage).slice(0, 6)
 
 export function HomeRecreateCards() {
+  if (RECREATE.length === 0) return null
   return (
     <section className="container mx-auto px-4 py-16">
       <h2 className="text-2xl md:text-3xl font-bold mb-3 text-white text-center">Recreate a look like this</h2>
       <p className="text-muted-foreground max-w-2xl mx-auto mb-10 text-center">
-        Open a preset in the demo Studio, or start a design in the same direction.
+        Pick a design, add your client&apos;s photo, and render it in the free demo.
       </p>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-        {RECREATE.map((preset, i) => {
-          const href = studioPresetHref(preset, { demo: true })
-          const isPreset = Boolean(preset.referenceImage) || i % 2 === 0
-          const cover = preset.referenceImage?.src ?? FALLBACK_COVERS[i % FALLBACK_COVERS.length]
-          return (
-            <Link
-              key={preset.slug}
-              href={isPreset ? href : GUEST_STUDIO_HREF}
-              className="group rounded-lg border border-border overflow-hidden bg-card hover:border-primary/40 transition-colors"
-            >
-              <div className="relative aspect-[4/3] bg-muted">
-                <Image
-                  src={cover}
-                  alt={preset.referenceImage?.alt ?? ""}
-                  fill
-                  className="object-cover"
-                  sizes="(min-width:1024px) 33vw, 50vw"
-                />
-              </div>
-              <div className="p-3">
-                <p className="text-sm font-medium text-foreground truncate">{preset.title}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {isPreset ? "Open this preset in demo" : "Start a design like this"}
-                </p>
-              </div>
-            </Link>
-          )
-        })}
+        {RECREATE.map((preset) => (
+          <Link
+            key={preset.slug}
+            href={studioPresetHref(preset, { demo: true })}
+            className="group rounded-lg border border-border overflow-hidden bg-card hover:border-primary/40 transition-colors"
+          >
+            <div className="relative aspect-[4/3] bg-muted overflow-hidden">
+              <Image
+                src={preset.referenceImage!.src}
+                alt={preset.referenceImage!.alt}
+                fill
+                className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
+              />
+            </div>
+            <div className="flex items-center justify-between gap-3 p-3">
+              <p className="text-sm font-medium text-foreground">{preset.title}</p>
+              <span className="shrink-0 rounded-md border border-border px-2.5 py-1 text-xs text-muted-foreground group-hover:border-primary group-hover:text-foreground">
+                Recreate this
+              </span>
+            </div>
+          </Link>
+        ))}
       </div>
     </section>
   )

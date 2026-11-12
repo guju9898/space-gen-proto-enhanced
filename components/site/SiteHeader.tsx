@@ -2,6 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { LoginButton } from "@/components/auth/LoginButton"
 import { MobileNav } from "./MobileNav"
+import { HeaderCtaLink } from "@/components/marketing/IntroOffer"
 import { DEFAULT_CTA, PRIMARY_NAV_LINKS, type HeaderCta, type NavKey } from "./nav"
 
 type SiteHeaderProps = {
@@ -45,12 +46,11 @@ export function SiteHeader({ active, cta = DEFAULT_CTA }: SiteHeaderProps) {
 
       <div className="hidden lg:flex items-center gap-4">
         <LoginButton />
-        <Link
+        <HeaderCtaLink
           href={cta.href}
+          label={cta.label}
           className="text-sm bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-4 py-2 rounded-md"
-        >
-          {cta.label}
-        </Link>
+        />
       </div>
 
       <MobileNav active={active} cta={cta} />

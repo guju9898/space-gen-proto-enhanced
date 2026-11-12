@@ -32,6 +32,7 @@ import {
 } from "@/components/conversion/group-1/HomeWave5"
 import { IntroPlanLink } from "@/components/marketing/IntroPlanLink"
 import { CATALOG, moneyFromCents, perRenderLabel } from "@/lib/pricing/catalog"
+import { IntroTripwireButtonLabel, IntroTripwireLine } from "@/components/marketing/IntroOffer"
 
 export const metadata: Metadata = pageMetadata({
   path: "/",
@@ -214,8 +215,7 @@ export default async function Home() {
             {CATALOG.intro.name}
           </span>
           <p className="text-sm text-muted-foreground">
-            New here? Try Renderspace on a real job for{" "}
-            <span className="font-semibold text-white">{moneyFromCents(CATALOG.intro.amountCents)}</span>
+            <IntroTripwireLine />
           </p>
           <p className="text-sm text-muted-foreground mt-1">
             {CATALOG.intro.credits} credits each week. {perRenderLabel("intro")}. Billed weekly until you cancel.
@@ -224,7 +224,7 @@ export default async function Home() {
             This is a recurring subscription, not a one-time purchase. Cancel in billing settings before the next week.
           </p>
           <IntroPlanLink className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-4 py-2 rounded-md text-sm font-medium">
-            Try {CATALOG.intro.credits} Credits for {moneyFromCents(CATALOG.intro.amountCents)}
+            <IntroTripwireButtonLabel />
           </IntroPlanLink>
         </div>
 

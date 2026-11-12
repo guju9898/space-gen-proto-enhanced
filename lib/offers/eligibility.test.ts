@@ -24,8 +24,9 @@ function facts(overrides: Partial<LifecycleFacts> = {}): LifecycleFacts {
   }
 }
 
+// The Nov 1–8 test campaign (Black Friday is listed first since Wave 5).
 const livePromo = {
-  ...PRICING_CAMPAIGNS[0],
+  ...PRICING_CAMPAIGNS.find((c) => c.id === "candidate-initial-20")!,
   enabled: true,
   stripeCouponEnv: "STRIPE_COUPON_TEST",
 }

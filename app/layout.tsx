@@ -67,6 +67,9 @@ export default function RootLayout({
           <SessionAuthProvider>
             <AuthProvider>
               <DesignConfigProvider>
+                <Suspense fallback={null}>
+                  <PromoBanner />
+                </Suspense>
                 {children}
                 <Suspense fallback={null}>
                   <LoginModalWrapper />
@@ -74,9 +77,6 @@ export default function RootLayout({
                 <CheckoutResume />
                 <Suspense fallback={null}>
                   <IntroModal />
-                </Suspense>
-                <Suspense fallback={null}>
-                  <PromoBanner />
                 </Suspense>
                 <Suspense fallback={null}>
                   <AffiliateRefCapture />

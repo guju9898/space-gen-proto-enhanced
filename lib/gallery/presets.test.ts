@@ -14,10 +14,10 @@ import {
 } from "./presets"
 
 describe("gallery presets", () => {
-  it("seeds five regional presets with unique slugs", () => {
-    assert.equal(GALLERY_PRESETS.length, 5)
+  it("seeds eight regional presets with unique slugs", () => {
+    assert.equal(GALLERY_PRESETS.length, 8)
     const slugs = new Set(GALLERY_PRESETS.map((preset) => preset.slug))
-    assert.equal(slugs.size, 5)
+    assert.equal(slugs.size, 8)
     for (const preset of GALLERY_PRESETS) {
       assert.equal(preset.schemaVersion, 1)
       assert.equal(preset.category, "landscape")
@@ -31,7 +31,13 @@ describe("gallery presets", () => {
     const withImage = GALLERY_PRESETS.filter((preset) => preset.referenceImage)
     assert.deepEqual(
       withImage.map((preset) => preset.slug).sort(),
-      ["cedar-pergola-outdoor-kitchen", "classical-dallas-landscape"]
+      [
+        "cedar-pergola-outdoor-kitchen",
+        "classical-dallas-landscape",
+        "formal-fountain-front-entry",
+        "mediterranean-wisteria-courtyard",
+        "slate-pool-desert-planter",
+      ]
     )
     for (const preset of withImage) {
       assert.match(preset.referenceImage!.src, /^\/gallery\/[a-z0-9-]+\.jpg$/)

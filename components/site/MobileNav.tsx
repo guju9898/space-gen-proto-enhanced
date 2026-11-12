@@ -1,5 +1,7 @@
 "use client"
 
+import { HeaderCtaLink } from "@/components/marketing/IntroOffer"
+
 import { useState } from "react"
 import Link from "next/link"
 import { Menu } from "lucide-react"
@@ -66,12 +68,11 @@ export function MobileNav({ active, cta }: MobileNavProps) {
             Log in
           </button>
           <SheetClose asChild>
-            <Link
+            <HeaderCtaLink
               href={cta.href}
+              label={cta.label}
               className="w-full text-center text-sm bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 text-white px-4 py-3 rounded-md"
-            >
-              {cta.label}
-            </Link>
+            />
           </SheetClose>
         </div>
       </SheetContent>

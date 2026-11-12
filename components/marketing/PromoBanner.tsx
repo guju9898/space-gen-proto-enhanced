@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react"
 import { usePathname, useSearchParams } from "next/navigation"
 import { X } from "lucide-react"
 import { IntroPlanLink } from "@/components/marketing/IntroPlanLink"
-import { Button } from "@/components/ui/button"
 import { CATALOG, moneyFromCents } from "@/lib/pricing/catalog"
 import {
   advertisedIntroCampaign,
@@ -95,13 +94,35 @@ export function PromoBanner() {
     campaign.amountOffCents != null
       ? Math.max(0, CATALOG.intro.amountCents - campaign.amountOffCents)
       : CATALOG.intro.amountCents
+  const offerName = campaign.id === "black-friday-2026" ? "Black Friday" : "Limited-time offer"
+  const lastDay = new Date(Date.parse(campaign.endsAt) - 60_000).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    timeZone: "America/Chicago",
+  })
 
+  // Slim strip at the top of the page, in the document flow: it scrolls away with the
+  // page, so it never covers the hero buttons or the phone bottom bar.
   return (
     <div
-      className="fixed z-40 max-w-sm rounded-xl border border-border bg-card p-4 shadow-lg sm:bottom-6 sm:right-6 sm:left-auto bottom-4 left-1/2 -translate-x-1/2 sm:translate-x-0"
       role="region"
-      aria-label={`${CATALOG.intro.name} offer`}
+      aria-label={`${offerName} offer`}
+      className="relative z-30 border-b border-orange-500/30 bg-gradient-to-r from-orange-600 to-violet-800 text-white"
     >
+      <div className="container mx-auto flex flex-wrap items-center justify-center gap-x-3 gap-y-1 py-2 pl-4 pr-10 text-center text-xs sm:text-sm">
+        <span className="font-semibold">
+          {offerName}: your first {CATALOG.intro.name} week for {moneyFromCents(firstWeekCents)}
+        </span>
+        <span className="text-white/85">
+          then {moneyFromCents(CATALOG.intro.amountCents)}/week · ends {lastDay}, 11:59pm CT ·{" "}
+          <span role="timer" aria-live="off" className="font-mono tabular-nums">
+            {formatCountdown(remaining)}
+          </span>
+        </span>
+        <IntroPlanLink className="rounded-md bg-white px-2.5 py-1 text-xs font-semibold text-violet-900 hover:bg-white/90">
+          Claim the {moneyFromCents(firstWeekCents)} week
+        </IntroPlanLink>
+      </div>
       <button
         type="button"
         onClick={() => {
@@ -112,27 +133,11 @@ export function PromoBanner() {
             // ignore
           }
         }}
-        className="absolute right-2 top-2 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-white/80 hover:text-white"
         aria-label="Dismiss offer"
       >
         <X className="h-4 w-4" />
       </button>
-      <h3 className="pr-8 text-base font-semibold text-foreground">
-        {moneyFromCents(firstWeekCents)} first week, then {moneyFromCents(CATALOG.intro.amountCents)}/week
-      </h3>
-      <p className="mt-1.5 text-sm text-muted-foreground">
-        {moneyFromCents(campaign.amountOffCents ?? 0)} off your first {CATALOG.intro.name} charge. Applied at
-        checkout.
-      </p>
-      <p className="mt-2 text-xs font-medium text-foreground" role="timer" aria-live="polite">
-        Ends in {formatCountdown(remaining)}
-      </p>
-      <Button
-        asChild
-        className="mt-4 w-full bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 text-white rounded-md font-medium"
-      >
-        <IntroPlanLink>Start the {CATALOG.intro.name}</IntroPlanLink>
-      </Button>
     </div>
   )
 }
