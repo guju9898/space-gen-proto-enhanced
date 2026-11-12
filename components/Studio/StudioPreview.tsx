@@ -81,6 +81,7 @@ export function StudioPreview({
   const pathname = usePathname();
   const wasRendering = useRef(false);
   const renderAtStart = useRef<string | null>(null);
+  const renderBoxRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const studio = studioKindFromPath(pathname) ?? undefined;
     if (rendering && !wasRendering.current) {
@@ -90,6 +91,10 @@ export function StudioPreview({
     if (!rendering && wasRendering.current) {
       const gotNew = Boolean(currentRender) && currentRender !== renderAtStart.current;
       trackStudioEvent(gotNew ? "render_completed" : "render_failed", { studio, version: latestRenders.length });
+      // On one-column layouts the result sits below the form: bring the new render into view.
+      if (gotNew && typeof window !== "undefined" && window.innerWidth < 1024) {
+        requestAnimationFrame(() => renderBoxRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
+      }
     }
     wasRendering.current = rendering;
   }, [rendering, currentRender, latestRenders.length, pathname]);
@@ -130,12 +135,18 @@ export function StudioPreview({
           {rendering && <RenderStatus isRendering={true} />}
           {currentRender && !rendering && <RenderStatus isRendering={false} />}
           <ReadResultHint hasRender={Boolean(currentRender) && !rendering} />
-          <div className="aspect-[4/3] rounded-md overflow-hidden bg-muted">
+          {/* 13% smaller than the column, and never taller than the screen allows, so the whole
+              render is visible at default zoom. object-contain shows the full image, no cropping. */}
+          <div
+            ref={renderBoxRef}
+            data-render-box
+            className="mx-auto aspect-[4/3] w-[min(87%,calc((100dvh_-_17rem)*4/3))] min-w-[240px] max-w-full rounded-md overflow-hidden bg-muted"
+          >
             {currentRender ? (
               <img
                 src={currentRender}
                 alt="Current render"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 onError={(e) => {
                   console.error('❌ Image failed to load:', currentRender);
                   const target = e.target as HTMLImageElement;

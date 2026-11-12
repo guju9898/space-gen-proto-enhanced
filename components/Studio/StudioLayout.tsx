@@ -129,23 +129,24 @@ export function StudioLayout({ formContent, previewContent, requestContent, demo
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex min-h-screen flex-col lg:h-screen lg:overflow-hidden">
       <GlobalHeader demoMode={demoMode} />
       {demoMode && <DemoBanner />}
       <DemoRendersClaim demoMode={demoMode} />
       <Suspense fallback={null}>
         <CheckoutSuccessDialog />
       </Suspense>
-      <main className="flex-1 overflow-hidden">
-        <div className="container mx-auto px-6 py-8 h-full">
-          <div className="grid grid-cols-3 gap-6 h-full">
-            <div className="col-span-1 overflow-y-auto overscroll-contain pr-2">
+      <main className="flex-1 lg:overflow-hidden">
+        {/* One column below 1024px (phones, tablets); the original three columns above. */}
+        <div className="container mx-auto px-4 py-6 sm:px-6 lg:h-full lg:py-8">
+          <div className="grid grid-cols-1 gap-6 lg:h-full lg:grid-cols-3">
+            <div className="lg:col-span-1 lg:overflow-y-auto lg:overscroll-contain lg:pr-2">
               {formContent}
             </div>
-            <div className="col-span-1 overflow-hidden">
+            <div className="lg:col-span-1 lg:overflow-y-auto">
               {previewContent}
             </div>
-            <div className="col-span-1 overflow-hidden">
+            <div className="lg:col-span-1 lg:overflow-y-auto">
               {requestContent}
             </div>
           </div>
