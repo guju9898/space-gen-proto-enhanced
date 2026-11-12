@@ -44,9 +44,26 @@ export function StudioCreditPill({ className }: { className?: string }) {
   }, [auth, refreshKey])
 
   if (auth !== "authenticated" || !status) return null
-  if (status.creditsRemaining === null && !status.reason) return null
 
-  const out = status.reason === "credits_exhausted" || status.reason === "intro_period_ended" || (status.creditsRemaining ?? 0) <= 0
+  // Business (and other unmetered plans) report null remaining — show the plan label, not a blank pill.
+  if (status.creditsRemaining === null && !status.reason) {
+    return (
+      <Link
+        href="/profile"
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground",
+          className
+        )}
+      >
+        <Coins className="h-3.5 w-3.5" aria-hidden="true" />
+        <span className="font-medium text-foreground">Business plan</span>
+      </Link>
+    )
+  }
+
+  if (status.creditsRemaining === null) return null
+
+  const out = status.reason === "credits_exhausted" || status.reason === "intro_period_ended" || status.creditsRemaining <= 0
   const resets = status.resetsAt
     ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(new Date(status.resetsAt))
     : null
@@ -61,7 +78,7 @@ export function StudioCreditPill({ className }: { className?: string }) {
       )}
     >
       <Coins className="h-3.5 w-3.5" aria-hidden="true" />
-      <span className="font-medium text-foreground">{fmt(Math.max(0, status.creditsRemaining ?? 0))}</span>
+      <span className="font-medium text-foreground">{fmt(Math.max(0, status.creditsRemaining))}</span>
       {status.monthlyLimit != null && <span>of {fmt(status.monthlyLimit)}</span>}
       <span>credits</span>
       {resets && <span>· reset {resets}</span>}

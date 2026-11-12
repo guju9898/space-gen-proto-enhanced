@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Check, PenLine } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Dialog, DialogContent, DialogDescription, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { isCustomValue, resolveTypedValue } from "@/lib/studio/customValue"
 import { useFieldPresentation } from "@/components/Studio/useFieldPresentation"
@@ -138,7 +138,7 @@ export function ImageOptionGrid({
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-2xl p-5 sm:p-6">
-          <h3 className="text-lg font-semibold pr-8 mb-1">{pres.label || "Select an option"}</h3>
+          <DialogTitle className="text-lg font-semibold pr-8 mb-1">{pres.label || "Select an option"}</DialogTitle>
           <DialogDescription className="sr-only">Pick a card or type your own value.</DialogDescription>
 
           {allowCustom && (

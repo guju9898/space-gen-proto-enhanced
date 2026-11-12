@@ -1,10 +1,9 @@
 /**
- * Data access for projects.
- * V1: uses mock data. Swap to Supabase when tables exist.
+ * Data access for My Projects — real `projects` / `project_renders` rows (owner RLS).
  */
 
-import type { Project, SortOption } from "./types"
-import { getMockProjects } from "./mock-data"
+import { createClient } from "@/lib/supabase/client"
+import type { Project, ProjectType, SortOption } from "./types"
 
 export interface GetProjectsOptions {
   userId: string
@@ -13,29 +12,63 @@ export interface GetProjectsOptions {
   sort?: SortOption
 }
 
+type ProjectRow = {
+  id: string
+  user_id: string
+  name: string
+  project_type: string
+  cover_image: string | null
+  share_slug: string | null
+  is_shared: boolean | null
+  created_at: string
+  updated_at: string
+  project_renders?: { count: number }[] | null
+}
+
+function mapRow(row: ProjectRow): Project {
+  const count = Array.isArray(row.project_renders) ? Number(row.project_renders[0]?.count ?? 0) : 0
+  return {
+    id: row.id,
+    userId: row.user_id,
+    name: row.name,
+    projectType: row.project_type as ProjectType,
+    coverImageUrl: row.cover_image,
+    renderCount: Number.isFinite(count) ? count : 0,
+    updatedAt: row.updated_at,
+    createdAt: row.created_at,
+    shareSlug: row.share_slug,
+    isShared: Boolean(row.is_shared),
+  }
+}
+
 /**
- * Fetch projects for the current user.
- * TODO: Replace with Supabase query when projects table exists.
+ * Fetch projects for the signed-in user via the browser Supabase client (RLS).
  */
 export async function getProjects(options: GetProjectsOptions): Promise<Project[]> {
   const { userId, search = "", projectType, sort = "updated_desc" } = options
-  let projects = getMockProjects(userId)
+  const supabase = createClient()
 
-  if (search.trim()) {
-    const q = search.trim().toLowerCase()
-    projects = projects.filter((p) => p.name.toLowerCase().includes(q))
-  }
+  let query = supabase
+    .from("projects")
+    .select("id, user_id, name, project_type, cover_image, share_slug, is_shared, created_at, updated_at, project_renders(count)")
+    .eq("user_id", userId)
 
   if (projectType && projectType !== "all") {
-    projects = projects.filter((p) => p.projectType === projectType)
+    query = query.eq("project_type", projectType)
   }
 
-  const sorted = [...projects].sort((a, b) => {
-    if (sort === "updated_desc") return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-    if (sort === "created_desc") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    if (sort === "created_asc") return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    return 0
-  })
+  if (search.trim()) {
+    query = query.ilike("name", `%${search.trim()}%`)
+  }
 
-  return sorted
+  if (sort === "updated_desc") query = query.order("updated_at", { ascending: false })
+  else if (sort === "created_desc") query = query.order("created_at", { ascending: false })
+  else if (sort === "created_asc") query = query.order("created_at", { ascending: true })
+
+  const { data, error } = await query
+  if (error) {
+    console.error("getProjects failed", error.message)
+    return []
+  }
+  return ((data || []) as ProjectRow[]).map(mapRow)
 }

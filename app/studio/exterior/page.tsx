@@ -238,6 +238,7 @@ export default function ExteriorStudioPage() {
       const imageUrl = publicUrlData.publicUrl
       if (!imageUrl?.startsWith("http")) throw new Error("Invalid upload URL")
 
+      setNoPhotoMode(false)
       setImageState({ file, previewUrl, uploadedUrl: imageUrl })
       handleConfigChange("image")(imageUrl)
     } catch (err) {

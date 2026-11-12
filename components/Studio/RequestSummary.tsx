@@ -8,6 +8,7 @@ import { InteriorConfig, ExteriorConfig, LandscapeConfig } from "@/types/studio"
 import { cn } from "@/lib/utils"
 import { labelForKey } from "@/lib/studio/fields"
 import { studioKindFromPath } from "@/lib/studio/lastStudio"
+import { shouldShowSummaryKey } from "@/lib/studio/summary"
 
 interface RequestSummaryProps {
   tags?: string[]
@@ -42,6 +43,7 @@ export function RequestSummary({ tags, config, icon: Icon, onRemove, onClearAll 
         .filter(
           ([key, value]) =>
             !HIDDEN_KEYS.has(key) &&
+            shouldShowSummaryKey(key, (config || {}) as Record<string, unknown>) &&
             (typeof value === "string" || typeof value === "number") &&
             String(value).trim() !== "" &&
             String(value).trim().toLowerCase() !== "none"
