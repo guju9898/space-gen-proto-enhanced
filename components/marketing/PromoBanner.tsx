@@ -114,7 +114,10 @@ export function PromoBanner() {
           {offerName}: your first {CATALOG.intro.name} week for {moneyFromCents(firstWeekCents)}
         </span>
         <span className="text-white/85">
-          then {moneyFromCents(CATALOG.intro.amountCents)}/week · ends {lastDay}, 11:59pm CT ·{" "}
+          <span className="hidden sm:inline">
+            then {moneyFromCents(CATALOG.intro.amountCents)}/week · ends {lastDay}, 11:59pm CT ·{" "}
+          </span>
+          <span className="sm:hidden">ends in </span>
           <span role="timer" aria-live="off" className="font-mono tabular-nums">
             {formatCountdown(remaining)}
           </span>
