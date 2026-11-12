@@ -1,6 +1,8 @@
 "use client"
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import { LAST_STUDIO_COOKIE, studioKindFromPath } from '@/lib/studio/lastStudio';
 import { useDesignConfig } from '@/hooks/useDesignConfig';
 import { GlobalHeader } from './GlobalHeader';
 import { CheckoutSuccessDialog } from './CheckoutSuccessDialog';
@@ -15,6 +17,13 @@ interface StudioLayoutProps {
 
 export function StudioLayout({ formContent, previewContent, requestContent, demoMode }: StudioLayoutProps) {
   const { interior } = useDesignConfig();
+  const pathname = usePathname();
+
+  // Remember this Studio so /studio reopens it next time (one year, this site only).
+  useEffect(() => {
+    const kind = studioKindFromPath(pathname);
+    if (kind) document.cookie = `${LAST_STUDIO_COOKIE}=${kind}; path=/; max-age=31536000; samesite=lax`;
+  }, [pathname]);
 
   if (!interior) {
     return (

@@ -653,7 +653,7 @@ export default function InteriorStudioPage() {
           {error && (
             <div className="pt-2 text-sm text-destructive">
               <p>{error}</p>
-              {(error.includes("credit") || error.includes("plan") || error.includes("First Job Test")) && (
+              {(error.includes("credit") || error.includes("plan") || error.includes("Intro Plan")) && (
                 <a href="/pricing" className="mt-1 inline-block font-medium underline">Upgrade your plan</a>
               )}
             </div>

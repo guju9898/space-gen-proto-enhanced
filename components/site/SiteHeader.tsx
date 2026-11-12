@@ -2,7 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { LoginButton } from "@/components/auth/LoginButton"
 import { MobileNav } from "./MobileNav"
-import { DEFAULT_CTA, NAV_LINKS, type HeaderCta, type NavKey } from "./nav"
+import { DEFAULT_CTA, PRIMARY_NAV_LINKS, type HeaderCta, type NavKey } from "./nav"
 
 type SiteHeaderProps = {
   /** Highlights the current page in the nav. */
@@ -24,7 +24,7 @@ export function SiteHeader({ active, cta = DEFAULT_CTA }: SiteHeaderProps) {
       </Link>
 
       <nav aria-label="Main" className="hidden lg:flex items-center gap-7">
-        {NAV_LINKS.map((link) => {
+        {PRIMARY_NAV_LINKS.map((link) => {
           const isActive = link.key === active
           return (
             <Link

@@ -55,6 +55,7 @@ import { CreateMockupDialog } from "@/components/Studio/projects/CreateMockupDia
 import { downloadImage } from "@/lib/projects/utils"
 import { enableProjectShare, disableProjectShare } from "@/app/studio/projects/actions"
 import type { Project } from "@/lib/projects/types"
+import { PhotoDropArea } from "@/components/Studio/PhotoDropArea"
 
 const architecturalStyleOptions = [
   { value: "modern", label: "Modern", icon: Layout },
@@ -775,7 +776,7 @@ export default function ExteriorStudioPage() {
             <p className="text-xs text-muted-foreground mb-2">
               Upload JPG, PNG, or WEBP under 10MB. Higher resolution produces better results.
             </p>
-            <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${isUploading ? "cursor-wait opacity-70 border-muted" : "hover:border-muted-foreground/50 border-border"}`}>
+            <PhotoDropArea onFile={handleImageUpload} isUploading={isUploading}>
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -815,7 +816,7 @@ export default function ExteriorStudioPage() {
                   </div>
                 )}
               </label>
-            </div>
+            </PhotoDropArea>
             <div className="text-xs text-muted-foreground space-y-1">
               <p>Supported formats: JPG, PNG, WEBP</p>
               <p>Max size: 10MB</p>
@@ -839,7 +840,7 @@ export default function ExteriorStudioPage() {
           {error && (
             <div className="bg-destructive/10 text-destructive px-4 py-2 rounded-md text-sm">
               <p>{error}</p>
-              {(error.includes("credit") || error.includes("plan") || error.includes("First Job Test")) && (
+              {(error.includes("credit") || error.includes("plan") || error.includes("Intro Plan")) && (
                 <a href="/pricing" className="mt-1 inline-block font-medium underline">Upgrade your plan</a>
               )}
             </div>

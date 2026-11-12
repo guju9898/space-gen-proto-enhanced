@@ -9,6 +9,7 @@ const FOOTER_LINKS = [
   { href: "/faq", label: "FAQ" },
   { href: "/gallery", label: "Gallery" },
   { href: "/human-polish", label: "Human Polish™" },
+  { href: "/mockup-method", label: "Mockup Method" },
   { href: "/academy", label: "Academy" },
   { href: "/developers", label: "Developers" },
   { href: "/affiliates", label: "Affiliates" },
