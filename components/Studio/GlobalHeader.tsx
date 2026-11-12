@@ -49,8 +49,8 @@ export function GlobalHeader({ demoMode }: GlobalHeaderProps = {}) {
 
   return (
     <header className="bg-background border-b border-border">
-      <div className="container mx-auto px-6 py-4">
-        <nav className="flex items-center justify-between">
+      <div className="container mx-auto px-3 sm:px-6 py-3 sm:py-4">
+        <nav className="flex items-center justify-between gap-2">
           {/* Left: Studio Mode Toggle */}
           <div className="flex items-center">
             <div className="bg-muted p-1 rounded-full flex items-center gap-1">
@@ -58,7 +58,8 @@ export function GlobalHeader({ demoMode }: GlobalHeaderProps = {}) {
                 <Link
                   key={type}
                   href={demoMode ? `${path}?demo=true` : path}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${
+                  aria-label={name}
+                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full transition-colors ${
                     pathname?.startsWith(path)
                       ? 'bg-background text-foreground shadow-sm'
                       : 'text-muted-foreground hover:text-foreground'
@@ -66,14 +67,14 @@ export function GlobalHeader({ demoMode }: GlobalHeaderProps = {}) {
                   onClick={() => setActiveStudio(type)}
                 >
                   {icon}
-                  <span className="text-sm font-medium">{name}</span>
+                  <span className="hidden sm:inline text-sm font-medium">{name}</span>
                 </Link>
               ))}
             </div>
           </div>
 
           {/* Center: Navigation Links */}
-          <div className="flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-8">
             {links.map(({ name, path }) => (
               <Link
                 key={path}
@@ -90,9 +91,9 @@ export function GlobalHeader({ demoMode }: GlobalHeaderProps = {}) {
           </div>
 
           {/* Right: Language & Profile / Login */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 sm:gap-6">
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+              <DropdownMenuTrigger className="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground">
                 <Globe className="w-4 h-4" />
                 EN
                 <ChevronDown className="w-4 h-4" />
@@ -111,10 +112,18 @@ export function GlobalHeader({ demoMode }: GlobalHeaderProps = {}) {
                     <AvatarImage src={user.user_metadata?.avatar_url} />
                     <AvatarFallback>{(user.email?.[0] ?? user.user_metadata?.name?.[0] ?? 'U').toUpperCase()}</AvatarFallback>
                   </Avatar>
-                  <span className="text-sm font-medium">{user.user_metadata?.name ?? user.email ?? 'Account'}</span>
+                  <span className="hidden md:inline text-sm font-medium">{user.user_metadata?.name ?? user.email ?? 'Account'}</span>
                   <ChevronDown className="w-4 h-4 text-muted-foreground" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {/* On phones the page links live here (the center nav is hidden). */}
+                  {links
+                    .filter(({ path }) => path !== '/studio')
+                    .map(({ name, path }) => (
+                      <DropdownMenuItem key={path} asChild className="md:hidden">
+                        <Link href={path}>{name}</Link>
+                      </DropdownMenuItem>
+                    ))}
                   <DropdownMenuItem asChild>
                     <Link href="/profile">Profile</Link>
                   </DropdownMenuItem>
