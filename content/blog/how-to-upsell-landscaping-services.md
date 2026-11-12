@@ -106,7 +106,7 @@ You should not have to choose between an expensive design presentation and a pla
 
 I built Renderspace because I believe contractors should be able to demonstrate the value of their ideas without turning every suggestion into a sales pitch. When homeowners can see an improvement on their own property, especially with the freedom to adjust specific details, they can decide whether it's worth the investment. That's a much better conversation than arguing over another line item.
 
-Try it on your next proposal. The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo. See every plan on the [pricing page](/pricing).
+Try it on your next proposal. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo. See every plan on the [pricing page](/pricing).
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

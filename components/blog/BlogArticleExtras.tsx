@@ -37,7 +37,7 @@ export function BlogArticleCta({
             category={category}
             className="inline-flex justify-center items-center rounded-md bg-gradient-to-r from-orange-500 to-violet-700 px-4 py-2.5 text-sm font-medium text-white hover:opacity-90"
           >
-            Try the First Job Test — {usd(PLANS.starter.priceUsd)}/week
+            Try the {PLANS.starter.name}: {usd(PLANS.starter.priceUsd)}/week
           </BlogCtaLink>
           <BlogCtaLink
             href={BLOG_CTA_HUMAN_POLISH}
@@ -110,7 +110,7 @@ export function BlogArticleCta({
     <aside className={shell} aria-label="Try Renderspace">
       <h2 className="text-xl font-semibold text-white mb-3">Try it on a real estimate</h2>
       <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-        The First Job Test is {usd(PLANS.starter.priceUsd)} a week for {PLANS.starter.credits} credits.
+        The {PLANS.starter.name} is {usd(PLANS.starter.priceUsd)} a week for {PLANS.starter.credits} credits.
         {usd(PLANS.starter.priceUsd)} is charged today, then the same amount renews every week until you cancel.
         It is a recurring subscription, not a one-time purchase.
       </p>
@@ -121,7 +121,7 @@ export function BlogArticleCta({
           category={category}
           className="inline-flex justify-center items-center rounded-md bg-gradient-to-r from-orange-500 to-violet-700 px-4 py-2.5 text-sm font-medium text-white hover:opacity-90"
         >
-          Start the First Job Test
+          Start the {PLANS.starter.name}
         </BlogCtaLink>
         <BlogCtaLink
           href={BLOG_CTA_PRICING}

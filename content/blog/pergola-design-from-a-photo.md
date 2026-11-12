@@ -112,7 +112,7 @@ That is the job a fast photorealistic concept does. It helps contractors win bid
 
 I built Renderspace so contractors could show a homeowner their vision without spending days creating a presentation for a job they haven't won. Whether it's a cedar pergola or a limestone-clad patio cover, you should be able to describe the details, generate a concept and discuss it right there.
 
-Try it on your next patio cover lead. The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo.
+Try it on your next patio cover lead. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo.
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

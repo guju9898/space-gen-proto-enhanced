@@ -7,7 +7,7 @@ import {
   savingsCents,
 } from "./catalog"
 import { recommendPlan } from "./recommend"
-import { PRICING_CAMPAIGNS, decideCampaign, evaluatePromotion } from "./promotions"
+import { PRICING_CAMPAIGNS, advertisedIntroCampaign, decideCampaign, evaluatePromotion } from "./promotions"
 import {
   planCodeForPriceId,
   resolveCheckoutPrice,
@@ -150,5 +150,36 @@ describe("promotions", () => {
     assert.equal(decideCampaign({ ...campaign, duration: "forever" }, base).reason, "forever_blocked")
     assert.equal(decideCampaign(campaign, { ...base, couponConfigured: false }).reason, "missing_coupon")
     assert.equal(decideCampaign(campaign, base).reason, "ok")
+  })
+})
+
+describe("advertised Intro Plan promotion", () => {
+  const base = PRICING_CAMPAIGNS[0]
+  const intro = {
+    ...base,
+    id: "intro-test",
+    planCodes: ["intro"] as const,
+    intervals: ["week"] as const,
+    enabled: true,
+    stripeCouponEnv: "STRIPE_COUPON_INTRO_TEST",
+    startsAt: "2026-12-01T00:00:00.000Z",
+    endsAt: "2026-12-08T00:00:00.000Z",
+  }
+
+  it("shows nothing with today's shipped campaigns", () => {
+    assert.equal(advertisedIntroCampaign(new Date("2026-11-11T12:00:00Z")), null)
+  })
+
+  it("shows a real campaign only inside its dates", () => {
+    assert.equal(advertisedIntroCampaign(new Date("2026-11-30T23:59:59Z"), [intro]), null)
+    assert.equal(advertisedIntroCampaign(new Date("2026-12-03T12:00:00Z"), [intro])?.id, "intro-test")
+    assert.equal(advertisedIntroCampaign(new Date("2026-12-08T00:00:00Z"), [intro]), null)
+  })
+
+  it("never shows a disabled campaign or one without a Stripe coupon", () => {
+    const when = new Date("2026-12-03T12:00:00Z")
+    assert.equal(advertisedIntroCampaign(when, [{ ...intro, enabled: false }]), null)
+    assert.equal(advertisedIntroCampaign(when, [{ ...intro, stripeCouponEnv: null }]), null)
+    assert.equal(advertisedIntroCampaign(when, [{ ...intro, planCodes: ["professional"] as const }]), null)
   })
 })

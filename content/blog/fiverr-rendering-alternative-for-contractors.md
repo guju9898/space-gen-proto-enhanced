@@ -35,13 +35,13 @@ This article compares the paths neutrally — without invented marketplace price
 
 ## Path 2: Self-serve AI-assisted concepts (Renderspace)
 
-**How it works:** You upload a photo of the actual job site, adjust style and variables, and generate a concept in [about 30 seconds](/faq), typically 20 to 40, with 4K export. You control iteration in real time, including on-site while the client is present.
+**How it works:** You upload a photo of the actual job site, adjust style and variables, and generate a concept in [about 30 seconds](/faq), typically 20 to 40. You control iteration in real time, including on-site while the client is present.
 
 **What it optimizes for:** Early alignment on direction before detailed design, estimating, and permitting. Low marginal cost per additional concept direction. Speed tied to your calendar, not someone else's inbox.
 
 **Where it stops:** Self-serve output is concept exploration — not engineered drawings, permit submissions, or presentation packages that require human production review. For category limits, see [AI Landscape Design Software for Contractors: What It Does Well—and What It Doesn't](/blog/ai-landscape-design-software-for-contractors).
 
-**Entry point:** The [First Job Test](/onboarding?plan=starter) is **$19.99** for **40 credits** over **7 days**. Ongoing self-serve plans include [Professional at $99/month (500 credits)](/pricing) and [Business at $349/month (6000 credits)](/pricing).
+**Entry point:** The [Intro Plan](/onboarding?plan=starter) is **$19.99 a week** for **40 credits**, renewing weekly until you cancel. Ongoing self-serve plans include [Professional at $98/month (500 credits)](/pricing) and [Business at $349/month (6000 credits)](/pricing).
 
 ## Path 3: Human Polish production
 
@@ -92,6 +92,6 @@ No. Every path here is visualization for presentation. Engineering, drainage and
 | HOA or client presentation package from approved direction | Human Polish Build-Ready (scoped before payment) |
 | Engineering, drainage, permits | Appropriate licensed professionals — not any rendering path |
 
-Most contractors do not switch all at once. A common pattern: test self-serve on live estimates with the [First Job Test](/onboarding?plan=starter), keep freelancers for specialized projects if that still works, and route larger presentation needs to [Human Polish](/human-polish) when scope exceeds what a fast concept pass should carry.
+Most contractors do not switch all at once. A common pattern: test self-serve on live estimates with the [Intro Plan](/onboarding?plan=starter), keep freelancers for specialized projects if that still works, and route larger presentation needs to [Human Polish](/human-polish) when scope exceeds what a fast concept pass should carry.
 
 For a broader look at outsourced visualization as a department function, see [Outsourced Visualization for Landscape Contractors](/blog/outsourced-visualization-for-landscape-contractors).

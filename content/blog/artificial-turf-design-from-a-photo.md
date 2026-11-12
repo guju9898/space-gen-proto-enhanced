@@ -97,7 +97,7 @@ That is how fast, photorealistic concepts help you win bids faster. The homeowne
 
 I built Renderspace because I believe a contractor's presentation should communicate more than materials and square footage. Turf is a perfect example. The homeowner isn't buying synthetic grass in isolation; they're buying a better backyard. Show them that complete vision, let them explore specific materials and landscaping details, and give them something meaningful to compare against the price.
 
-Try it on your next turf estimate. The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo. Every plan is on the [pricing page](/pricing).
+Try it on your next turf estimate. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo. Every plan is on the [pricing page](/pricing).
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

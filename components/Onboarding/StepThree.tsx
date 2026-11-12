@@ -47,7 +47,7 @@ export default function StepThree({ selectedPlan, onSelectPlan }: StepThreeProps
       credits: CATALOG.intro.credits,
       description: "credits each week",
       cadence: "/ week",
-      badge: "First Job Test",
+      badge: CATALOG.intro.name,
       note: disclosure.renewal,
       cta: "Start weekly",
     },

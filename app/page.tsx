@@ -3,7 +3,7 @@ import { cookies, headers } from "next/headers"
 import { pageMetadata } from "@/lib/seo/metadata"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { softwareApplicationLd } from "@/lib/seo/schema"
-import { PLANS, PROOF, usd } from "@/lib/seo/facts"
+import { PLANS, PROOF, count, usd } from "@/lib/seo/facts"
 import Image from "next/image"
 import Link from "next/link"
 import { SiteHeader } from "@/components/site/SiteHeader"
@@ -281,13 +281,13 @@ export default async function Home() {
       <section id="pricing" className="container mx-auto px-4 py-16">
         <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white text-center">Choose Your Plan</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-12 text-center">
-          Find the perfect plan for your design needs, from one-time projects to professional use
+          Start weekly to try it on a real job. Move to monthly when you use it on every bid.
         </p>
 
         {/* Tripwire Banner */}
         <div className="max-w-3xl mx-auto rounded-xl border border-[#343434] bg-[#191f33]/60 p-5 mb-6 text-center relative">
           <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-amber-600 text-white text-xs px-2.5 py-0.5 rounded-full font-medium">
-            First Job Test
+            {PLANS.starter.name}
           </span>
           <p className="text-sm text-muted-foreground">
             New here? Try Renderspace on a real job for <span className="font-semibold text-white">{usd(PLANS.starter.priceUsd)}</span>
@@ -334,13 +334,13 @@ export default async function Home() {
               <span className="text-3xl font-bold text-white">{usd(PLANS.professional.priceUsd)}</span>
             </div>
             <ul className="space-y-2 mb-6">
-              <li className="text-sm text-muted-foreground">500 generations / credits per month</li>
-              <li className="text-sm text-muted-foreground">4K resolution</li>
+              <li className="text-sm text-muted-foreground">{count(PLANS.professional.credits)} credits per month</li>
+              <li className="text-sm text-muted-foreground">Full-size PNG downloads</li>
               <li className="text-sm text-muted-foreground">All style options</li>
               <li className="text-sm text-muted-foreground">Use renders in proposals, marketing &amp; ads</li>
             </ul>
             <Link
-              href="/onboarding"
+              href="/onboarding?plan=professional&step=3"
               className="block text-center py-2 bg-gradient-to-r from-orange-500 to-violet-700 rounded-md text-white hover:opacity-90 transition-all"
             >
               Start with Professional
@@ -359,13 +359,13 @@ export default async function Home() {
               <span className="text-3xl font-bold text-white">{usd(PLANS.business.priceUsd)}</span>
             </div>
             <ul className="space-y-2 mb-6">
-              <li className="text-sm text-muted-foreground">6,000 generations / credits per month</li>
-              <li className="text-sm text-muted-foreground">4K resolution</li>
+              <li className="text-sm text-muted-foreground">{count(PLANS.business.credits)} credits per month</li>
+              <li className="text-sm text-muted-foreground">Full-size PNG downloads</li>
               <li className="text-sm text-muted-foreground">All style options</li>
               <li className="text-sm text-muted-foreground">Use renders in proposals, marketing &amp; ads</li>
             </ul>
             <Link
-              href="/onboarding"
+              href="/onboarding?plan=business&step=3"
               className="block text-center py-2 bg-gradient-to-r from-orange-500 to-violet-700 rounded-md text-white hover:opacity-90 transition-all"
             >
               Start with Business

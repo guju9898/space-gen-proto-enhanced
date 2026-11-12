@@ -55,7 +55,7 @@ Renderspace was built for this one job. Here is what that means in practice:
 - **It is fast.** A render typically comes back in about 30 seconds, usually 20 to 40, so you can do it on the visit.
 - **Settings carry over,** so you can change one thing at a time instead of rolling the dice on a new image.
 - **It covers the whole outdoor project:** pool, patio, outdoor kitchen, landscape and exterior concepts, plus interiors.
-- **It exports in 4K,** so the image holds up in a proposal.
+- **It downloads a full-size PNG,** sized for a proposal page or a screen.
 - **You can use it commercially.** Every paid plan may use renders in proposals, websites, social and ads.
 
 ![Concept: outdoor kitchen with a cedar pergola, polished concrete counters and a built-in pizza oven on warm-gray pavers](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-19/outdoor-kitchen-pergola-pizza-oven-phoenix-photo-to-concept-01-311176.png)
@@ -74,7 +74,7 @@ Use the right tool for the stage you are in:
 | Social media inspiration posts | Good fit | Good fit |
 | Showing a client their own yard | Risky: the site can shift | Built for this |
 | Changing one detail during the meeting | Edits can change the whole scene | Settings carry over |
-| Proposal image | Around 1K output | 4K export |
+| Proposal image | Around 1K output | Full-size PNG (about 1K), with your own photo as the base |
 
 I'd happily use ChatGPT to brainstorm landscaping styles, explore material combinations or write a rough design brief. It's an incredibly flexible tool for developing ideas. But when I'm presenting a contractor's proposal, I want a workflow specifically built around the client's property. That's where I'd use Renderspace, while still checking that the generated concept accurately represents the intended work.
 
@@ -102,7 +102,7 @@ You can ask, but edits often regenerate more than you asked for, such as lightin
 
 ### What does Renderspace cost to try?
 
-The First Job Test is $19.99 for 40 credits over 7 days. If you continue, it upgrades to Professional at $99 a month for 500 credits. Every plan is on the [Renderspace pricing page](/pricing).
+The Intro Plan is $19.99 a week for 40 credits and renews weekly until you cancel. Professional is $98 a month for 500 credits. Every plan is on the [Renderspace pricing page](/pricing).
 
 ## Close enough loses the bid. Their own yard wins it.
 
@@ -112,7 +112,7 @@ Now imagine doing that on the first visit. You snap a photo, and about 30 second
 
 That is why fast, photorealistic concepts help contractors win bids faster. Homeowners commit sooner when they can see their own space finished before the quote.
 
-Try it on one real job. The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo. No designer to wait on.
+Try it on one real job. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo. No designer to wait on.
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

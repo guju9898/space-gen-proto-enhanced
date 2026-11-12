@@ -104,7 +104,7 @@ That is what a good proposal should do: communicate the vision as clearly as the
 
 One reason I built Renderspace was to make the design conversation more flexible before it becomes an expensive commitment. Contractors shouldn't have to wait days for a revised image just because the client wants a different stone or fixture. Let them explore those choices early, document what they approve, and spend more time building instead of resolving misunderstandings.
 
-Try it on your next estimate. The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo. Every plan is on the [pricing page](/pricing).
+Try it on your next estimate. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo. Every plan is on the [pricing page](/pricing).
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

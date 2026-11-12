@@ -87,7 +87,7 @@ The important distinction is that these are visual options, not finalized specif
 
 ### Can I make an interior rendering from a phone photo?
 
-Yes. Renderspace works from a phone photo of the existing room and returns a photorealistic concept in about 30 seconds, typically 20 to 40, with 4K export.
+Yes. Renderspace works from a phone photo of the existing room and returns a photorealistic concept in about 30 seconds, typically 20 to 40.
 
 ### Is an AI rendering accurate enough to order cabinets from?
 
@@ -109,7 +109,7 @@ They stop talking about samples. They start talking about when you can start.
 
 That is the difference between a remodeler who describes the job and one who shows it. Fast photorealistic concepts help contractors win bids faster, because clients commit sooner when they see their own space finished before the quote.
 
-Try it on one real job. The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo you take on the visit.
+Try it on one real job. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo you take on the visit.
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

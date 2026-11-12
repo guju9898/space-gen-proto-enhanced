@@ -60,6 +60,6 @@ When a project needs a more formal presentation — a client board meeting, an H
 
 ## Try it on the next exterior estimate
 
-The [First Job Test](/onboarding?plan=starter) is $19.99 for 40 credits over 7 days — enough to run photo-to-concept on a real exterior job and see whether showing their own house changes how the conversation goes.
+The [Intro Plan](/onboarding?plan=starter) is $19.99 a week for 40 credits (renews weekly until you cancel) — enough to run photo-to-concept on a real exterior job and see whether showing their own house changes how the conversation goes.
 
 Exterior remodeling will always be a high-stakes, highly visible category. The contractors who reduce guesswork in the sales conversation — by letting clients see the proposal, not just hear it — often find that clarity does more work than another round of verbal description ever could.

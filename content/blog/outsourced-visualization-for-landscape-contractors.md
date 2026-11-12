@@ -38,7 +38,7 @@ Freelance rendering is a familiar stopgap: post a brief, wait for a deliverable,
 
 ### 3. Self-serve with Renderspace
 
-When you need concepts in seconds or minutes — while you are still on site or between appointments — self-serve AI fits the workflow. Upload a job-site photo, explore directions, iterate without a revision queue. The [First Job Test](/onboarding?plan=starter) is $19.99 for 40 credits over 7 days, enough to run the workflow on a real estimate before you commit to a subscription. This path is built for speed and exploration, not for formal design-review packages.
+When you need concepts in seconds or minutes — while you are still on site or between appointments — self-serve AI fits the workflow. Upload a job-site photo, explore directions, iterate without a revision queue. The [Intro Plan](/onboarding?plan=starter) is $19.99 a week for 40 credits (renews weekly until you cancel), enough to run the workflow on a real estimate before you commit to a subscription. This path is built for speed and exploration, not for formal design-review packages.
 
 ### 4. AI Render Packs (Human Polish)
 

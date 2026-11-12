@@ -3,7 +3,7 @@ import { API_RENDER_CREDIT_COST } from "@/lib/usage/creditCost"
 import { enforceCredits, type CreditEnforcementResult } from "@/lib/usage/enforceCredits"
 import { isUsableSubscriptionStatus } from "@/lib/usage/subscriptionStatus"
 
-/** Public API access starts at Professional. Intro / First Job Test is not eligible. */
+/** Public API access starts at Professional. The Intro Plan is not eligible. */
 export const API_ELIGIBLE_PLANS = new Set(["professional", "business"])
 
 export type ApiAccessResult =

@@ -59,7 +59,7 @@ You are not outsourcing because you cannot use the tool. You are outsourcing bec
 
 ## Two paths worth trying before the next late night
 
-**Self-serve on one real job.** The [First Job Test](/onboarding?plan=starter) is $19.99 for 40 credits over 7 days — enough to run the workflow on an actual estimate and see whether concept prep still belongs at 11 PM.
+**Self-serve on one real job.** The [Intro Plan](/onboarding?plan=starter) is $19.99 a week for 40 credits (renews weekly until you cancel) — enough to run the workflow on an actual estimate and see whether concept prep still belongs at 11 PM.
 
 **Hand off a packed week.** When volume is the bottleneck, not skill, an AI Render Pack scopes production before you pay and delivers concepts without you touching the tool at all.
 

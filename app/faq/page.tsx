@@ -13,7 +13,7 @@ export const metadata: Metadata = pageMetadata({
   path: "/faq",
   title: "AI Rendering FAQ: Speed, Credits and Licensing",
   description:
-    "How fast an AI rendering from a job-site photo is (about 30 seconds), how credits work, 4K export, using renders in proposals and ads, and canceling.",
+    "How fast an AI rendering from a job-site photo is (about 30 seconds), how credits work, image size, using renders in proposals and ads, and canceling.",
 })
 
 export default function FAQPage() {

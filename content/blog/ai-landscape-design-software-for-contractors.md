@@ -26,7 +26,7 @@ You are a contractor, not a hobbyist. You do not have time to test six apps to l
 
 ## What AI landscape software does well
 
-**Concept speed from real photos.** The core value is unglamorous and extremely practical. You photograph an actual job site — not a stock image — and get a photorealistic concept of what that specific space could look like. Paver patio, fire pit, layered planting, outdoor structure — whatever direction the conversation is already heading. You can see real examples in the [Renderspace gallery](/gallery). Renderspace turns a job-site photo into a concept in [about 30 seconds](/faq), typically 20 to 40, with 4K export.
+**Concept speed from real photos.** The core value is unglamorous and extremely practical. You photograph an actual job site — not a stock image — and get a photorealistic concept of what that specific space could look like. Paver patio, fire pit, layered planting, outdoor structure — whatever direction the conversation is already heading. You can see real examples in the [Renderspace gallery](/gallery). Renderspace turns a job-site photo into a concept in [about 30 seconds](/faq), typically 20 to 40.
 
 **On-site decision support.** Homeowners struggle to imagine transformation from a verbal description. They react well to something they can see. Software in this category earns its keep when it is fast enough to use *while you are still standing in the yard* with the client — which is the workflow described in [How Landscape Contractors Show Clients a Design Before Construction](/blog/show-landscape-clients-design-before-construction).
 
@@ -86,6 +86,6 @@ No. It shows a client a direction fast. Measurements, drainage, plant choices fo
 
 ## Try it on your own site
 
-The [First Job Test](/onboarding?plan=starter) is **$19.99** for **40 credits** over **7 days** — enough to run concepts from your own photos, not a demo reel. For hardscape-specific workflow detail, see [Hardscape Visualization: Turn a Job-Site Photo Into a Client-Ready Concept](/blog/hardscape-visualization-job-site-photo).
+The [Intro Plan](/onboarding?plan=starter) is **$19.99 a week** for **40 credits**, renewing weekly until you cancel — enough to run concepts from your own photos, not a demo reel. For hardscape-specific workflow detail, see [Hardscape Visualization: Turn a Job-Site Photo Into a Client-Ready Concept](/blog/hardscape-visualization-job-site-photo).
 
-When volume justifies it, [Professional ($99/month, 500 credits)](/pricing) and [Business ($349/month, 6000 credits)](/pricing) support ongoing self-serve use across your estimate calendar.
+When volume justifies it, [Professional ($98/month, 500 credits)](/pricing) and [Business ($349/month, 6000 credits)](/pricing) support ongoing self-serve use across your estimate calendar.

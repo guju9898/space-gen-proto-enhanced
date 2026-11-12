@@ -13,7 +13,7 @@ import { API_RENDER_CREDIT_COST } from "@/lib/usage/creditCost"
 export const metadata: Metadata = pageMetadata({
   path: "/pricing",
   title: `Pricing: ${usd(PLANS.starter.priceUsd)}/week, Plans From ${usd(PLANS.professional.priceUsd)}/mo`,
-  description: `First Job Test is a weekly subscription: ${usd(PLANS.starter.priceUsd)} today for ${PLANS.starter.credits} credits, then the same amount each week until you cancel. Professional is ${usd(PLANS.professional.priceUsd)}/mo for ${count(PLANS.professional.credits)} credits; Business is ${usd(PLANS.business.priceUsd)}/mo for ${count(PLANS.business.credits)} credits.`,
+  description: `The ${PLANS.starter.name} is a weekly subscription: ${usd(PLANS.starter.priceUsd)} today for ${PLANS.starter.credits} credits, then the same amount each week until you cancel. Professional is ${usd(PLANS.professional.priceUsd)}/mo for ${count(PLANS.professional.credits)} credits; Business is ${usd(PLANS.business.priceUsd)}/mo for ${count(PLANS.business.credits)} credits.`,
 })
 
 export default function PricingPage() {
@@ -34,7 +34,7 @@ export default function PricingPage() {
       <section className="container mx-auto px-4 py-8">
         <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white text-center">Choose Your Plan</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-12 text-center">
-          Find the perfect plan for your design needs, from one-time projects to professional use
+          Start weekly to try it on a real job. Move to monthly when you use it on every bid.
         </p>
 
         <SelfServePrices />
@@ -61,7 +61,7 @@ export default function PricingPage() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>• No long-term commitment — cancel anytime</li>
             <li>• Secure payment via Stripe</li>
-            <li>• Client-ready 4K exports</li>
+            <li>• Full-size PNG downloads</li>
             <li>
               • Professional and Business include{" "}
               <Link href="/developers" className="text-primary hover:underline">

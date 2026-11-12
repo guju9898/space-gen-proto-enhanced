@@ -165,7 +165,7 @@ describe("enforceCredits intro allowance", () => {
     })
     assert.equal(result.allow, false)
     assert.equal(result.reason, "intro_period_ended")
-    assert.equal(getCreditErrorMessage(result.reason), "Your 7-day First Job Test window has ended.")
+    assert.equal(getCreditErrorMessage(result.reason), "This week's Intro Plan credits have ended. They renew at your next weekly charge.")
   })
 })
 

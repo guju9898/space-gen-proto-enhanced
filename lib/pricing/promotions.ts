@@ -134,3 +134,32 @@ export function evaluatePromotion(input: {
   if (!campaign) return { eligible: false, campaignId: null, reason: "unknown" }
   return decideCampaign(campaign, input)
 }
+
+/**
+ * The one promotion the site may advertise for the Intro Plan right now, or null.
+ * Shown only when a campaign is enabled, covers the Intro Plan, names a Stripe
+ * coupon, and `now` is inside its real start and end dates. No campaign → no banner.
+ */
+export function advertisedIntroCampaign(
+  now: Date,
+  campaigns: readonly PricingCampaign[] = PRICING_CAMPAIGNS
+): PricingCampaign | null {
+  const t = now.getTime()
+  return (
+    campaigns.find((c) => {
+      const start = Date.parse(c.startsAt)
+      const end = Date.parse(c.endsAt)
+      return (
+        c.enabled &&
+        c.duration !== "forever" &&
+        c.planCodes.includes("intro") &&
+        c.stripeCouponEnv !== null &&
+        (c.percentOff !== null || c.amountOffCents !== null) &&
+        Number.isFinite(start) &&
+        Number.isFinite(end) &&
+        t >= start &&
+        t < end
+      )
+    }) ?? null
+  )
+}

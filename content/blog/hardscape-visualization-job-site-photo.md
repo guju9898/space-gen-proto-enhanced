@@ -80,4 +80,4 @@ If the job also includes planting, pool decks, or structures beyond hardscape, t
 
 Hardscape sells on permanence, which is exactly why words alone stall so many bids. Give the client something to look at on their own property, and the conversation usually gets shorter and more concrete.
 
-Test the workflow on your next hardscape walk-through with the [First Job Test](/onboarding?plan=starter) — **$19.99**, **40 credits**, **7 days** — before deciding whether it belongs in how you sell. When you are generating concepts weekly across crews, [Professional ($99/month, 500 credits)](/pricing) or [Business ($349/month, 6000 credits)](/pricing) may fit better than one-off tests alone.
+Test the workflow on your next hardscape walk-through with the [Intro Plan](/onboarding?plan=starter) — **$19.99 a week** for **40 credits** — before deciding whether it belongs in how you sell. When you are generating concepts weekly across crews, [Professional ($98/month, 500 credits)](/pricing) or [Business ($349/month, 6000 credits)](/pricing) may fit better than one-off tests alone.

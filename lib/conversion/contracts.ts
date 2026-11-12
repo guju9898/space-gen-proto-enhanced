@@ -29,8 +29,8 @@ export function onboardingPlanQuery(plan: MarketingPlanKey): CheckoutPlanCode {
 
 /**
  * Promotions that already exist in the database or server config.
- * `NEW15` in `components/marketing/IntroPlanPromo.tsx` is not in this list:
- * checkout does not apply a coupon.
+ * The Intro Plan promo card only renders a campaign from lib/pricing/promotions.ts
+ * (advertisedIntroCampaign), so it can never advertise a code checkout ignores.
  */
 export type ExistingPromotionType = "intro_offer" | "first_purchase_25" | "subscriber_15"
 

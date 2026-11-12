@@ -19,7 +19,7 @@ export default function OrderSummary({ planName, planPrice, billingPeriod }: Ord
     <div>
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="font-medium">{planName} plan</h3>
+          <h3 className="font-medium">{/plan$/i.test(planName) ? planName : `${planName} plan`}</h3>
           <p className="text-sm text-gray-400">Billed {billingPeriod}</p>
         </div>
         <span className="font-bold">{formatPrice(planPrice)}</span>

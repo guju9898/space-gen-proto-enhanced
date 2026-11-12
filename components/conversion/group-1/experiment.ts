@@ -14,7 +14,7 @@ export const HOME_EXPERIMENT_MAX_AGE_SEC = 90 * 24 * 60 * 60
 /** Existing guest Studio. Middleware sets renderspace_demo_mode when demo=true. */
 export const GUEST_STUDIO_HREF = "/studio/exterior?demo=true"
 
-/** Paid First Job Test. Price copy must come from lib/seo/facts.ts, not a new literal. */
+/** Paid Intro Plan. Price copy must come from lib/seo/facts.ts, not a new literal. */
 export const PAID_PLAN_HREF = "/onboarding?plan=starter"
 
 export type HomeVariant = "a" | "b"

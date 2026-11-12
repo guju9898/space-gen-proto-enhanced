@@ -73,7 +73,7 @@ One mistake I'd avoid in Texas is designing a front yard as if climate and archi
 
 Many free apps can turn a yard photo into a pretty idea image, and homeowners use them for inspiration. For a contractor, the bar is higher: the concept has to keep the client's house recognizable, follow the design you are actually proposing, and survive several rounds of changes in front of the client.
 
-Renderspace was built for that job. It works from a phone photo, settings carry over so you can change one thing at a time, and it exports in 4K for the proposal. For the backyard side of the same client, see [how landscape contractors show clients a design before construction](/blog/show-landscape-clients-design-before-construction), and for HOA review, [can you use AI renderings for HOA approval?](/blog/ai-renderings-for-hoa-approval)
+Renderspace was built for that job. It works from a phone photo, settings carry over so you can change one thing at a time, and it downloads a full-size image for the proposal. For the backyard side of the same client, see [how landscape contractors show clients a design before construction](/blog/show-landscape-clients-design-before-construction), and for HOA review, [can you use AI renderings for HOA approval?](/blog/ai-renderings-for-hoa-approval)
 
 Like any concept, it is for visualization and presentation, not a construction drawing or a permit set.
 
@@ -111,7 +111,7 @@ That is the advantage. Fast photorealistic concepts help contractors win bids fa
 
 I built Renderspace because I want homeowners to see more than a list of plants, materials and labor costs before making a decision. They should recognize their own house in the proposal and understand how the design improves it. And if they want different stone, fewer hedges or another planting style, exploring those changes should be simple.
 
-Try it on your next curb appeal estimate. The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo. See plans on the [pricing page](/pricing).
+Try it on your next curb appeal estimate. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo. See plans on the [pricing page](/pricing).
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

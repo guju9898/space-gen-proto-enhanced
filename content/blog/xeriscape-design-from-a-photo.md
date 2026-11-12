@@ -104,7 +104,7 @@ Fast photorealistic concepts help contractors win bids faster, because homeowner
 
 As someone building Renderspace in Central Texas, I think water-wise landscaping deserves better visual representation. A xeriscape shouldn't feel like a compromise. I'd tell any contractor quoting a conversion to show the homeowner how beautiful their yard could be, right down to the stone finishes and plant varieties, before asking them to give up the grass.
 
-Try it on your next turf conversion. The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo.
+Try it on your next turf conversion. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo.
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

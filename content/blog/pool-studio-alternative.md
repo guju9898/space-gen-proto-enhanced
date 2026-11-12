@@ -45,7 +45,7 @@ Renderspace is built for an earlier moment: the first visit, before the client h
 - **Returns a concept in about 30 seconds,** usually 20 to 40.
 - **Settings carry over,** so you can change one thing at a time: shape, coping, decking, spa placement.
 - **Covers the whole backyard:** pool, patio, outdoor kitchen, landscape and exterior concepts.
-- **Exports in 4K** for proposals, websites, social and ads on any paid plan.
+- **Full-size PNG downloads** you can use in proposals, websites, social and ads on any paid plan.
 
 ![A freeform lagoon-style swimming pool with flagstone coping, a cool-gray concrete deck, and a natural rock waterfall.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-17/freeform-pool-boulders-boulder-waterfall-atlanta-photo-to-concept-04-bed9eb.png)
 
@@ -62,7 +62,7 @@ What it does not do: it does not produce dimensioned plans, engineering, permit 
 | Construction and permit drawings | Yes, per Structure Studios | No, visualization only |
 | Runs on | Windows PC | Works from a phone photo |
 | Best moment | After the client commits to a direction | The first visit, before the quote |
-| Entry price | 30-day free trial, then subscription | $19.99 First Job Test (40 credits, 7 days) |
+| Entry price | 30-day free trial, then subscription | $19.99-a-week Intro Plan (40 credits each week) |
 
 ## Should you replace your pool design software?
 
@@ -90,7 +90,7 @@ If the homeowner prefers darker slate or wants the spa closer to the house, anot
 
 ### Is there a free alternative to Pool Studio?
 
-Pool Studio itself offers a 30-day free trial. Renderspace is not free, but the First Job Test is $19.99 for 40 credits over 7 days, so you can try it on real jobs.
+Pool Studio itself offers a 30-day free trial. Renderspace is not free, but the Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), so you can try it on real jobs.
 
 ### Can Renderspace make pool construction plans?
 
@@ -110,7 +110,7 @@ That is when the room changes. They stop asking whether and start asking how wid
 
 Then, once they are in, build the full design with the tool you already trust.
 
-Try it on your next pool lead. The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo.
+Try it on your next pool lead. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo.
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

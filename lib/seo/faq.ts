@@ -97,14 +97,14 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     id: "first-job-test",
-    q: "What is the First Job Test?",
+    q: "What is the Intro Plan?",
     a: `A recurring ${usd(PLANS.starter.priceUsd)} weekly subscription: ${PLANS.starter.credits} credits each week. ${usd(PLANS.starter.priceUsd)} is charged today, then the same amount renews every week until you cancel. It is not a one-time purchase. Cancel in billing settings before the next week.`,
     surfaces: ["faq"],
   },
   {
     id: "resolution",
     q: "What resolution are the images?",
-    a: "All plans include 4K (3840x2160) export, so your renders are print- and presentation-ready.",
+    a: "Renders download as full-size PNG files, about 1,024 to 1,248 pixels on the long side. That is sharp on screens, in proposal PDFs and on social posts. For large-format print, Human Polish delivers higher-resolution files.",
     surfaces: ["faq"],
   },
   {

@@ -108,7 +108,7 @@ Try it the other way. Before the number, show them their own yard finished: the 
 
 I built Renderspace because I believe a contractor shouldn't have to abandon a great design just because the homeowner can't afford everything immediately. Show them the complete vision, then use flexible prompts to explore what each phase could look like. A smaller first contract can still be the beginning of a much larger relationship.
 
-Try it on your next design meeting. The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo. Every plan is on the [pricing page](/pricing).
+Try it on your next design meeting. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo. Every plan is on the [pricing page](/pricing).
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

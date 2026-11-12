@@ -23,7 +23,7 @@ export function absoluteBlogUrl(path: string): string {
   return `${origin}${normalized}`
 }
 
-/** First Job Test / self-serve onboarding */
+/** Intro Plan / self-serve onboarding */
 export const BLOG_CTA_SELF_SERVE = "/onboarding?plan=starter"
 export const BLOG_CTA_PRICING = "/pricing"
 export const BLOG_CTA_HUMAN_POLISH = "/human-polish"

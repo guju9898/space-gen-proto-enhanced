@@ -63,7 +63,7 @@ Pool projects tend to grow into decking, a patio, an outdoor kitchen and landsca
 
 ### Is the output good enough for the proposal?
 
-Renderspace exports in 4K, and every paid plan may use renders in proposals, websites, social and ads. Plan details are on the [pricing page](/pricing).
+Renderspace downloads full-size PNG files, and every paid plan may use renders in proposals, websites, social and ads. Plan details are on the [pricing page](/pricing).
 
 People with boots on the ground know that the closing conversation can't always rely on logic or verbal promises. Homeowners need something that engages their emotions, and fulfills their hopes of having a more comfortable home. Today's world is a visual world, we are constantly shown images on social media that intrigue us. Why not then use visual proposals to help close deals, especially with the cost now lower than it's ever been? 
 
@@ -105,7 +105,7 @@ It is accurate enough to agree on a direction: shape, placement, materials and o
 
 ### What does it cost to try?
 
-The First Job Test is $19.99 for 40 credits over 7 days. Professional is $99 a month for 500 credits if you continue.
+The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel). Professional is $98 a month for 500 credits if you continue.
 
 ### Can I use the renderings in my marketing?
 
@@ -121,7 +121,7 @@ That is the moment the conversation turns. They stop asking "how much" in the ab
 
 Fast, photorealistic concepts help you win bids faster. Homeowners commit sooner when they see their own space finished before they see the quote.
 
-You do not have to bet much to find out. The First Job Test is $19.99 for 40 credits over 7 days, and it works from the phone already in your pocket. Take it to your next pool appointment and see what happens when the client can see it.
+You do not have to bet much to find out. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from the phone already in your pocket. Take it to your next pool appointment and see what happens when the client can see it.
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

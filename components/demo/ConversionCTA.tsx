@@ -12,7 +12,7 @@ export function ConversionCTA() {
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
-            href="/onboarding"
+            href="/onboarding?plan=intro"
             className="inline-flex items-center justify-center bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 transition-all text-white px-6 py-3 rounded-md font-medium w-full sm:w-auto"
           >
             Start Intro Plan

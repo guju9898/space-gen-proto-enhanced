@@ -35,7 +35,7 @@ Here is how the main options compare:
 | Option | Typical cost | Typical wait | Best for |
 | --- | --- | --- | --- |
 | Outsourced 3D render (studio or freelancer) | About $600-$1,500 per exterior image (Cedreo) | Days, more with revisions | Large or complex projects, marketing images |
-| Renderspace self-serve | $99/mo Professional (500 credits), or a $19.99 First Job Test | About 30 seconds per render | Showing the client their own yard on the visit |
+| Renderspace self-serve | $98/mo Professional (500 credits), or the $19.99-a-week Intro Plan | About 30 seconds per render | Showing the client their own yard on the visit |
 | Renderspace Human Polish | 25 concepts $399 ($349 on a first purchase) | 24-48 hours | Teams that want concepts made for them |
 
 Full plan details are on the [pricing page](/pricing).
@@ -82,7 +82,7 @@ The rendering won't establish exact grading or construction costs, but it can he
 
 ### How much does a 3D rendering of a backyard cost?
 
-Outsourced exterior renders commonly run hundreds to over a thousand dollars per image, depending on complexity and revisions. A Renderspace concept from a phone photo uses credits on a plan starting with a $19.99 First Job Test.
+Outsourced exterior renders commonly run hundreds to over a thousand dollars per image, depending on complexity and revisions. A Renderspace concept from a phone photo uses credits on a plan starting with the $19.99-a-week Intro Plan.
 
 ### Are cheap renderings worth it?
 
@@ -102,7 +102,7 @@ Now picture taking a photo on the visit and, about 30 seconds later, showing the
 
 That is why fast photorealistic concepts help contractors win bids faster. Homeowners commit sooner when they see their own space finished before the quote.
 
-The cost of finding out is small. The First Job Test is $19.99 for 40 credits over 7 days, and all you need is the phone in your pocket.
+The cost of finding out is small. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and all you need is the phone in your pocket.
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

@@ -32,7 +32,7 @@ export const CATALOG: Record<PlanCode, CatalogPlan> = {
   intro: {
     code: "intro",
     factsKey: "starter",
-    name: "First Job Test",
+    name: "Intro Plan",
     amountCents: 1999,
     credits: 40,
     interval: "week",

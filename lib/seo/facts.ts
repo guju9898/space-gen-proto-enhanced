@@ -72,7 +72,8 @@ export type Plan = {
   /** Stripe billing interval. Intro is a week. Professional and Business are a month. */
   period: "week" | "month"
   recurring: true
-  resolution: "4K"
+  /** Measured 2026-11-11 on production renders: 1024x1024 to 1248x832 PNG. */
+  resolution: "Full-size PNG"
   /** Usage rights for renders made on this plan. */
   license: string
 }
@@ -86,7 +87,7 @@ function planFromCatalog(key: PlanKey): Plan {
     credits: source.credits,
     period: source.interval,
     recurring: true,
-    resolution: "4K",
+    resolution: "Full-size PNG",
     license: USAGE_RIGHTS,
   }
 }

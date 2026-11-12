@@ -105,7 +105,7 @@ That is often where the bid turns. You have already shown them the finished spac
 
 Fast photorealistic concepts help contractors win bids faster, because homeowners commit sooner when they can see their own space finished before the quote.
 
-The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo. Use it on your next bid.
+The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo. Use it on your next bid.
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

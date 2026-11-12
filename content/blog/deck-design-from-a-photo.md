@@ -107,7 +107,7 @@ Every paid Renderspace plan may use renders in proposals, websites, social and a
 
 ### Is it high enough quality for a printed proposal?
 
-Renderspace exports in 4K, which holds up in a proposal PDF or a printed leave-behind.
+Renderspace downloads a full-size PNG that works in a proposal PDF or a letter-size leave-behind.
 
 ## The board they pick is the one they can see on their own house
 
@@ -119,7 +119,7 @@ That is why fast photorealistic concepts help contractors win bids faster. Homeo
 
 I built Renderspace for the moment before a contractor knows whether a homeowner will buy. A full design presentation can be worth the effort later, but comparing deck boards shouldn't require one. Take a photo, describe the exact materials and railing, and show what could work on that house.
 
-Run it on one real deck lead. The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo.
+Run it on one real deck lead. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo.
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

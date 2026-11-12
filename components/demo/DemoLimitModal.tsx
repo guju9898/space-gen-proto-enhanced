@@ -26,7 +26,7 @@ export function DemoLimitModal({ open, onClose }: DemoLimitModalProps) {
         </p>
         <div className="flex flex-col sm:flex-row gap-3 mt-4">
           <Button asChild className="flex-1 bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 text-white">
-            <Link href="/onboarding">Start Intro Plan</Link>
+            <Link href="/onboarding?plan=intro">Start Intro Plan</Link>
           </Button>
           <Button asChild variant="outline" className="flex-1">
             <Link href="/pricing">View Pricing</Link>

@@ -93,7 +93,7 @@ Yes. Label concepts as concepts and keep finished-project photos separate. It ke
 
 ### How fast can I make marketing images?
 
-A Renderspace render takes about 30 seconds, and it works from a phone photo. You can export in 4K.
+A Renderspace render takes about 30 seconds, and it works from a phone photo. Each render downloads as a full-size PNG.
 
 ### What if I would rather not make them myself?
 
@@ -109,6 +109,6 @@ The same picture does the selling in the field: when homeowners see their own sp
 
 I built Renderspace because I don't think contractors should have to wait for another completed project just to communicate what they're capable of creating. Your marketing should reflect the work you want to win, not only the jobs you've already photographed. With flexible prompts, you can explore specific styles and materials while keeping those concepts clearly separate from your finished portfolio.
 
-The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo. Make a week of concepts and see what your feed looks like. Every plan is on the [pricing page](/pricing).
+The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo. Make a week of concepts and see what your feed looks like. Every plan is on the [pricing page](/pricing).
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)

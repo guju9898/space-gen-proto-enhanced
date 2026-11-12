@@ -39,7 +39,7 @@ The workflow mirrors other hardscape visualization jobs, with outdoor-kitchen-sp
 
 1. **Photograph the footprint** — side yard, patio extension, or existing slab you are building from.
 2. **Upload and set direction** — grill island, counter run, pergola or shade structure, seating adjacency.
-3. **Generate a concept in about 30 seconds** — typically 20 to 40, with [4K export](/faq).
+3. **Generate a concept in about 30 seconds** — typically 20 to 40, as a [full-size PNG](/faq).
 4. **Iterate on-site** — counter material, layout mirror, with or without overhead structure — while the client reacts in real space.
 
 Because the render uses their property, not a catalog scene, the conversation shifts from abstract features to concrete preferences: "Can we move the sink to this side?" instead of "I'm not sure I need all that."
@@ -91,6 +91,6 @@ No. It is a concept for client presentation. Gas, electrical, structural and cod
 
 Most outdoor kitchen bids that quietly downscope were never fully shown — only described. Closing the picturing gap early keeps the conversation about the project the client actually wanted.
 
-Run your next estimate with the [First Job Test](/onboarding?plan=starter) — **$19.99**, **40 credits**, **7 days** — and compare how the client engages when they can see their kitchen on their patio instead of assembling it from your words.
+Run your next estimate with the [Intro Plan](/onboarding?plan=starter) — **$19.99 a week** for **40 credits** — and compare how the client engages when they can see their kitchen on their patio instead of assembling it from your words.
 
-If outdoor kitchens are a regular line item for your company, ongoing [Professional ($99/month, 500 credits)](/pricing) or [Business ($349/month, 6000 credits)](/pricing) plans keep the same workflow available across estimators without treating every concept like a one-off design purchase.
+If outdoor kitchens are a regular line item for your company, ongoing [Professional ($98/month, 500 credits)](/pricing) or [Business ($349/month, 6000 credits)](/pricing) plans keep the same workflow available across estimators without treating every concept like a one-off design purchase.

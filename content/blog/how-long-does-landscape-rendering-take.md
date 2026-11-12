@@ -112,7 +112,7 @@ That is the meeting where the decision starts. While your competitors are still 
 
 Fast, photorealistic concepts help contractors win bids faster, because homeowners commit sooner when they see their own space finished before the quote.
 
-The risk is small. The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo. Use it on your next walkthrough and see how the conversation changes.
+The risk is small. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo. Use it on your next walkthrough and see how the conversation changes.
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

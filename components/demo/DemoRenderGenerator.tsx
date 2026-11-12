@@ -210,7 +210,7 @@ export function DemoRenderGenerator() {
                   You&apos;ve reached the demo limit. Create a free account to continue generating renders.
                 </p>
                 <Button asChild className="bg-gradient-to-r from-orange-500 to-violet-700 hover:opacity-90 text-white">
-                  <Link href="/onboarding">Start Intro Plan</Link>
+                  <Link href="/onboarding?plan=intro">Start Intro Plan</Link>
                 </Button>
               </div>
             )}

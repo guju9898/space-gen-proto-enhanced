@@ -61,7 +61,7 @@ Seeing what they would be paying for. Asking for a fee on a promise is a hard co
 
 That is where a fast concept fits. On the first visit, you take a phone photo and generate a photorealistic concept of their real yard in about 30 seconds with a tool like Renderspace. It is not the full design. It is a preview that shows the direction and proves you can see what they cannot yet.
 
-Then the fee conversation changes from "pay me to find out" to "you have seen the direction; the design makes it buildable." Plans start with the $19.99 First Job Test; see [Renderspace pricing](/pricing).
+Then the fee conversation changes from "pay me to find out" to "you have seen the direction; the design makes it buildable." Plans start with the $19.99-a-week Intro Plan; see [Renderspace pricing](/pricing).
 
 ![A fire pit lounge with four teak chairs and a granite fire pit, set on light gray pavers in front of a modern house.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-19/fire-pit-seating-granite-fire-pit-charlotte-photo-to-concept-08-68a57a.png)
 
@@ -103,6 +103,6 @@ That is the quiet power of a fast, photorealistic concept. It helps contractors 
 
 I built Renderspace because I don't think contractors should have to choose between spending hours on an expensive presentation and showing a homeowner nothing but an estimate. There's room in between. A quick, flexible concept lets you demonstrate your vision without giving away the detailed design work that makes a project buildable.
 
-Try it on your next consultation. The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo.
+Try it on your next consultation. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo.
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)

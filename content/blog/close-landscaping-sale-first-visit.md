@@ -107,6 +107,6 @@ That is why fast, photorealistic concepts help contractors win bids faster. Home
 
 I built Renderspace around that moment when a homeowner is deciding whether they trust your vision. Contractors shouldn't have to wait days to show what they're proposing. Give them a way to visualize their own yard, adjust specific details and feel confident about the project before you leave.
 
-Try it on your next first visit. The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo. If you would rather have the concepts done for you, Human Polish render packs are there for that.
+Try it on your next first visit. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo. If you would rather have the concepts done for you, Human Polish render packs are there for that.
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)

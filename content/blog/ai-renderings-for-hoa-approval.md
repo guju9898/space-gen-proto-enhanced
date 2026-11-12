@@ -67,7 +67,7 @@ I think contractors sometimes treat HOA approval as an administrative hurdle ins
 
 For house-facing changes like siding or paint, see [exterior renovation visualization for contractors](/blog/exterior-renovation-visualization-for-contractors), and browse more street-view concepts in the [gallery](/gallery).
 
-With Renderspace, a concept typically comes back in about 30 seconds from a phone photo, and settings carry over, so you can change one material at a time to match the spec sheet. Renders export in 4K for a clean printout.
+With Renderspace, a concept typically comes back in about 30 seconds from a phone photo, and settings carry over, so you can change one material at a time to match the spec sheet. Renders download as full-size PNG files that print cleanly on a letter-size page.
 
 If you would rather have a set of concepts made for you, [Human Polish](/human-polish) render packs and Build-Ready Essentials 2D or 3D plans are available for presentation and layout. They are visualization only, not permit or construction drawings.
 
@@ -103,7 +103,7 @@ Picture your client's next board meeting. Instead of a site plan the members squ
 
 That same picture works on the homeowner first. When they see their own space finished before the quote, they commit sooner. Fast photorealistic concepts help contractors win bids faster, and they make the paperwork that follows easier to explain.
 
-You can try it on one real job for very little. The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo you take on the visit.
+You can try it on one real job for very little. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo you take on the visit.
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

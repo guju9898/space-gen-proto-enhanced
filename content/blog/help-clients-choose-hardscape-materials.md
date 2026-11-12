@@ -100,6 +100,6 @@ A proposal should communicate the vision as clearly as the price, and the vision
 
 I built Renderspace around these small decisions because they can hold up an entire job. A homeowner shouldn't need to wait days to see whether limestone or slate suits their house. Let them compare a specific finish in their actual space, change their mind, and move forward with greater confidence.
 
-Try it on your next material conversation. The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo.
+Try it on your next material conversation. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo.
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)

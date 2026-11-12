@@ -45,7 +45,7 @@ None of these replaces architects, engineers, or permit professionals. Visualiza
 | **Intended use** | Early client alignment, on-site selling, fast exploration | Volume concept production; client and HOA/design-review presentation support | Custom production for high-stakes or fully bespoke visual needs |
 | **Self-serve vs human-produced** | Fully self-serve | AI Render Packs: team-generated concepts. Build-Ready: human-produced plans and views | Human-produced throughout |
 | **Project stage** | Discovery and estimate | Mid-pipeline batch work or formal presentation prep | Any stage; often detailed design or marketing-quality production |
-| **Pricing structure** | Subscription / [First Job Test](/onboarding?plan=starter) at $19.99 (40 credits, 7 days). See [pricing](/pricing) | AI Render Packs: $399 / $699 / $1,199 (25 / 50 / 100 concepts; first 25-pack at $349). Build-Ready: $599 (2D) / $899 (3D). See [Human Polish](/human-polish) | Quoted per project; varies by scope and studio |
+| **Pricing structure** | Subscription / [Intro Plan](/onboarding?plan=starter) at $19.99 a week (40 credits each week). See [pricing](/pricing) | AI Render Packs: $399 / $699 / $1,199 (25 / 50 / 100 concepts; first 25-pack at $349). Build-Ready: $599 (2D) / $899 (3D). See [Human Polish](/human-polish) | Quoted per project; varies by scope and studio |
 
 Nobody wins every row. That is the point.
 

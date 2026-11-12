@@ -101,7 +101,7 @@ export default function PaymentForm({ planName, planPrice, billingPeriod, onClos
           {/* Payment Information Section */}
           <div className="flex-1 p-6 md:p-8">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold">{planName} plan</h2>
+              <h2 className="text-xl font-bold">{/plan$/i.test(planName) ? planName : `${planName} plan`}</h2>
               <button onClick={() => onClose()} className="text-gray-400 hover:text-white transition-colors" aria-label="Close">
                 <X size={20} />
               </button>

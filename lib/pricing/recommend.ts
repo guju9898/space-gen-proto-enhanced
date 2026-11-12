@@ -46,7 +46,7 @@ export function recommendPlan(input: RecommendInput): PlanRecommendation {
     return {
       plan: "intro",
       rendersPerMonth,
-      reason: `This estimate is ${rendersPerMonth.toLocaleString("en-US")} renders a month. The First Job Test includes ${CATALOG.intro.credits} credits each week.`,
+      reason: `This estimate is ${rendersPerMonth.toLocaleString("en-US")} renders a month. The ${CATALOG.intro.name} includes ${CATALOG.intro.credits} credits each week.`,
       serviceNote,
     }
   }

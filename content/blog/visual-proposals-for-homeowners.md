@@ -117,7 +117,7 @@ Now think about the contractor bidding against you. Their proposal says "renderi
 
 You do not need a design team or a new process to try this. You need one photo from your next site visit.
 
-The First Job Test is $19.99 for 40 credits over 7 days. It works from a phone photo, and each concept takes about 30 seconds. Use it on one real proposal this week and see what the homeowner says.
+The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel). It works from a phone photo, and each concept takes about 30 seconds. Use it on one real proposal this week and see what the homeowner says.
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

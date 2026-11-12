@@ -337,7 +337,7 @@ export default function ProfilePage() {
           </CardTitle>
           <CardDescription>
             {profile?.current_plan === "intro"
-              ? "Your First Job Test credits for this 7-day window"
+              ? "Your Intro Plan credits for this week"
               : "Your credit allocation"}
           </CardDescription>
         </CardHeader>

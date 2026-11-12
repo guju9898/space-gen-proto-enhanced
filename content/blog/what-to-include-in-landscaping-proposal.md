@@ -51,7 +51,7 @@ I think contractors skip visuals because they've been conditioned to associate g
 
 Put it first, right after the cover note. The picture tells the homeowner what they are buying; the scope and price explain it. When the price comes after the picture, it reads as the cost of something they already want, not a number to compare.
 
-With an AI rendering tool, the visual no longer has to be expensive. You take a phone photo on the site visit and generate a photorealistic concept of their yard with the project in place. With Renderspace it typically takes about 30 seconds, exports in 4K for a clean proposal page, and every paid plan may use renders in proposals.
+With an AI rendering tool, the visual no longer has to be expensive. You take a phone photo on the site visit and generate a photorealistic concept of their yard with the project in place. With Renderspace it typically takes about 30 seconds, downloads a full-size image for the proposal page, and every paid plan may use renders in proposals.
 
 ![A two-story house with a bluestone walkway bordered by red brick, flanked by white shrub roses and boxwood.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-19/front-yard-curb-appeal-boxwood-spheres-in-planters-dallas-photo-to-concept-05-0cf523.png)
 
@@ -99,7 +99,7 @@ That is what a fast photorealistic concept does for a proposal. It helps contrac
 
 I built Renderspace because I want every homeowner to understand exactly what their contractor is proposing before they sign. Not just the price, but the actual vision. If they want different stone, specific plant varieties or another layout, they should be able to explore those choices while the conversation is happening.
 
-Try it on your next proposal. The First Job Test is $19.99 for 40 credits over 7 days, and it works from a phone photo. See every plan on the [pricing page](/pricing).
+Try it on your next proposal. The Intro Plan is $19.99 a week for 40 credits (renews weekly until you cancel), and it works from a phone photo. See every plan on the [pricing page](/pricing).
 
 [Try 40 credits for $19.99](/onboarding?plan=starter)
 

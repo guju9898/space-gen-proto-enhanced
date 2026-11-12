@@ -4,6 +4,7 @@ import { useEffect, type ReactNode } from "react"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
 import { trackHomepageEvent } from "./analytics"
+import { CATALOG } from "@/lib/pricing/catalog"
 import {
   GUEST_STUDIO_HREF,
   PAID_PLAN_HREF,
@@ -105,7 +106,7 @@ export function HomeClosingCta({
             Visualize My Next Project <ChevronRight className="w-4 h-4" aria-hidden="true" />
           </HomeCtaLink>
           <HomeCtaLink href={PAID_PLAN_HREF} variant={variant} destination="paid_plan" className={secondaryClass}>
-            Start the First Job Test
+            Start the {CATALOG.intro.name}
           </HomeCtaLink>
         </div>
       </>
@@ -120,7 +121,7 @@ export function HomeClosingCta({
         before you leave.
       </p>
       <HomeCtaLink href={PAID_PLAN_HREF} variant={variant} destination="paid_plan" className={primaryClass}>
-        Start the First Job Test <ChevronRight className="w-4 h-4" aria-hidden="true" />
+        Start the {CATALOG.intro.name} <ChevronRight className="w-4 h-4" aria-hidden="true" />
       </HomeCtaLink>
     </>
   )

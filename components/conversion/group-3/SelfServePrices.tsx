@@ -57,7 +57,7 @@ export function SelfServePrices() {
     <>
       <div className="max-w-3xl mx-auto rounded-xl border border-[#343434] bg-[#191f33]/60 p-5 mb-6 text-center relative">
         <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-amber-600 text-white text-xs px-2.5 py-0.5 rounded-full font-medium">
-          First Job Test
+          {intro.name}
         </span>
         <p className="text-sm text-muted-foreground">
           Charged today: <span className="font-semibold text-white">{moneyFromCents(disclosure.chargedTodayCents)}</span>
@@ -76,7 +76,7 @@ export function SelfServePrices() {
         </Link>
       </div>
 
-      <BillingIntervalToggle value={interval} annualAvailable={annualReady} onChange={setInterval} />
+      {annualReady && <BillingIntervalToggle value={interval} annualAvailable={annualReady} onChange={setInterval} />}
 
       <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-10">
         {(["professional", "business"] as const).map((code) => {
@@ -100,7 +100,7 @@ export function SelfServePrices() {
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="text-sm text-muted-foreground">{plan.credits.toLocaleString("en-US")} credits per month</li>
-                <li className="text-sm text-muted-foreground">4K resolution</li>
+                <li className="text-sm text-muted-foreground">Full-size PNG downloads</li>
                 <li className="text-sm text-muted-foreground">All style options</li>
                 <li className="text-sm text-muted-foreground">Use renders in proposals, marketing &amp; ads</li>
               </ul>
