@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import Replicate from "replicate"
 import { isString, isObject } from "@/lib/types/typeGuards"
+import { isInternalCall } from "@/lib/api/internalCall"
 
 export const runtime = "nodejs"
 
@@ -11,6 +12,11 @@ function getReplicateClient(): Replicate | null {
 }
 
 export async function POST(request: Request) {
+  // Server-to-server only (called by /api/demo-render, which enforces the demo limit).
+  // Open to the internet this route ran paid renders with no account or limit.
+  if (!isInternalCall(request)) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 })
+  }
   try {
     const replicate = getReplicateClient()
     if (!replicate) {

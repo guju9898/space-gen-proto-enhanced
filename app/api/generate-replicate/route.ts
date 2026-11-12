@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server"
+import { NextResponse, after } from "next/server"
+import { recordGuestRender } from "@/lib/demo/guestRenders"
 import Replicate from "replicate"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { renderCreditCost } from "@/lib/usage/creditCost"
@@ -143,6 +144,11 @@ export async function POST(req: Request) {
       }
       const newRendersUsed = await incrementDemoUsage(supabaseDemo, email, ip, cookieId)
       const rendersRemaining = Math.max(0, DEMO_LIMIT - newRendersUsed)
+      // Keep the render so it can move into the account at signup (R12).
+      const demoSource = bodyTyped.imageUrl
+      after(() =>
+        recordGuestRender(supabaseDemo, { cookieId, studioType: "interior", imageUrl: generatedImageUrl, sourceImageUrl: demoSource }).then(() => undefined)
+      )
       return NextResponse.json({
         imageUrl: generatedImageUrl,
         rendersRemaining,

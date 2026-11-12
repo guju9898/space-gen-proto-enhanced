@@ -5,6 +5,7 @@ import { ImageOff, Info } from "lucide-react"
 import { useCameraControlsHidden } from "@/components/Studio/useFieldPresentation"
 import { useStudioV2 } from "@/components/Studio/StudioV2Context"
 import { trackStudioEvent } from "@/components/Studio/analytics"
+import { PhotoCheck, PhotoCoach } from "@/components/Studio/OnboardingBits"
 
 /** Hides its children (camera/composition controls) in v2 photo mode until the user shows them. */
 export function CameraControlsGate({ children }: { children: ReactNode }) {
@@ -26,16 +27,21 @@ export function PhotoStepFooter({
   noPhotoMode,
   onNoPhotoModeChange,
   allowNoPhoto = true,
+  photoUrl = null,
 }: {
   hasPhoto: boolean
   noPhotoMode: boolean
   onNoPhotoModeChange?: (next: boolean) => void
   allowNoPhoto?: boolean
+  /** The uploaded photo, for the soft photo check (spec F step 2). */
+  photoUrl?: string | null
 }) {
   const v2 = useStudioV2()
   if (!v2.enabled) return null
   return (
     <div className="space-y-2 text-xs text-muted-foreground">
+      {!hasPhoto && !noPhotoMode && <PhotoCoach studio={v2.studio} />}
+      {hasPhoto && <PhotoCheck photoUrl={photoUrl} studio={v2.studio} />}
       <p className="flex gap-2">
         <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
         <span>

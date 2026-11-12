@@ -52,6 +52,7 @@ import type { Project } from "@/lib/projects/types"
 import { PhotoDropArea } from "@/components/Studio/PhotoDropArea"
 import { useStudioV2Flag } from "@/components/Studio/StudioV2Context"
 import { CameraControlsGate, PhotoStepFooter } from "@/components/Studio/StudioV2Bits"
+import { DemoRendersLeft, RenderCostLine } from "@/components/Studio/OnboardingBits"
 import { trackStudioEvent } from "@/components/Studio/analytics"
 
 const gardenTypeOptions = [
@@ -400,7 +401,7 @@ export default function LandscapeStudioPage() {
               <p>Avoid blurry, dark, or heavily compressed images.</p>
             </div>
           </div>
-                        <PhotoStepFooter hasPhoto={hasSitePhoto} noPhotoMode={noPhotoMode} onNoPhotoModeChange={setNoPhotoMode} />
+                        <PhotoStepFooter photoUrl={imageState?.previewUrl ?? imageState?.uploadedUrl ?? null} hasPhoto={hasSitePhoto} noPhotoMode={noPhotoMode} onNoPhotoModeChange={setNoPhotoMode} />
             </FormSection>
   )
 
@@ -952,18 +953,16 @@ export default function LandscapeStudioPage() {
           )}
           
           {demoMode ? (
-            <div className="pt-4 text-sm text-muted-foreground">
-              You have <span className="font-medium text-foreground">{rendersRemaining}</span> demo render{rendersRemaining !== 1 ? "s" : ""} remaining.
-            </div>
+            <DemoRendersLeft remaining={rendersRemaining} />
           ) : (
             <div className="pt-4 space-y-2">
               <StudioCreditBadge remainingOverride={creditsRemaining} />
-              <div className="text-xs text-muted-foreground">
+              {!studioV2 && (<><div className="text-xs text-muted-foreground">
                 This render uses {RENDER_CREDIT_COST} credit
               </div>
               <div className="text-xs text-muted-foreground italic">
                 Credits are only deducted after a successful render appears.
-              </div>
+              </div></>)}
             </div>
           )}
 
@@ -997,6 +996,7 @@ export default function LandscapeStudioPage() {
                     ? "Demo limit reached"
                     : "Render Design"}
             </Button>
+            <RenderCostLine demoMode={demoMode} demoRemaining={rendersRemaining} credits={creditsRemaining} cost={RENDER_CREDIT_COST} />
           </div>
         </div>
       </div>
@@ -1122,7 +1122,11 @@ export default function LandscapeStudioPage() {
                 .catch(() => {})
             }}
           />
-          <DemoLimitModal open={showLimitModal} onClose={() => setShowLimitModal(false)} />
+          <DemoLimitModal
+            open={showLimitModal}
+            onClose={() => setShowLimitModal(false)}
+            renders={[currentRender, ...latestRenders].filter((r): r is string => Boolean(r))}
+          />
         </>
       )}
     </>

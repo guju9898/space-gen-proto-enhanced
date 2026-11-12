@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react"
 import { usePathname } from "next/navigation"
 import { studioKindFromPath } from "@/lib/studio/lastStudio"
 import { trackStudioEvent } from "@/components/Studio/analytics"
+import { ReadResultHint } from './OnboardingBits';
 
 interface StudioPreviewProps {
   currentRender: string | null
@@ -128,6 +129,7 @@ export function StudioPreview({
         <div className="space-y-3">
           {rendering && <RenderStatus isRendering={true} />}
           {currentRender && !rendering && <RenderStatus isRendering={false} />}
+          <ReadResultHint hasRender={Boolean(currentRender) && !rendering} />
           <div className="aspect-[4/3] rounded-md overflow-hidden bg-muted">
             {currentRender ? (
               <img

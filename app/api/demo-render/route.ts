@@ -1,6 +1,8 @@
-import { NextResponse } from "next/server"
+import { NextResponse, after } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { isString, isObject } from "@/lib/types/typeGuards"
+import { INTERNAL_CALL_HEADER, internalCallToken } from "@/lib/api/internalCall"
+import { recordGuestRender } from "@/lib/demo/guestRenders"
 
 export const runtime = "nodejs"
 
@@ -169,7 +171,7 @@ export async function POST(request: Request) {
 
     const genRes = await fetch(`${origin}/api/generate-interior`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", [INTERNAL_CALL_HEADER]: internalCallToken() ?? "" },
       body: JSON.stringify({
         prompt: promptText,
         image: imageInput,
@@ -228,6 +230,10 @@ export async function POST(request: Request) {
     }
 
     const rendersRemaining = Math.max(0, DEMO_LIMIT - newRendersUsed)
+
+    // Keep the render so it can move into the account at signup (R12).
+    const demoSource = isString(imageInput) && imageInput.startsWith("https://") ? imageInput : null
+    after(() => recordGuestRender(supabase, { cookieId, studioType: "interior", imageUrl, sourceImageUrl: demoSource }).then(() => undefined))
 
     return NextResponse.json({
       imageUrl,
