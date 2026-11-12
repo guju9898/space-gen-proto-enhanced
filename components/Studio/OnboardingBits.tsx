@@ -246,10 +246,13 @@ export function GuideButton({ className }: { className?: string }) {
 
 /** Demo counter with the carry-over line (true now that /api/demo/claim exists). */
 export function DemoRendersLeft({ remaining }: { remaining: number }) {
+  const v2 = useStudioV2()
   const { main, carry } = demoRendersLeftText(remaining)
+  // v2 shows the count in the cost line under Render; keep only the carry-over line here.
+  if (v2.enabled && !carry) return null
   return (
     <div className="pt-4 text-sm text-muted-foreground">
-      <p>{main}</p>
+      {!v2.enabled && <p>{main}</p>}
       {carry && <p className="mt-1 text-xs">{carry}</p>}
     </div>
   )
