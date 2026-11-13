@@ -61,7 +61,7 @@ I think contractors sometimes treat HOA approval as an administrative hurdle ins
 - **Show two compliant options** if the guidelines are tight, so the board can choose instead of reject.
 - **Label it honestly:** "Concept rendering for visualization. Final dimensions per site plan."
 
-![A bluestone walkway with a red brick border leads to a house with a low stone seat wall and white shrub roses.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-17/front-yard-curb-appeal-stone-seat-wall-san-antonio-concept-09-05107d.png)
+![Concept: bluestone walkway with red brick border, low stone seat wall and white shrub roses at the front door](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-17/front-yard-curb-appeal-stone-seat-wall-san-antonio-concept-09-05107d.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/front-yard-curb-appeal-stone-seat-wall-san-antonio-concept-09-05107d)
 

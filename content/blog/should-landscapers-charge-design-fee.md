@@ -44,7 +44,7 @@ Free design is smart only when you know exactly what you're giving away. A fast 
 
 ## How do you credit a design fee toward the project?
 
-The common structure is simple: the client pays for the design up front, and if they hire you to build it, the fee is credited back against the installation. Borst describes doing exactly that, with the design cost built into the project estimate so the company still recovers its time.
+The common structure is simple: the client pays for the design up front, and if they hire you to build it, the fee is credited back against the installation. Borst describes doing exactly that, with the design cost built into the project estimate so the company still recovers its time. Write the credit into the [landscaping proposal](/blog/what-to-include-in-landscaping-proposal) as its own line so the homeowner sees it next to the price.
 
 A few practical choices to make before you start:
 
@@ -63,7 +63,7 @@ That is where a fast concept fits. On the first visit, you take a phone photo an
 
 Then the fee conversation changes from "pay me to find out" to "you have seen the direction; the design makes it buildable." Plans start with the $19.99-a-week Intro Plan; see [Renderspace pricing](/pricing).
 
-![A fire pit lounge with four teak chairs and a granite fire pit, set on light gray pavers in front of a modern house.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-19/fire-pit-seating-granite-fire-pit-charlotte-photo-to-concept-08-68a57a.png)
+![Concept: fire pit lounge with four teak chairs and a granite fire pit on light gray pavers](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-19/fire-pit-seating-granite-fire-pit-charlotte-photo-to-concept-08-68a57a.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/fire-pit-seating-granite-fire-pit-charlotte-photo-to-concept-08-68a57a)
 

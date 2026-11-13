@@ -51,7 +51,7 @@ With an AI rendering tool, you can take a phone photo of the space and show a ph
 
 It is a visualization, not a construction drawing. Dimensions, structure and permits still come from your normal process.
 
-![A kitchen with deep green shaker cabinets, honed black soapstone counters and a soft white zellige tile backsplash.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-27/kitchen-remodel-soapstone-counters-houston-photo-to-concept-18-63e3bb.png)
+![Concept: kitchen remodel with deep green shaker cabinets, honed soapstone counters and white zellige backsplash](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-27/kitchen-remodel-soapstone-counters-houston-photo-to-concept-18-63e3bb.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/kitchen-remodel-soapstone-counters-houston-photo-to-concept-18-63e3bb)
 

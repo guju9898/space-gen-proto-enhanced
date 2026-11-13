@@ -2,7 +2,7 @@
 slug: hardscape-visualization-job-site-photo
 title: "Hardscape Visualization: Turn a Job-Site Photo Into a Client-Ready Concept"
 seoTitle: Hardscape Visualization for Contractors | Renderspace
-description: How hardscape contractors turn a job-site photo into a client-ready visual concept in minutes — and where engineering and permits still require separate professionals.
+description: "Hardscape visualization for contractors: turn a job-site photo into a client-ready patio, wall or paver concept, and know where engineering still applies."
 excerpt: Hardscape sells on permanence, which makes it hard to sell with words alone. A photo-to-concept workflow on-site closes the picturing gap without replacing engineering.
 category: Use case
 datePublished: 2026-08-11
