@@ -38,6 +38,8 @@ export default async function GalleryPage() {
               alt="Concept rendering of a modern limestone house with olive trees, terracotta urns and a gravel front courtyard"
               width={600}
               height={400}
+              sizes="(min-width: 768px) 50vw, 100vw"
+              priority
               className="w-full aspect-[4/3] object-cover"
             />
           </div>
