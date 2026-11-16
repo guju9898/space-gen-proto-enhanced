@@ -98,7 +98,7 @@ I built Renderspace around a simple idea: contractors shouldn't need a full mode
 
 Picture the next estimate. Normally you would walk the yard, go home, and either pay for a rendering that arrives next week or skip it and hope your description lands. Meanwhile, the homeowner talks to two other contractors.
 
-Now picture taking a photo on the visit and, about 30 seconds later, showing them their own yard with the patio, the pool or the outdoor kitchen already built. They point at what they like. You change one thing. They start talking about when, not whether.
+Now picture taking a photo on the visit and, about 30 seconds later, showing them their own yard with the patio, the pool or the outdoor kitchen already built. They point at what they like. You change one thing. They start talking about when, not whether. For pool jobs, here is [what to look for in AI pool rendering software](/blog/ai-rendering-software-for-pool-contractors).
 
 That is why fast photorealistic concepts help contractors win bids faster. Homeowners commit sooner when they see their own space finished before the quote.
 

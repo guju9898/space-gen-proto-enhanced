@@ -16,6 +16,7 @@ relatedSlugs:
   - xeriscape-design-from-a-photo
   - visual-proposals-for-homeowners
   - ai-renderings-for-hoa-approval
+  - ai-landscape-design-software-for-contractors
 ---
 
 Artificial turf design from a photo means showing a homeowner their own yard with synthetic grass installed before they sign. For turf installers, it answers a question that stalls many turf sales: "Will it look fake?"

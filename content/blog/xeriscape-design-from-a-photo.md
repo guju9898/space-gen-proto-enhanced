@@ -16,6 +16,7 @@ relatedSlugs:
   - hardscape-visualization-job-site-photo
   - hoa-landscape-presentation-package
   - show-landscape-clients-design-before-construction
+  - ai-landscape-design-software-for-contractors
 ---
 
 The best way to sell a xeriscape conversion is to show the homeowner their own yard without the lawn, finished, before you quote it. A photo of the existing turf turned into a photorealistic concept of gravel, stone, native plants and a path gives them something to say yes to, instead of a picture in their head of "rocks and cactus."

@@ -6,7 +6,7 @@ description: "AI rendering software for pool contractors: what to look for, how 
 excerpt: "What pool contractors should look for in AI rendering software, how a photo-to-concept workflow fits a sales call, and what an AI pool rendering can't do."
 category: Visualization
 datePublished: 2026-10-19
-dateModified: 2026-11-05
+dateModified: 2026-11-16
 author: KeSean Fallon
 featuredImage: /landing/renders/exterior-hero-01.jpg
 featuredImageAlt: "Concept rendering of a stone house with a long rectangular pool and a pale stone deck"
@@ -37,7 +37,7 @@ That gap shows up in familiar ways:
 
 Rapidly generating photorealistic renderings helps contractors win bids faster, because homeowners commit sooner when they see their own space finished before the quote.
 
-## What should pool contractors look for in AI rendering software?
+## What should pool contractors look for in AI pool rendering software?
 
 There are a growing number of AI design tools, including pool-specific apps and general home design generators. Before you pick one, test it against the way you actually sell.
 

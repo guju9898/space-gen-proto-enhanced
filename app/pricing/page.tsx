@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { pageMetadata } from "@/lib/seo/metadata"
 import { JsonLd } from "@/components/seo/JsonLd"
-import { PLANS, count, usd } from "@/lib/seo/facts"
+import { PLANS, usd } from "@/lib/seo/facts"
 import { softwareApplicationLd } from "@/lib/seo/schema"
 import Link from "next/link"
 import { SelfServePrices } from "@/components/conversion/group-3/SelfServePrices"
@@ -13,7 +13,7 @@ import { API_RENDER_CREDIT_COST } from "@/lib/usage/creditCost"
 export const metadata: Metadata = pageMetadata({
   path: "/pricing",
   title: `Pricing: ${usd(PLANS.starter.priceUsd)}/week, Plans From ${usd(PLANS.professional.priceUsd)}/mo`,
-  description: `The ${PLANS.starter.name} is a weekly subscription: ${usd(PLANS.starter.priceUsd)} today for ${PLANS.starter.credits} credits, then the same amount each week until you cancel. Professional is ${usd(PLANS.professional.priceUsd)}/mo for ${count(PLANS.professional.credits)} credits; Business is ${usd(PLANS.business.priceUsd)}/mo for ${count(PLANS.business.credits)} credits.`,
+  description: `Renderspace pricing: the ${PLANS.starter.name} is ${usd(PLANS.starter.priceUsd)}/week for ${PLANS.starter.credits} credits, renewing weekly until you cancel. Professional is ${usd(PLANS.professional.priceUsd)}/mo; Business is ${usd(PLANS.business.priceUsd)}/mo.`,
 })
 
 export default function PricingPage() {

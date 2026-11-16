@@ -36,6 +36,12 @@ export const FAQ_ITEMS: FaqItem[] = [
     surfaces: ["home", "faq"],
   },
   {
+    id: "what-is-ai-rendering",
+    q: "What is AI rendering?",
+    a: `AI rendering turns a photo of a real space into a photorealistic image of a proposed design. With Renderspace you start from a photo of the client's yard, home exterior or room and get a concept in about ${PROOF.secondsPerConcept.typical} seconds, so they can see the finished project before you quote. It is a visualization, not a construction or permit drawing.`,
+    surfaces: ["faq"],
+  },
+  {
     id: "visual-proposals",
     q: "What software helps contractors create visual proposals for homeowners?",
     a: `Photo-to-concept rendering software like Renderspace. You take a photo of the homeowner's yard, home exterior or room, and in about ${PROOF.secondsPerConcept.typical} seconds you have a photorealistic concept of the proposed pool, patio, outdoor kitchen, landscape or remodel on their actual property, as a full-size image to drop into your proposal. Seeing their own space finished helps homeowners decide sooner, and every paid plan lets you use the renders in proposals, on your website and in ads.`,

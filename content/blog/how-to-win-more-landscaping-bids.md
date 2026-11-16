@@ -16,6 +16,7 @@ relatedSlugs:
   - show-landscape-clients-design-before-construction
   - ai-landscape-design-software-for-contractors
   - late-night-rendering-cost-before-estimate
+  - what-to-include-in-landscaping-proposal
 ---
 
 You win more landscaping bids by picking the right jobs, pricing them accurately, and making your proposal the easiest one for the homeowner to say yes to. The fastest way to do that last part is to show the client their own yard finished before they compare your number with anyone else's.
