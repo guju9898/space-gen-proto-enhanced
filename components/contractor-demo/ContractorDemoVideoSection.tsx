@@ -8,10 +8,10 @@ export function ContractorDemoVideoSection() {
         <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-white/10 bg-[#191f33] shadow-lg shadow-inner mb-4">
           <video
             src="/videos/contractor-demo/VSL_2_with_captions.mp4"
-            poster="/images/mailers/mailer-backyard.png"
+            poster="/images/mailers/mailer-backyard.webp"
             controls
             playsInline
-            preload="metadata"
+            preload="none"
             className="block w-full h-full object-cover"
           />
         </div>
