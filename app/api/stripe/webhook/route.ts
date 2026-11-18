@@ -5,6 +5,7 @@ import { upsertLoopsContact, sendLoopsEvent } from "@/lib/loops"
 import { syncAffiliateStripeEvent } from "@/lib/affiliates/stripe-events"
 import { getStripePriceIds, introRollsIntoProfessional, planCodeForPriceId, shouldRefreshIntroCredits } from "@/lib/stripe/plans"
 import { readSubscriptionPeriod } from "@/lib/stripe/subscriptionPeriod"
+import { applySubscriptionDeleted } from "@/lib/stripe/subscriptionDeleted"
 import { CATALOG } from "@/lib/pricing/catalog"
 import { logCreditError } from "@/lib/usage/creditErrors"
 import { grantIntroUsage, type IntroGrantDb } from "@/lib/usage/introGrant"
@@ -409,30 +410,31 @@ export async function POST(request: Request) {
 
         const { data: profile } = await supabase
           .from("profiles")
-          .select("id")
+          .select("id, stripe_subscription_id")
           .eq("stripe_customer_id", customerId)
           .single()
 
         if (!profile) break
 
-        await supabase
-          .from("subscriptions")
-          .update({
-            status: "canceled",
-            updated_at: new Date().toISOString(),
-          })
-          .eq("user_id", profile.id)
+        const deletedPriceId = subscription.items?.data?.[0]?.price?.id
+        const deletedPeriod = readSubscriptionPeriod(subscription)
+        const deletion = await applySubscriptionDeleted(supabase, {
+          profileId: profile.id,
+          profileSubscriptionId: (profile as { stripe_subscription_id?: string | null }).stripe_subscription_id ?? null,
+          subscriptionId: subscription.id ?? null,
+          customerId,
+          planCode: deletedPriceId ? priceIdToPlanCode(deletedPriceId) : null,
+          periodStartIso: deletedPeriod?.startIso ?? null,
+          periodEndIso: deletedPeriod?.endIso ?? null,
+        })
 
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({
-            subscription_status: "canceled",
-            current_plan: null,
-          })
-          .eq("id", profile.id)
-
-        if (updateError) {
-          console.error("❌ Error updating profile for subscription deletion:", updateError)
+        if (!deletion.ok) {
+          console.error(`❌ Error saving subscription deletion for user ${profile.id}: ${deletion.error}`)
+          // 500 so Stripe retries instead of leaving the profile active forever.
+          return NextResponse.json({ error: "Failed to save subscription cancellation" }, { status: 500 })
+        }
+        if (deletion.skipped) {
+          console.log(`ℹ️ Ignored deletion of old subscription ${subscription.id} for user ${profile.id}`)
         } else {
           console.log(`✅ Profile updated for user ${profile.id} - subscription canceled`)
         }
