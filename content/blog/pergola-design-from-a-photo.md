@@ -44,7 +44,7 @@ A brochure answers none of those for their house. A catalog photo shows someone 
 
 **An AI concept from a photo.** You take a phone photo of the existing patio and generate a photorealistic concept of the same space with the pergola or cover in place. With Renderspace a render typically comes back in about 30 seconds, and settings carry over, so you can change one thing at a time: cedar to black steel, open slats to a solid roof, freestanding to attached.
 
-![Exterior view of a modern home with a covered patio featuring a cedar ceiling, exposed beams, and a limestone fireplace.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-16/covered-patio-limestone-fireplace-austin-photo-to-concept-01-bc6e31.png)
+![Concept: covered patio with a cedar ceiling, exposed beams and a limestone fireplace on a modern home](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-16/covered-patio-limestone-fireplace-austin-photo-to-concept-01-bc6e31.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/covered-patio-limestone-fireplace-austin-photo-to-concept-01-bc6e31)
 
@@ -70,7 +70,7 @@ Keep the first pass to the big choices, because those are what the homeowner is 
 
 Then show two versions side by side. The homeowner picks a direction, and your proposal follows it. For the cooking side of the same patio, see [outdoor kitchen rendering from a job-site photo](/blog/outdoor-kitchen-rendering-from-photo).
 
-![A backyard deck with an ipe hardwood finish, a black steel pergola with jasmine, a raised spa with slate, and bamboo.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-18/spa-deck-slate-spa-phoenix-photo-to-concept-04-bda128.png)
+![Concept: ipe deck with a black steel pergola and jasmine, raised slate spa and bamboo screening](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-18/spa-deck-slate-spa-phoenix-photo-to-concept-04-bda128.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/spa-deck-slate-spa-phoenix-photo-to-concept-04-bda128)
 

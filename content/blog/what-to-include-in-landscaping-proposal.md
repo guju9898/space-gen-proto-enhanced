@@ -53,7 +53,7 @@ Put it first, right after the cover note. The picture tells the homeowner what t
 
 With an AI rendering tool, the visual no longer has to be expensive. You take a phone photo on the site visit and generate a photorealistic concept of their yard with the project in place. With Renderspace it typically takes about 30 seconds, downloads a full-size image for the proposal page, and every paid plan may use renders in proposals.
 
-![A two-story house with a bluestone walkway bordered by red brick, flanked by white shrub roses and boxwood.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-19/front-yard-curb-appeal-boxwood-spheres-in-planters-dallas-photo-to-concept-05-0cf523.png)
+![Concept: two-story house with a bluestone walkway bordered by red brick, white shrub roses and boxwood](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-19/front-yard-curb-appeal-boxwood-spheres-in-planters-dallas-photo-to-concept-05-0cf523.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/front-yard-curb-appeal-boxwood-spheres-in-planters-dallas-photo-to-con-0cf523)
 

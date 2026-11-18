@@ -16,6 +16,7 @@ relatedSlugs:
   - visual-proposals-for-homeowners
   - how-to-win-more-landscaping-bids
   - show-landscape-clients-design-before-construction
+  - what-to-include-in-landscaping-proposal
 ---
 
 The best way to upsell landscaping services is to offer the add-on that solves a problem the client already has, explain why it matters, and show it on their own property before you price it. Clients cut add-ons they cannot picture; they keep the ones they have already seen finished.
@@ -57,7 +58,7 @@ If I were choosing which upgrades to present first, landscape lighting and plant
 
 **Show it on their house.** This is the step most proposals skip. Generate one concept of the base project and one with the add-on, from the same photo. With Renderspace a render typically comes back in about 30 seconds, and settings carry over, so the second image changes only the add-on. The client compares their own yard with and without it.
 
-![A modern home at night with warm uplights on tree canopies and soft wash lights on the facade, illuminating a stone path.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-18/landscape-lighting-dusk-tree-uplighting-austin-photo-to-concept-02-ea803f.png)
+![Concept at dusk: modern home with uplit tree canopies, soft facade wash lights and a lit stone path](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-18/landscape-lighting-dusk-tree-uplighting-austin-photo-to-concept-02-ea803f.png)
 
 [See this concept in the Renderspace gallery](https://www.renderspace.ai/gallery/landscape-lighting-dusk-tree-uplighting-austin-photo-to-concept-02-ea803f)
 

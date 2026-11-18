@@ -53,7 +53,7 @@ Then do the part most contractors skip. Show them.
 
 Pull out your phone, take a photo of the area you are standing in, and generate a concept of the patio, pool or kitchen you just talked about, on their real property. With Renderspace that takes about 30 seconds, typically 20 to 40. Because the settings carry over, you can change one thing at a time. If they want flagstone instead of pavers, or the fire pit on the other side, you show that version too, without starting over.
 
-![A covered patio with a cedar ceiling, exposed beams and a limestone fireplace on a modern Austin home](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-16/covered-patio-limestone-fireplace-austin-photo-to-concept-01-bc6e31.png)
+![Concept: covered patio with a cedar ceiling, exposed beams and a limestone fireplace on a modern Austin home](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-16/covered-patio-limestone-fireplace-austin-photo-to-concept-01-bc6e31.png)
 
 *[See this concept in the gallery](https://www.renderspace.ai/gallery/covered-patio-limestone-fireplace-austin-photo-to-concept-01-bc6e31)*
 
@@ -61,7 +61,7 @@ Now the conversation changes. They are not imagining your description. They are 
 
 ## How do you handle price pushback without discounting?
 
-Negotiate scope, not price. Zimmerman's advice is to offer specific changes when a client pushes back: cut a feature, change a material, or phase the project. Dropping the price on the same scope tells them the first number was padded.
+Negotiate scope, not price. Zimmerman's advice is to offer specific changes when a client pushes back: cut a feature, change a material, or phase the project. Dropping the price on the same scope tells them the first number was padded. It also helps to lead the [landscaping proposal](/blog/what-to-include-in-landscaping-proposal) with the picture and put the price after the scope.
 
 Steinhauer's version, from the NALP piece, is to design something that can be installed in phases over several years. A concept makes phasing easier to sell, because the homeowner can see the whole finished yard and agree to start with part of it.
 

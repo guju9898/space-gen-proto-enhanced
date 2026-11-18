@@ -53,7 +53,7 @@ Show them the finished yard first. When the client has seen their own property c
 
 An AI rendering tool lets you take a phone photo of the yard and show a photorealistic concept of the full design in about 30 seconds. In Renderspace, settings carry over between renders, so you can render the finished yard and then a second concept of the same yard with only phase one built, and show them side by side. The client sees exactly what they are getting now and what is coming.
 
-![A curved bluestone walkway with a red brick border leads to a house, with limestone piers, lanterns and a Japanese maple.](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-23/front-yard-curb-appeal-bronze-lanterns-austin-concept-25-04b2b8.png)
+![Concept: curved bluestone walkway with red brick border, limestone piers, lanterns and a Japanese maple](https://swcbfogvadsissikiupx.supabase.co/storage/v1/object/public/renders/content/2026-10-23/front-yard-curb-appeal-bronze-lanterns-austin-concept-25-04b2b8.png)
 
 [See this front yard concept in the gallery](https://www.renderspace.ai/gallery/front-yard-curb-appeal-bronze-lanterns-austin-concept-25-04b2b8)
 
