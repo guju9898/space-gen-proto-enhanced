@@ -1,13 +1,13 @@
 import { createServerClient } from "@supabase/ssr"
-import type { CookieOptions } from "@supabase/ssr"
 import { cookies } from "next/headers"
-
-type CookieToSet = { name: string; value: string; options: CookieOptions }
+import { applyServerCookieWrites, type CookieToSet } from "@/lib/supabase/serverCookies"
 
 /**
- * SERVER-SIDE SUPABASE CLIENT (FOR API ROUTES & AUTH CALLBACK)
+ * SERVER-SIDE SUPABASE CLIENT (FOR API ROUTES, SERVER ACTIONS & SERVER COMPONENTS)
  *
  * Persists auth cookies for Next.js 16 App Router using getAll/setAll only.
+ * Cookie writes are best-effort in Server Components (see applyServerCookieWrites);
+ * proxy.ts refreshes expired sessions for /studio/*.
  */
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies()
@@ -21,9 +21,7 @@ export async function createSupabaseServerClient() {
           return cookieStore.getAll()
         },
         setAll(cookiesToSet: CookieToSet[]) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set(name, value, options)
-          })
+          applyServerCookieWrites(cookieStore, cookiesToSet)
         },
       },
     }

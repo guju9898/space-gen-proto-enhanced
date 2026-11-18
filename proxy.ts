@@ -7,11 +7,12 @@ import {
   decideHomeExperiment,
 } from "@/components/conversion/group-1/experiment"
 import { GALLERY_PRESET_COOKIE, isPresetSlug } from "@/lib/gallery/presets"
+import { updateSession } from "@/lib/supabase/updateSession"
 
 const CANONICAL_HOST = "www.renderspace.ai"
 const DEMO_MODE_COOKIE = "renderspace_demo_mode"
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const host = request.nextUrl.hostname
   if (host === "renderspace.ai") {
     const path = request.nextUrl.pathname + request.nextUrl.search
@@ -34,7 +35,13 @@ export function proxy(request: NextRequest) {
     requestHeaders.set(HOME_EXPERIMENT_HEADER, experiment.variant)
   }
 
-  const res = NextResponse.next({ request: { headers: requestHeaders } })
+  let res = NextResponse.next({ request: { headers: requestHeaders } })
+
+  // Refresh expired Supabase sessions for Studio (including /studio/projects/*)
+  // before other cookie writes, so setAll can replace `res` safely.
+  if (isStudio) {
+    res = await updateSession(request, res, { requestHeaders })
+  }
 
   if (experiment?.shouldSetCookie) {
     res.cookies.set(HOME_EXPERIMENT_COOKIE, experiment.variant, {

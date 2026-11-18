@@ -17,12 +17,14 @@ export default async function StudioLayout({
     return <>{children}</>
   }
 
+  // Prefer getUser() (validates JWT / refreshes). Cookie writes from a refresh are
+  // ignored here via applyServerCookieWrites; proxy.ts refreshes /studio/* first.
   const supabase = await createSupabaseServerClient()
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (!session) {
+  if (!user) {
     const preset = resolveGalleryPreset(cookieStore.get(GALLERY_PRESET_COOKIE)?.value)
     if (preset) {
       redirect(`/?login=1&next=${encodeURIComponent(studioPresetHref(preset))}`)
