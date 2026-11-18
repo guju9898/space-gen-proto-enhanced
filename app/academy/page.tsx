@@ -13,7 +13,7 @@ export const metadata: Metadata = pageMetadata({
   path: "/academy",
   title: "Contractor Academy: Visual Sales for Outdoor Projects",
   description:
-    "Six lessons for landscape, pool, and design/build contractors: photograph the site, create a Renderspace concept, compare directions, and present it without calling it a permit plan.",
+    "Six lessons for landscape, pool and design-build contractors: photograph the site, create a concept, compare directions and present it to the client.",
 })
 
 export default function AcademyPage() {
