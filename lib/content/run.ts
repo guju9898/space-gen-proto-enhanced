@@ -25,7 +25,7 @@ import {
 import { describeRender } from "@/lib/content/describe"
 
 export const CONTENT_SOURCES_BUCKET = "content-sources"
-export const DAILY_RENDER_TARGET = 18
+export const DAILY_RENDER_TARGET = 6
 const MAX_STOCK_BYTES = 10 * 1024 * 1024
 const CONCURRENCY = 4
 

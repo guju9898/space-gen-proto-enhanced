@@ -1,7 +1,7 @@
 /**
  * GET /api/cron/content-renders
  *
- * Daily content renders for marketing (15-20 concept images every morning).
+ * Daily content renders for marketing (6 concept images every morning).
  * Vercel Cron calls this with `Authorization: Bearer $CRON_SECRET`.
  * Fail-closed without CRON_SECRET. See lib/content/run.ts.
  */
