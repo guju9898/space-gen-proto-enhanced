@@ -1,0 +1,29 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.guju9898/renderspace",
+  "title": "Renderspace",
+  "description": "Turn a job-site photo into a photorealistic pool, patio, landscape, exterior or interior concept.",
+  "version": "1.0.0",
+  "websiteUrl": "https://www.renderspace.ai/developers",
+  "repository": {
+    "url": "https://github.com/guju9898/space-gen-proto-enhanced",
+    "source": "github",
+    "subfolder": "integrations/mcp"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "renderspace-mcp",
+      "version": "1.0.0",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "RENDERSPACE_API_KEY",
+          "description": "Your Renderspace API key (Professional or Business plan).",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

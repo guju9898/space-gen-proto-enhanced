@@ -1,0 +1,35 @@
+{
+  "name": "renderspace-mcp",
+  "version": "1.0.0",
+  "description": "Official Renderspace MCP server and CLI: turn a job-site photo into a photorealistic pool, patio, landscape, exterior or interior concept in about 30 seconds.",
+  "type": "module",
+  "bin": {
+    "renderspace-mcp": "server.mjs",
+    "renderspace": "cli.mjs"
+  },
+  "main": "lib.mjs",
+  "files": ["lib.mjs", "server.mjs", "cli.mjs", "README.md", "server.json"],
+  "engines": { "node": ">=18" },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "renderspace",
+    "rendering",
+    "ai-rendering",
+    "landscape-design",
+    "pool-design",
+    "architecture-visualization",
+    "contractor",
+    "agent-tool"
+  ],
+  "homepage": "https://www.renderspace.ai/developers",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guju9898/space-gen-proto-enhanced.git",
+    "directory": "integrations/mcp"
+  },
+  "bugs": { "url": "https://github.com/guju9898/space-gen-proto-enhanced/issues" },
+  "author": "Renderspace (https://www.renderspace.ai)",
+  "license": "MIT",
+  "mcpName": "io.github.guju9898/renderspace"
+}
