@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Renderspace</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <header><img src="icon-48.png" alt=""><h1>Render this photo</h1></header>
+    <p id="nokey" class="muted" hidden>Add your Renderspace API key first in <a href="options.html">settings</a>.</p>
+    <label for="src">Photo URL</label>
+    <input id="src" type="url" placeholder="https://…">
+    <label for="type">What is it?</label>
+    <select id="type">
+      <option value="landscape">Yard, pool, patio or outdoor kitchen</option>
+      <option value="exterior">House exterior</option>
+      <option value="interior">Interior room</option>
+    </select>
+    <label for="instruction">What should it look like?</label>
+    <textarea id="instruction" placeholder="e.g. linear pool with a travertine deck, a pergola and warm dusk lighting"></textarea>
+    <button id="go">Render (2 credits)</button>
+    <p id="status" class="muted"></p>
+    <p id="error" class="error" hidden></p>
+    <div class="pair">
+      <figure><img id="before" alt="Original photo" hidden><figcaption class="muted">Before</figcaption></figure>
+      <figure><img id="after" alt="Renderspace concept" hidden><figcaption class="muted" id="afterCap">Concept</figcaption></figure>
+    </div>
+  </main>
+  <script src="render.js"></script>
+</body>
+</html>
