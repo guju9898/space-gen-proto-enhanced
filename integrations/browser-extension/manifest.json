@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Renderspace: Render This Photo",
+  "short_name": "Renderspace",
+  "version": "1.0.0",
+  "description": "Right-click any photo of a yard, house or room and turn it into a photorealistic design concept with Renderspace.",
+  "homepage_url": "https://www.renderspace.ai",
+  "icons": { "16": "icon-16.png", "32": "icon-32.png", "48": "icon-48.png", "128": "icon-128.png" },
+  "permissions": ["contextMenus", "storage"],
+  "host_permissions": ["https://www.renderspace.ai/*"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_title": "Renderspace", "default_popup": "popup.html", "default_icon": { "16": "icon-16.png", "32": "icon-32.png" } },
+  "options_page": "options.html"
+}
