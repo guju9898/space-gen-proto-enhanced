@@ -85,7 +85,7 @@ export function HeroProofSection({ cityLabel, premiumHref, onClickPremium, onCli
           <CopyBlock title="Before" body={beforeBody} align="before" />
         </div>
         <div className="order-2 lg:order-2 min-w-0 flex-1 flex justify-center">
-          <RenderspaceBeforeAfterSlider categories={categories} categoryOrder={categoryOrder} />
+          <RenderspaceBeforeAfterSlider categories={categories} categoryOrder={categoryOrder} priority />
         </div>
         <div className="order-3 lg:order-3">
           <CopyBlock title="After" body={afterBody} align="after" />
