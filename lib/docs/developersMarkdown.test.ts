@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 import {
   agentDocsDirective,
+  developersHtmlParitySegments,
   developersMarkdown,
   llmsTxt,
   prefersMarkdown,
@@ -25,6 +26,18 @@ describe("agent-friendly developer docs", () => {
     assert.match(md, /\/api\/v1\/renders/)
     assert.match(md, /\/api\/v1\/credits/)
     assert.match(md, /Authorization: Bearer/)
+  })
+
+  it("Markdown covers every HTML main-content segment (content parity)", () => {
+    const md = developersMarkdown()
+    const missing = developersHtmlParitySegments().filter((segment) => !md.includes(segment))
+    assert.deepEqual(
+      missing,
+      [],
+      `Markdown is missing ${missing.length} HTML segment(s):\n${missing.map((s) => `- ${s}`).join("\n")}`
+    )
+    const missingPct = (missing.length / developersHtmlParitySegments().length) * 100
+    assert.ok(missingPct < 5, `missing ${missingPct.toFixed(1)}% of HTML segments (AFDocs fail is >20%)`)
   })
 
   it("prefersMarkdown only when Accept includes text/markdown", () => {
