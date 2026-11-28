@@ -3,6 +3,11 @@ import Image from "next/image"
 import Link from "next/link"
 import { SiteFooter } from "@/components/site/SiteFooter"
 import { SiteHeader } from "@/components/site/SiteHeader"
+import {
+  DEVELOPERS_MD_PATH,
+  DEVELOPERS_ORIGIN,
+  LLMS_TXT_PATH,
+} from "@/lib/docs/developersMarkdown"
 import { USAGE_RIGHTS } from "@/lib/seo/facts"
 import { API_RENDER_CREDIT_COST } from "@/lib/usage/creditCost"
 
@@ -10,7 +15,12 @@ export const metadata: Metadata = {
   title: "Developers — Renderspace API",
   description:
     "Public REST API for generating photorealistic landscape, exterior, and interior concepts from a job-site photo.",
-  alternates: { canonical: "https://www.renderspace.ai/developers" },
+  alternates: {
+    canonical: `${DEVELOPERS_ORIGIN}/developers`,
+    types: {
+      "text/markdown": `${DEVELOPERS_ORIGIN}${DEVELOPERS_MD_PATH}`,
+    },
+  },
 }
 
 const curlExample = `curl -X POST https://www.renderspace.ai/api/v1/renders \\
@@ -38,8 +48,16 @@ function verifyRenderspace(rawBody, headers, secret) {
 export default function DevelopersPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* Discoverability for agents/crawlers — hoisted to <head>, no visual change */}
+      <link rel="describedby" href={LLMS_TXT_PATH} />
+      <link rel="alternate" type="text/markdown" href={DEVELOPERS_MD_PATH} title="Markdown" />
       <SiteHeader active="developers" />
       <main>
+        {/* Near-top content directive for Agent Score / afdocs (sr-only: no visual change) */}
+        <p className="sr-only">
+          AI agents: documentation index at {LLMS_TXT_PATH}. Clean Markdown at {DEVELOPERS_MD_PATH}{" "}
+          or request Accept: text/markdown.
+        </p>
         <section className="border-b border-[#2a2a2a]">
           <div className="container mx-auto px-4 py-14 md:py-20 grid gap-10 lg:grid-cols-2 lg:gap-14 items-center">
             <div>

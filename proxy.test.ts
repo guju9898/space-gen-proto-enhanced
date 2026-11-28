@@ -3,6 +3,20 @@ import { describe, it } from "node:test"
 import { NextRequest } from "next/server"
 
 describe("proxy", () => {
+  it("rewrites /developers to Markdown when Accept includes text/markdown", async () => {
+    const { proxy } = await import("./proxy")
+    const req = new NextRequest("https://www.renderspace.ai/developers", {
+      headers: { Accept: "text/markdown" },
+    })
+    const res = await proxy(req)
+    assert.equal(res.status, 200)
+    // Next rewrite exposes the destination on x-middleware-rewrite (or equivalent).
+    const rewrite = res.headers.get("x-middleware-rewrite") || res.headers.get("x-nextjs-rewrite") || ""
+    assert.match(rewrite, /\/developers\.md/)
+    assert.match(res.headers.get("link") || "", /llms\.txt/)
+    assert.match(res.headers.get("link") || "", /developers\.md/)
+  })
+
   it("keeps www redirect and demo-mode cookie behaviour for /studio/*", async () => {
     // Force updateSession to no-op so this test does not call Supabase Auth.
     const prevUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
